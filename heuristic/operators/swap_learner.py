@@ -5,4 +5,4 @@ def swap_learner(state: State) -> State:
     """
     Swaps two selected learners, if applicable.
     """
-    pass
+    return State.from_state(state)      # TODO

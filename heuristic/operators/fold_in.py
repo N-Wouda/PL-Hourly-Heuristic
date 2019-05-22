@@ -5,4 +5,4 @@ def fold_in(state: State) -> State:
     """
     Folds-in an activity into self-study, if applicable.
     """
-    pass
+    return State.from_state(state)      # TODO

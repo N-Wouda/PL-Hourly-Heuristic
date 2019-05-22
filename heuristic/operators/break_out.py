@@ -5,4 +5,4 @@ def break_out(state: State) -> State:
     """
     Breaks-out an activity from self-study, if possible.
     """
-    pass
+    return State.from_state(state)      # TODO

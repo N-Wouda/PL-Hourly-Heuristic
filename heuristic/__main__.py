@@ -9,6 +9,7 @@ from .adaptive_large_neighbourhood_search import \
 with open(f"experiments/{sys.argv[1]}/{sys.argv[2]}.json") as file:
     data = json.load(file)
 
-result = adaptive_large_neighbourhood_search(data)
+result, best = adaptive_large_neighbourhood_search(data)
 
 print(result.evaluate())
+print(best.evaluate())

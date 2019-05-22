@@ -1,17 +1,20 @@
+from typing import Tuple
+
+import numpy as np
+
+from .Configuration import Configuration
 from .State import State
 from .initial_solution import initial_solution
 from .operators import OPERATORS
-import numpy as np
-from .Configuration import Configuration
+from .utils import accept, convex_combination
 
 
-def adaptive_large_neighbourhood_search(data) -> State:
+def adaptive_large_neighbourhood_search(data) -> Tuple[State, State]:
     """
     This particular implementation is largely based on the pseudo-code examples
     given at <http://orbit.dtu.dk/files/5293785/Pisinger.pdf>.
     """
     global_best = state = initial_solution(data)
-
     weights = np.ones_like(OPERATORS)
 
     for iteration in range(Configuration.MAX_ITERATIONS):
@@ -20,21 +23,7 @@ def adaptive_large_neighbourhood_search(data) -> State:
         idx = np.random.choice(len(OPERATORS), p=probabilities)
         method = OPERATORS[idx]
 
-        next_state = method(state)
-
-        new_objective = next_state.evaluate()
-        old_objective = state.evaluate()
-
-        if new_objective > old_objective:
-            state = next_state
-            weight = Configuration.IS_BETTER
-        # This term is borrowed from simulated annealing, to allow for worse
-        # choices in the beginning.
-        elif accept(new_objective, old_objective) > np.random.random():
-            state = next_state
-            weight = Configuration.IS_ACCEPTED
-        else:
-            weight = Configuration.IS_REJECTED
+        state, weight = _update(method(state), state)
 
         # This is already the new state, if it was better than the previous.
         if state.evaluate() > global_best.evaluate():
@@ -42,32 +31,21 @@ def adaptive_large_neighbourhood_search(data) -> State:
             weight = Configuration.IS_BEST
 
         # Updates the weight associated with the selected method
-        weights[idx] = convex_combination(Configuration.OPERATOR_DECAY,
-                                          weights[idx],
-                                          weight)
+        weights[idx] = convex_combination(weights[idx], weight)
 
-    return state
+    return state, global_best
 
 
-def accept(new, old):
+def _update(new: State, old: State) -> Tuple[State, float]:
     """
-    Computes the acceptance probability according to a simulated annealing
-    scheme. <https://en.wikipedia.org/wiki/Simulated_annealing#Pseudocode>.
+    Determines the next state, and the weight associated with the performed
+    operation.
     """
-    return np.exp((old - new) / next(get_temperature()))
-
-
-def get_temperature():
-    """
-    Generator method that returns the current temperature, to be used in
-    determining the acceptance probability.
-    """
-    temperature = Configuration.INITIAL_TEMPERATURE
-
-    while True:
-        yield temperature                                           # see p. 9
-        temperature = temperature * Configuration.TEMPERATURE_DECAY
-
-
-def convex_combination(parameter, a, b):
-    return parameter * a + (1 - parameter) * b                  # see p. 12
+    if new.evaluate() > old.evaluate():
+        return new, Configuration.IS_BETTER
+    # This term is borrowed from simulated annealing, to allow for worse
+    # choices in the beginning.
+    elif accept(new.evaluate(), old.evaluate()) > np.random.random():
+        return new, Configuration.IS_ACCEPTED
+    else:
+        return old, Configuration.IS_REJECTED

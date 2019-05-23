@@ -1,7 +1,7 @@
-from ..State import State
 import numpy as np
-from .find_teacher import find_teacher
-from .find_classroom import find_classroom
+
+from heuristic.utils import find_classroom, find_teacher
+from ..State import State
 
 
 def break_out(state: State) -> State:

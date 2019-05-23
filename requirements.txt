@@ -1,0 +1,7 @@
+# List is up-to-date as of 23rd of May, 2019.
+ortools == 7.1.6722
+numpy == 1.16.2
+pandas == 0.24.1
+matplotlib == 3.0.2
+seaborn == 0.9.0
+simplejson == 3.16.0

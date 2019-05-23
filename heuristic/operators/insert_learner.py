@@ -6,7 +6,7 @@ def insert_learner(state: State) -> State:
     """
     Inserts a learner into a different activity, or self-study.
     """
-    learner = np.random.randint(0, len(state.learners))
+    learner = np.random.choice(state.learners)['id']
 
     # We include the self-study module, as the learner could also be inserted
     # into a self-study assignment.
@@ -55,8 +55,12 @@ def _can_attend(state: State, module: int) -> bool:
 
     fellow_learners = np.count_nonzero(state.learner_assignments == module)
 
-    # If it is strictly smaller, it will still be at least equal when one
-    # learner joins.
+    if module == -1:    # only capacity is of relevance for self-study modules
+        # If it is strictly smaller, it will still be at least equal when one
+        # learner joins.
+        return fellow_learners < sum(state.classrooms[classroom]['capacity']
+                                     for classroom in classrooms)
+
     return fellow_learners < sum(min(state.max_batch,
                                      state.classrooms[classroom]['capacity'])
                                  for classroom in classrooms)

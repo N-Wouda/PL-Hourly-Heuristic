@@ -30,13 +30,21 @@ class State:
 
     @property
     def classroom_assignments(self) -> Set[int]:
-        return {classroom for classroom, teacher
-                in self.classroom_teacher_assignments}
+        classrooms = {classroom for classroom, teacher
+                      in self.classroom_teacher_assignments}
+
+        assert len(classrooms) == len(self.classroom_teacher_assignments)
+
+        return classrooms
 
     @property
     def teacher_assignments(self) -> Set[int]:
-        return {teacher for classroom, teacher
-                in self.classroom_teacher_assignments}
+        teachers = {teacher for classroom, teacher
+                    in self.classroom_teacher_assignments}
+
+        assert len(teachers) == len(self.classroom_teacher_assignments)
+
+        return teachers
 
     @property
     def module_assignments(self) -> Set[int]:

@@ -2,16 +2,17 @@ from functools import lru_cache
 from typing import Optional, Dict, List, Set
 
 from .Data import Data
+import numpy as np
 
 
 class State:
 
     def __init__(self, data: Data,
-                 learner_assignments: Optional[Dict] = None,
+                 learner_assignments: Optional[np.ndarray] = None,
                  classroom_teacher_assignments: Optional[Dict] = None):
         self._data = data
 
-        self._learner_assignments = {} \
+        self._learner_assignments = np.empty_like(self.learners) \
             if learner_assignments is None \
             else learner_assignments.copy()
 
@@ -38,9 +39,19 @@ class State:
                 in self.classroom_teacher_assignments}
 
     @property
+    def module_assignments(self) -> Set[int]:
+        return {module for module
+                in self.classroom_teacher_assignments.values()}
+
+    @property
     @lru_cache(1)
     def preferences(self):
         return self._data.preferences
+
+    @property
+    @lru_cache(1)
+    def most_preferred(self):
+        return self._data.most_preferred
 
     @property
     @lru_cache(1)
@@ -90,17 +101,14 @@ class State:
         assert len(self._learner_assignments) == len(self.learners), \
             "Not all learners have been assigned!"
 
-        modules = sum(self.preferences[learner, module]
-                      for learner, module
-                      in self._learner_assignments.items())
+        modules = self.preferences[np.arange(len(self.preferences)),
+                                   self.learner_assignments]
 
-        penalty = sum(self.penalty for learner, module
-                      in self._learner_assignments.items()
-                      if module == self.modules[-1]['id'])
+        num_self_study = np.count_nonzero(self.learner_assignments == -1)
 
         # The total value of the object is the preference for each module
         # assignment, minus the penalty for self study, where applicable.
-        return modules - penalty
+        return sum(modules) - self.penalty * num_self_study
 
     @classmethod
     def from_state(cls, state: "State") -> "State":

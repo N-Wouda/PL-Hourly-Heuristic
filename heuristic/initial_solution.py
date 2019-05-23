@@ -1,17 +1,16 @@
 from itertools import zip_longest
 
-from .State import State
+import numpy as np
+
 from .Data import Data
+from .State import State
 
 
 def initial_solution(data: Data) -> State:
     state = State(data)
 
-    self_study_module = state.modules[-1]['id']
-
     # 1. Assign all learners to self-study.
-    state = State(data, {learner['id']: self_study_module
-                         for learner in state.learners})
+    state = State(data, np.full_like(state.learners, -1, dtype=int))
 
     # 2. Construct (classroom, teacher) pairs for them.
 
@@ -32,7 +31,7 @@ def initial_solution(data: Data) -> State:
 
         assignment = (classroom['id'], teacher['id'])
 
-        state.classroom_teacher_assignments[assignment] = self_study_module
+        state.classroom_teacher_assignments[assignment] = -1
 
         learners_to_assign -= min(learners_to_assign, classroom['capacity'])
 

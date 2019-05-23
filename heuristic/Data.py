@@ -21,6 +21,18 @@ class Data:
 
     @property
     @lru_cache(1)
+    def most_preferred(self):
+        """
+        Returns the most preferred module (index/ID) per learner.
+        """
+        by_module = np.argsort(-self.preferences[:, :-1], axis=1)
+
+        # Since only one module per course may be preferred, we can safely
+        # discard all the others.
+        return by_module[:, :self.num_courses]
+
+    @property
+    @lru_cache(1)
     def qualifications(self):
         return np.asarray(self._data['qualifications'])
 
@@ -64,3 +76,11 @@ class Data:
     @lru_cache(1)
     def max_batch(self) -> int:
         return self._data['parameters']['max_batch']
+
+    @property
+    @lru_cache(1)
+    def num_courses(self) -> int:
+        """
+        There are 48 modules per course, excluding the self-study module.
+        """
+        return (len(self.modules) - 1) // 48

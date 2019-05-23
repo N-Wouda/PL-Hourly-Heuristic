@@ -7,9 +7,10 @@ from .State import State
 from .initial_solution import initial_solution
 from .operators import OPERATORS
 from .utils import accept, convex_combination
+from .Data import Data
 
 
-def adaptive_large_neighbourhood_search(data) -> Tuple[State, State]:
+def adaptive_large_neighbourhood_search(data: Data) -> Tuple[State, State]:
     """
     This particular implementation is largely based on the pseudo-code examples
     given at <http://orbit.dtu.dk/files/5293785/Pisinger.pdf>.

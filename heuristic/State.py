@@ -1,12 +1,12 @@
 from functools import lru_cache
 from typing import Optional, Dict, List, Set
 
-import numpy as np
+from .Data import Data
 
 
 class State:
 
-    def __init__(self, data,
+    def __init__(self, data: Data,
                  learner_assignments: Optional[Dict] = None,
                  classroom_teacher_assignments: Optional[Dict] = None):
         self._data = data
@@ -40,50 +40,47 @@ class State:
     @property
     @lru_cache(1)
     def preferences(self):
-        preferences = np.asarray(self._data["preferences"])
-
-        # Preferences, and the self-study module preference
-        return np.concatenate((preferences, np.max(preferences, 1)[:, None]), 1)
+        return self._data.preferences
 
     @property
     @lru_cache(1)
     def qualifications(self):
-        return np.asarray(self._data['qualifications'])
+        return self._data.qualifications
 
     @property
+    @lru_cache(1)
     def learners(self) -> List:
-        return self._data['learners']
+        return self._data.learners
 
     @property
+    @lru_cache(1)
     def teachers(self) -> List:
-        return self._data['teachers']
+        return self._data.teachers
 
     @property
+    @lru_cache(1)
     def classrooms(self) -> List:
-        return self._data['classrooms']
+        return self._data.classrooms
 
     @property
     @lru_cache(1)
     def modules(self) -> List:
-        modules = self._data['modules'].copy()
-
-        modules.append(dict(id=-1,                  # self-study module
-                            room_type=999,
-                            qualification=3))
-
-        return modules
+        return self._data.modules
 
     @property
+    @lru_cache(1)
     def penalty(self) -> float:
-        return self._data['parameters']['penalty']
+        return self._data.penalty
 
     @property
+    @lru_cache(1)
     def min_batch(self) -> int:
-        return self._data['parameters']['min_batch']
+        return self._data.min_batch
 
     @property
+    @lru_cache(1)
     def max_batch(self) -> int:
-        return self._data['parameters']['max_batch']
+        return self._data.max_batch
 
     @lru_cache(1)
     def evaluate(self) -> float:
@@ -93,7 +90,8 @@ class State:
         assert len(self._learner_assignments) == len(self.learners), \
             "Not all learners have been assigned!"
 
-        modules = sum(self.preferences[learner, module] for learner, module
+        modules = sum(self.preferences[learner, module]
+                      for learner, module
                       in self._learner_assignments.items())
 
         penalty = sum(self.penalty for learner, module
@@ -112,4 +110,4 @@ class State:
 
     def __str__(self):
         return str(self.learner_assignments) \
-               + str(self.classroom_teacher_assignments)
+            + str(self.classroom_teacher_assignments)

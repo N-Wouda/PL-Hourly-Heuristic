@@ -1,9 +1,10 @@
 from itertools import zip_longest
 
 from .State import State
+from .Data import Data
 
 
-def initial_solution(data) -> State:
+def initial_solution(data: Data) -> State:
     state = State(data)
 
     self_study_module = state.modules[-1]['id']

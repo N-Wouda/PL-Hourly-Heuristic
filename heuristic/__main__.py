@@ -13,7 +13,7 @@ with open(f"experiments/{sys.argv[1]}/{sys.argv[2]}.json") as file:
     data = Data(json.load(file))
 
 if Configuration.FIX_SEED:
-    np.random.seed(19950215)
+    np.random.seed(19950215)            # TODO generate seeds
 
 last, best, history, weights = adaptive_large_neighbourhood_search(data)
 

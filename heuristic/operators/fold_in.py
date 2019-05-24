@@ -9,6 +9,9 @@ def fold_in(state: State) -> State:
     """
     classroom, teacher, module = random_activity(state)
 
+    if module == -1:        # No need to fold-in self-study assignments, as
+        return state        # those are already simplified via another operator
+
     # Total learners assigned to the module associated with this activity
     total_learners = np.count_nonzero(state.learner_assignments == module)
 
@@ -19,18 +22,25 @@ def fold_in(state: State) -> State:
         if state.classroom_teacher_assignments[(classroom, teacher)] == module}
     classrooms.discard(classroom)
 
-    if module == -1:    # only capacity is of relevance for self-study modules
-        total_capacity = sum(state.classrooms[room]['capacity']
-                             for room in classrooms)
-    else:
-        total_capacity = sum(min(state.classrooms[room]['capacity'],
-                                 state.max_batch)
-                             for room in classrooms)
+    new_state = State.from_state(state)
 
+    total_capacity = sum(min(state.classrooms[room]['capacity'],
+                             state.max_batch)
+                         for room in classrooms)
+
+    # This implies we can freely remove an activity, as there is sufficient
+    # capacity in the remaining activities.
     if total_capacity >= total_learners:
-        new_state = State.from_state(state)
         del new_state.classroom_teacher_assignments[(classroom, teacher)]
+    # We have some excess learners in this case. Let us try to move those back
+    # into self-study.
+    if state.classrooms[classroom]['self_study_allowed'] and module != -1:
+        excess = total_learners - total_capacity
 
-        return new_state
+        module_learners = (state.learner_assignments == module)
+        excess_learners = module_learners.nonzero()[0][:excess]
 
-    return state
+        new_state.learner_assignments[excess_learners] = -1
+        new_state.classroom_teacher_assignments[(classroom, teacher)] = -1
+
+    return new_state

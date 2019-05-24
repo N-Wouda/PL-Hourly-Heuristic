@@ -35,28 +35,26 @@ def break_out(state: State) -> State:
         # we can create a new state.
         new_state = State.from_state(state)
 
-        preferences = state.preferences[self_study_learners, module]
-        learners = preferences.nonzero()
+        # Of these learners, we should make sure their assignment *improves*:
+        # the newly selected preferences should be above what their current
+        # assignment provides.
+        current = state.preferences[:, -1] - state.penalty
+        module_preferences = state.preferences[:, module]
 
-        # Check the minimum and maximum bounds
-        if len(learners[0]) < state.min_batch:
+        learners, *_ = np.nonzero(      # indices/IDs where these masks hold
+            (self_study_learners == 1)
+            & (module_preferences != 0)
+            & (current < state.preferences[:, module]))
+
+        if len(learners) < state.min_batch:         # ensures minimum bound
             continue
 
-        max_group_size = min(state.max_batch,
-                             state.classrooms[classroom]['capacity'])
+        learners = learners[:min(state.max_batch,   # ensures maximum bound
+                                 state.classrooms[classroom]['capacity'])]
 
-        if len(learners[0]) > max_group_size:
-            # This exploits a neat trick: the indices into the preferences
-            # array are the learner IDs. Since we have more learners than
-            # max_group_size, we only select those learners that most prefer
-            # this module assignment.
-            indices = (-preferences).argsort()
-            learners = indices[:max_group_size]
-
-        # Assign all selected learners to the new module
+        # Assign all selected learners to the new module and (classroom,
+        # teacher) pair
         new_state.learner_assignments[learners] = module
-
-        # And finally, assign the (classroom, teacher) pair
         new_state.classroom_teacher_assignments[(classroom, teacher)] = module
 
         return new_state

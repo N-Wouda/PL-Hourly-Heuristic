@@ -28,11 +28,8 @@ def simplify_activity(state: State) -> State:
     available_classrooms = available_classrooms - state.classroom_assignments
     available_classrooms = available_classrooms | set(classrooms)
 
-    # Total number of learners that need to be scheduled for this module.
-    total_learners = np.count_nonzero(state.learner_assignments == module)
-
-    needed_rooms = _minimal_cover(total_learners,
-                                  state.max_batch,
+    needed_rooms = _minimal_cover(state,
+                                  module,
                                   [classroom for classroom in state.classrooms
                                    if classroom['id'] in available_classrooms])
 
@@ -54,7 +51,7 @@ def simplify_activity(state: State) -> State:
     return state
 
 
-def _minimal_cover(total_learners: int, max_batch: int, available_rooms: List):
+def _minimal_cover(state: State, module: int, available_rooms: List):
     """
     Returns the rooms needed (from those available), such that a minimal
     amount of extra space is wasted.
@@ -66,15 +63,20 @@ def _minimal_cover(total_learners: int, max_batch: int, available_rooms: List):
     variables = {idx: solver.BoolVar(f'x[{idx}]')
                  for idx, _ in enumerate(available_rooms)}
 
-    objective = [
-        variables[idx] * min(max_batch, available_rooms[idx]['capacity'])
-        for idx in variables]
+    if module == -1:    # only capacity is of relevance for self-study modules
+        objective = [variables[idx] * available_rooms[idx]['capacity']
+                     for idx in variables]
+    else:
+        objective = [variables[idx] * min(state.max_batch,
+                                          available_rooms[idx]['capacity'])
+                     for idx in variables]
 
     # Minimise the empty overhead in classroom assignments
     solver.Minimize(solver.Sum(objective))
 
     # Total capacity of the provided rooms *must* be greater than the number
     # of learners
+    total_learners = np.count_nonzero(state.learner_assignments == module)
     solver.Add(solver.Sum(objective) >= total_learners)
 
     assert solver.Solve() == pywraplp.Solver.OPTIMAL

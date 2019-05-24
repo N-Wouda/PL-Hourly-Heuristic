@@ -14,14 +14,13 @@ from .operators import OPERATORS
 with open(f"experiments/{sys.argv[1]}/{sys.argv[2]}.json") as file:
     data = Data(json.load(file))
 
-# Fixes a seed (useful for testing)
-np.random.seed(19680801)
+np.random.seed(19950215)        # fixes a seed (useful for testing)
 
 result, best, history, weights = adaptive_large_neighbourhood_search(data)
 
 # Objective values
-print("Final result:", result.evaluate())
-print("Best observed:", best.evaluate())
+print("Final result:", result.objective())
+print("Best observed:", best.objective())
 
 # Plot of objective over time, and operator weights
 fig = plt.figure(figsize=(12, 8))

@@ -29,7 +29,7 @@ def adaptive_large_neighbourhood_search(data: Data) \
     global_best = state = initial_solution(data)
     weights = np.ones_like(OPERATORS)
 
-    history = [state.evaluate()]
+    history = [state.objective()]
     weight_history = [weights / weights.sum()]
 
     for iteration in range(Configuration.MAX_ITERATIONS):
@@ -40,11 +40,11 @@ def adaptive_large_neighbourhood_search(data: Data) \
 
         state, weight = _update(method(state), state)
         # This is already the new state, if it was better than the previous.
-        if state.evaluate() > global_best.evaluate():
+        if state.objective() > global_best.objective():
             global_best = state
             weight = Configuration.IS_BEST
 
-        history.append(state.evaluate())
+        history.append(state.objective())
         weight_history.append(weights / weights.sum())
 
         # Updates the weight associated with the selected method
@@ -58,11 +58,14 @@ def _update(new: State, old: State) -> Tuple[State, float]:
     Determines the next state, and the weight associated with the performed
     operation.
     """
-    if new.evaluate() > old.evaluate():
+    if new.objective() > old.objective():
         return new, Configuration.IS_BETTER
-    # This term is borrowed from simulated annealing, to allow for worse
-    # choices in the beginning.
-    elif accept(new.evaluate(), old.evaluate()) > np.random.random():
+    elif new.objective() == old.objective():    # this might imply some tidying
+        return new, Configuration.IS_ACCEPTED   # up, which we do want to keep.
+
+    # This is borrowed from simulated annealing, to allow for worse choices
+    # in the beginning.
+    if accept(new.objective(), old.objective()) > np.random.random():
         return new, Configuration.IS_ACCEPTED
     else:
         return old, Configuration.IS_REJECTED

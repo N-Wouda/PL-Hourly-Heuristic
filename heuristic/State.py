@@ -52,17 +52,14 @@ class State:
                 in self.classroom_teacher_assignments.values()}
 
     @property
-    @lru_cache(1)
     def preferences(self):
         return self._data.preferences
 
     @property
-    @lru_cache(1)
     def most_preferred(self):
         return self._data.most_preferred
 
     @property
-    @lru_cache(1)
     def qualifications(self):
         return self._data.qualifications
 
@@ -72,37 +69,31 @@ class State:
         return self._data.learners
 
     @property
-    @lru_cache(1)
     def teachers(self) -> List:
         return self._data.teachers
 
     @property
-    @lru_cache(1)
     def classrooms(self) -> List:
         return self._data.classrooms
 
     @property
-    @lru_cache(1)
     def modules(self) -> List:
         return self._data.modules
 
     @property
-    @lru_cache(1)
     def penalty(self) -> float:
         return self._data.penalty
 
     @property
-    @lru_cache(1)
     def min_batch(self) -> int:
         return self._data.min_batch
 
     @property
-    @lru_cache(1)
     def max_batch(self) -> int:
         return self._data.max_batch
 
-    @lru_cache(1)
-    def evaluate(self) -> float:
+    @lru_cache(None)
+    def objective(self) -> float:
         """
         Evaluates the current solution, and returns the objective value.
         """
@@ -123,7 +114,3 @@ class State:
         return cls(state._data,
                    state.learner_assignments,
                    state.classroom_teacher_assignments)
-
-    def __str__(self):
-        return str(self.learner_assignments) \
-            + str(self.classroom_teacher_assignments)

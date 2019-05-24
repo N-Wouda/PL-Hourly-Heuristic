@@ -3,7 +3,7 @@ from typing import List, Set
 import numpy as np
 from ortools.linear_solver.pywraplp import Solver
 
-from ..State import State
+from utils import State
 
 
 def simplify_activity(state: State) -> State:
@@ -88,7 +88,7 @@ def _minimal_cover(state: State, module: int, available_rooms: List) -> List:
     total_learners = np.count_nonzero(state.learner_assignments == module)
     solver.Add(solver.Sum(objective) >= total_learners)
 
-    assert solver.Solve() == Solver.OPTIMAL
+    assert solver.Solve() == Solver.OPTIMAL, "Solution is not optimal!"
 
     return [available_rooms[idx] for idx in range(len(available_rooms))
             if variables[idx].solution_value() > 0]

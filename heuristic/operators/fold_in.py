@@ -1,4 +1,4 @@
-from ..State import State
+from utils import State
 import numpy as np
 from heuristic.utils import random_activity
 
@@ -32,6 +32,7 @@ def fold_in(state: State) -> State:
     # capacity in the remaining activities.
     if total_capacity >= total_learners:
         del new_state.classroom_teacher_assignments[(classroom, teacher)]
+
     # We have some excess learners in this case. Let us try to move those back
     # into self-study.
     if state.classrooms[classroom]['self_study_allowed'] and module != -1:

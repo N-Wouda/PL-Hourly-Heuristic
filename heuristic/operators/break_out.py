@@ -1,7 +1,7 @@
 import numpy as np
 
 from heuristic.utils import find_classroom, find_teacher
-from ..State import State
+from utils import State
 
 
 def break_out(state: State) -> State:
@@ -28,8 +28,8 @@ def break_out(state: State) -> State:
         teacher = find_teacher(state, module)
         classroom = find_classroom(state, module)
 
-        if not teacher or not classroom:        # no teacher or classroom is
-            continue                            # available for this module
+        if teacher is False or classroom is False:  # no teacher or classroom is
+            continue                                # available for this module
 
         # We have all the ingredients to host an activity with this module, so
         # we can create a new state.

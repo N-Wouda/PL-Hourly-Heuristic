@@ -3,11 +3,10 @@ from typing import List, Tuple
 import numpy as np
 
 from .Configuration import Configuration
-from .State import State
+from utils import Data, State
 from .initial_solution import initial_solution
 from .operators import OPERATORS
 from .utils import accept, convex_combination
-from .Data import Data
 
 
 def adaptive_large_neighbourhood_search(data: Data) \

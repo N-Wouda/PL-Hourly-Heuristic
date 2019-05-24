@@ -2,8 +2,7 @@ from itertools import zip_longest
 
 import numpy as np
 
-from .Data import Data
-from .State import State
+from utils import Data, State
 
 
 def initial_solution(data: Data) -> State:

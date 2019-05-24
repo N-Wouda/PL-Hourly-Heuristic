@@ -1,6 +1,6 @@
 import numpy as np
 
-from heuristic.State import State
+from utils import State
 from typing import Tuple
 
 

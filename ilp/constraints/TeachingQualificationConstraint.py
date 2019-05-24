@@ -14,5 +14,6 @@ class TeachingQualificationConstraint(BaseConstraint):
 
             q_m = data["modules"][j]["qualification"]
 
-            solver.add_constraint(  # eq. (16)
-                (q_m - solver.Q[l, j]) * assignment >= 0)
+            # Eq. (16)
+            solver.add_constraint((q_m - solver.Q[l, j]) * assignment >= 0)
+            solver.add_constraint(solver.Q[l, j] * assignment >= 0.5)

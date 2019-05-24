@@ -6,5 +6,5 @@ class MethodType(Enum):
     """
     The type of method used to arrive at a result.
     """
-    ILP = 0
-    HEURISTIC = 1
+    ILP = 'ilp'
+    HEURISTIC = 'heuristic'

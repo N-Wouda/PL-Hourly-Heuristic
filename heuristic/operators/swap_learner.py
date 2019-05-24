@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..State import State
+from utils import State
 
 
 def swap_learner(state: State) -> State:

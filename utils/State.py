@@ -33,7 +33,8 @@ class State:
         classrooms = {classroom for classroom, teacher
                       in self.classroom_teacher_assignments}
 
-        assert len(classrooms) == len(self.classroom_teacher_assignments)
+        assert len(classrooms) == len(self.classroom_teacher_assignments), \
+            "Classrooms are not uniquely assigned!"
 
         return classrooms
 
@@ -42,7 +43,8 @@ class State:
         teachers = {teacher for classroom, teacher
                     in self.classroom_teacher_assignments}
 
-        assert len(teachers) == len(self.classroom_teacher_assignments)
+        assert len(teachers) == len(self.classroom_teacher_assignments), \
+            "Teachers are not uniquely assigned!"
 
         return teachers
 

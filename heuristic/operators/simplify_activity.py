@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Set
 
 import numpy as np
-from ortools.linear_solver import pywraplp
+from ortools.linear_solver.pywraplp import Solver
 
 from ..State import State
 
@@ -21,12 +21,9 @@ def simplify_activity(state: State) -> State:
     # The number of available classrooms is computed as all classrooms,
     # excluding those currently used in an activity. To this we add those
     # classrooms currently used for *this* module, as those may be re-assigned.
-    available_classrooms = set(
-        classroom['id'] for classroom in state.classrooms
-        if classroom['room_type'] == state.modules[module]['room_type'])
-
-    available_classrooms = available_classrooms - state.classroom_assignments
-    available_classrooms = available_classrooms | set(classrooms)
+    available_classrooms = _classrooms_for_module(state, module)
+    available_classrooms -= state.classroom_assignments
+    available_classrooms |= set(classrooms)
 
     needed_rooms = _minimal_cover(state,
                                   module,
@@ -51,13 +48,25 @@ def simplify_activity(state: State) -> State:
     return state
 
 
-def _minimal_cover(state: State, module: int, available_rooms: List):
+def _classrooms_for_module(state: State, module: int) -> Set[int]:
+    """
+    Returns those classrooms that are available for the given module,
+    respecting the room type or self-study constraint.
+    """
+    if module == -1:
+        return set(classroom['id'] for classroom in state.classrooms
+                   if classroom['self_study_allowed'])
+
+    return set(classroom['id'] for classroom in state.classrooms
+               if classroom['room_type'] == state.modules[module]['room_type'])
+
+
+def _minimal_cover(state: State, module: int, available_rooms: List) -> List:
     """
     Returns the rooms needed (from those available), such that a minimal
     amount of extra space is wasted.
     """
-    solver = pywraplp.Solver('TestSolver',
-                             pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
+    solver = Solver('TestSolver', Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
     # Room at idx is used iff solution value > 0 (boolean True)
     variables = {idx: solver.BoolVar(f'x[{idx}]')
@@ -79,7 +88,7 @@ def _minimal_cover(state: State, module: int, available_rooms: List):
     total_learners = np.count_nonzero(state.learner_assignments == module)
     solver.Add(solver.Sum(objective) >= total_learners)
 
-    assert solver.Solve() == pywraplp.Solver.OPTIMAL
+    assert solver.Solve() == Solver.OPTIMAL
 
     return [available_rooms[idx] for idx in range(len(available_rooms))
             if variables[idx].solution_value() > 0]

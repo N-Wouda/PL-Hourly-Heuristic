@@ -12,4 +12,8 @@ def find_classroom(state: State, module: int) -> Union[int, bool]:
         if state.classrooms[classroom]['room_type'] == room_type_needed:
             return classroom
 
+        # Since self-study is generally allowed in multiple room types.
+        if module == -1 and state.classrooms[classroom]['self_study_allowed']:
+            return classroom
+
     return False

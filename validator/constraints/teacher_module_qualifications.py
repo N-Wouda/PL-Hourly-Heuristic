@@ -17,4 +17,5 @@ def teacher_module_qualifications(data: Data, solution: List[Tuple]) -> bool:
     return all(0
                < data.qualifications[teacher, module]
                <= data.modules[module]["qualification"]
-               for teacher, module in teacher_modules.items())
+               for teacher, module in teacher_modules.items()
+               if module != len(data.modules) - 1)

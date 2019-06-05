@@ -48,7 +48,7 @@ class Data:
     @property
     @lru_cache(1)
     def qualifications(self):
-        return np.asarray(self._data['qualifications'])
+        return np.asarray(self._data['qualifications'], dtype=int)
 
     @property
     @lru_cache(1)

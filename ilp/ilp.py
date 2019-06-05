@@ -26,7 +26,7 @@ def ilp(data: Data) -> State:
         if solution is None:
             raise ValueError("Infeasible!")
 
-        return _to_state(data, solution)
+        return _to_state(data, solver)
 
 
 def _setup_objective(data: Data, solver: Model):
@@ -55,19 +55,19 @@ def _setup_decision_variables(data: Data, solver: Model):
         *assignment_problem[1:], name="module_resources")
 
 
-def _to_state(data: Data, solution: Model) -> State:
+def _to_state(data: Data, solver: Model) -> State:
     learner_assignments = [
         module
         for learner in range(len(data.learners))
         for module in range(len(data.modules))
-        if solution.assignment[learner, module].solution_value]
+        if solver.assignment[learner, module].solution_value]
 
     classroom_teacher_assignments = {
         (classroom, teacher): module
         for classroom in range(len(data.classrooms))
         for teacher in range(len(data.teachers))
         for module in range(len(data.modules))
-        if solution.module_resources[classroom, teacher, module].solution_value}
+        if solver.module_resources[module, classroom, teacher].solution_value}
 
     return State(data,
                  np.asarray(learner_assignments),

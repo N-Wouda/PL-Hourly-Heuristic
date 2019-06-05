@@ -14,8 +14,9 @@ def teaching_qualification(data: Data, solver):
         # Module requirement must be 'less' than teacher qualification.
         # E.g. module needs 2, then teacher can be qualified as either 1
         # or 2, but *not* 3.
-        solver.add_constraint(q_m * assignment
-                              >= data.qualifications[l, j] * assignment)
+        solver.add_constraint((q_m - data.qualifications[l, j]) * assignment
+                              >= 0)
 
         # That is, greater than zero (the qualifications are {0, 1, 2, 3})
-        solver.add_constraint(data.qualifications[l, j] * assignment >= 0.5)
+        solver.add_constraint(data.qualifications[l, j] * assignment
+                              >= assignment)

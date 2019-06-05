@@ -14,10 +14,11 @@ for method_type in MethodType:          # ILP, and heuristic
         with open(path) as file:
             solution = [tuple(assignment) for assignment in json.load(file)]
     except IOError:
-        print(f"No {method_type.value} solution for exp. {sys.argv[1]},"
-              f" inst. {sys.argv[2]}.")
+        print("No {0} solution for exp. {1}, inst. {2}"
+              .format(method_type.value, sys.argv[1], sys.argv[2]))
     else:
         result = validate(data, solution)
 
-        print(f"Solution ({method_type.value}) satisfies constraints for"
-              f" exp. {sys.argv[1]}, inst. {sys.argv[2]}?", result)
+        print("Solution ({0}) satisfies constraints for exp. {1},"
+              " inst. {2}? {3}".format(method_type.value, sys.argv[1],
+                                       sys.argv[2], result))

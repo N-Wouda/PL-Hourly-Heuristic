@@ -11,6 +11,7 @@ def file_location(experiment: int,
     instance) is returned.
     """
     if method_type is None:
-        return f"experiments/{experiment}/{instance}.json"
+        return "experiments/{0}/{1}.json".format(experiment, instance)
 
-    return f"experiments/{experiment}/{instance}-{method_type.value}.json"
+    return "experiments/{0}/{1}-{2}.json".format(experiment, instance,
+                                                 method_type.value)

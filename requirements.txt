@@ -2,9 +2,6 @@
 numpy == 1.16.2
 simplejson == 3.16.0
 
-# Specifically for the ILP solver
-docplex == 2.9.141
-
 # Specifically for the heuristic
 ortools == 7.1.6722
 matplotlib == 3.0.2

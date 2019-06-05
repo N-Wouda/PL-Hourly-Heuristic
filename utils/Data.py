@@ -2,6 +2,9 @@ from functools import lru_cache
 from typing import List
 
 import numpy as np
+import simplejson as json
+
+from .file_location import file_location
 
 
 class Data:
@@ -10,6 +13,17 @@ class Data:
     """
     def __init__(self, data):
         self._data = data
+
+    @classmethod
+    def from_instance(cls, experiment: int, instance: int) -> "Data":
+        """
+        Builds a Data object for the experiment data file associated with the
+        given experiment and instance.
+        """
+        with open(file_location(experiment, instance)) as file:
+            data = json.load(file)
+
+        return Data(data)
 
     @property
     @lru_cache(1)

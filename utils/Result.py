@@ -14,10 +14,10 @@ class Result:
         return self._state
 
     @property
-    def assignments(self) -> List[str]:
+    def assignments(self) -> List[List]:
         """
         Returns the assignments, as a list of (learner, module, classroom,
-        teacher)-strings.
+        teacher)-lists.
         """
         assignments = []
         counters = defaultdict(lambda: 0)
@@ -40,7 +40,7 @@ class Result:
                         break
 
                     assignment = (learners.pop(), module, classroom, teacher)
-                    assignments.append(str(assignment))
+                    assignments.append(list(assignment))
 
                     counters[classroom] += 1
 
@@ -58,7 +58,7 @@ class Result:
                         break
 
                     assignment = (learners.pop(), module, classroom, teacher)
-                    assignments.append(str(assignment))
+                    assignments.append(list(assignment))
 
                     counters[classroom] += 1
 

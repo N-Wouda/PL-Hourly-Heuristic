@@ -77,4 +77,13 @@ Solution (ilp) satisfies constraints for exp. 1, inst. 5? True
 Solution (heuristic) satisfies constraints for exp. 1, inst. 5? True
 ```
 
-For experiment `1`, instance `5`.
+For experiment `1`, instance `5`. Since validating *all* instances in
+a given experiment quickly turns tedious, there is the option to pass
+in a wildcard, like so,
+
+```
+python -m validator 1 *
+```
+
+This will run the validator over all instances in the given experiment,
+`1` in this example.

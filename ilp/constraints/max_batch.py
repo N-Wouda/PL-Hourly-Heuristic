@@ -18,8 +18,8 @@ def max_batch(data: Data, solver):
 
         activities = solver.sum(
             solver.module_resources[module, classroom, teacher] * max_capacity(
-                data.max_batch,
                 data.classrooms[classroom]["capacity"],
+                data.max_batch,
                 module == len(data.modules) - 1)
             for classroom in range(len(data.classrooms))
             for teacher in range(len(data.teachers)))

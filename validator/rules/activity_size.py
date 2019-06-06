@@ -17,7 +17,7 @@ def activity_size(data: Data, solution: List[Tuple]) -> bool:
 
     return all(data.min_batch
                <= len(learners)
-               <= max_capacity(data.max_batch,
-                               data.classrooms[classroom]["capacity"],
+               <= max_capacity(data.classrooms[classroom]["capacity"],
+                               data.max_batch,
                                module == len(data.modules) - 1)
                for (classroom, module), learners in classroom_learners.items())

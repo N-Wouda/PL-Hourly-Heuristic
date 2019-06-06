@@ -1,10 +1,10 @@
 from .MethodType import MethodType
-from .Result import Result
+from .State import State
 import simplejson as json
 from .file_location import file_location
 
 
-def write_result(result: Result,
+def write_result(result: State,
                  method_type: MethodType,
                  experiment: int,
                  instance: int):
@@ -13,4 +13,4 @@ def write_result(result: Result,
     filesystem in the appropriate location.
     """
     with open(file_location(experiment, instance, method_type), 'w') as file:
-        json.dump(result.assignments, file)
+        json.dump(result.to_assignments(), file)

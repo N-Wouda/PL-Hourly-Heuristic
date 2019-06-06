@@ -27,10 +27,19 @@ class Data:
 
     @property
     @lru_cache(1)
-    def preferences(self):
+    def preferences(self) -> np.ndarray:
+        """
+        Learner preferences, as a NumPy array. Preferences as a matrix of
+        learners (rows) to modules (column), where each element represents the
+        preference of the given learner for the given module. When a preference
+        is zero, the learner is ineligible to take given module.
+        """
         preferences = np.asarray(self._data["preferences"])
 
-        # Preferences, and the self-study module preference
+        # Preferences, and the self-study module preference. The self-study
+        # preference is given as the maximum preference held for any module
+        # by the learner, as the learner will work on his/her own - presumably
+        # on the most preferred module.
         return np.concatenate((preferences, np.max(preferences, 1)[:, None]), 1)
 
     @property
@@ -47,7 +56,14 @@ class Data:
 
     @property
     @lru_cache(1)
-    def qualifications(self):
+    def qualifications(self) -> np.ndarray:
+        """
+        Returns the teacher qualification matrix, as a NumPy array.
+        Qualifications are a matrix of teachers (rows) to modules (columns),
+        where each element represents the given teacher's qualification for
+        the given module. A zero element indicates the teacher is not qualified
+        to teach the given module.
+        """
         return np.asarray(self._data['qualifications'], dtype=int)
 
     @property
@@ -68,6 +84,10 @@ class Data:
     @property
     @lru_cache(1)
     def modules(self) -> List:
+        """
+        Returns a list of modules. The last module in the list is the
+        self-study module.
+        """
         modules = self._data['modules'].copy()
 
         modules.append(dict(id=-1,                  # self-study module
@@ -79,6 +99,9 @@ class Data:
     @property
     @lru_cache(1)
     def penalty(self) -> float:
+        """
+        Returns the self-study penalty.
+        """
         return self._data['parameters']['penalty']
 
     @property

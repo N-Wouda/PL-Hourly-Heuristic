@@ -1,12 +1,11 @@
 from typing import List, Tuple
 
 from utils import Data
-from .constraints import CONSTRAINTS
+from .rules import RULES
 
 
 def validate(data: Data, solution: List[Tuple]) -> bool:
     """
-    Checks if the required constraints hold on the passed-in solution.
+    Checks if the required validation rules hold on the passed-in solution.
     """
-    return all(constraint(data, solution)
-               for constraint in CONSTRAINTS)
+    return all(rule(data, solution) for rule in RULES)

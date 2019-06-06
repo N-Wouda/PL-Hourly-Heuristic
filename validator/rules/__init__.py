@@ -11,7 +11,7 @@ from .teacher_module_qualifications import teacher_module_qualifications
 from .teachers_to_classrooms import teachers_to_classrooms
 from .teachers_to_modules import teachers_to_modules
 
-CONSTRAINTS = [
+RULES = [
     activity_size,
     classroom_teacher_tuples_to_modules,
     classrooms_to_modules,

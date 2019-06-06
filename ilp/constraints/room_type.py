@@ -4,13 +4,27 @@ from utils import Data
 
 
 def room_type(data: Data, solver):
-    for j, k in itertools.product(range(len(data.modules) - 1),
-                                  range(len(data.classrooms))):
+    """
+    For each classroom-module assignment, this guarantees the room types agree.
+    Room types are categorical ({1, 2, ...}), where only equality suffices -
+    there is no ordering!
 
-        assignment = solver.sum(solver.module_resources[j, k, l]
-                                for l in range(len(data.teachers)))
+    Note
+    ----
+    This constraint does not hold for self-study; self-study is checked in the
+    ``self_study_allowed`` constraint.
+    """
+    for module, teacher in itertools.product(range(len(data.modules) - 1),
+                                             range(len(data.classrooms))):
+        classroom_module = solver.sum(
+            solver.module_resources[module, teacher, teacher]
+            for teacher in range(len(data.teachers)))
 
-        m_r = data.modules[j]["room_type"]
-        c_r = data.classrooms[k]["room_type"]
+        module_room_type = data.modules[module]["room_type"]
+        classroom_room_type = data.classrooms[teacher]["room_type"]
 
-        solver.add_constraint((m_r - c_r) * assignment == 0)  # eq. (19)
+        # Room type is a categorical variable: the only requirement is that,
+        # if the classroom is assigned to the given module, that the room types
+        # match *exactly*.
+        solver.add_constraint(module_room_type * classroom_module
+                              == classroom_room_type * classroom_module)

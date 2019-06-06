@@ -2,8 +2,11 @@ from utils import Data
 
 
 def learner_schedule(data: Data, solver):
-    for i in range(len(data.learners)):
-        assignment = solver.sum(solver.assignment[i, j]
-                                for j in range(len(data.modules)))
+    """
+    This constraint ensures learners are assigned to exact *one* module.
+    """
+    for learner in range(len(data.learners)):
+        assignments = solver.sum(solver.assignment[learner, module]
+                                 for module in range(len(data.modules)))
 
-        solver.add_constraint(assignment == 1)
+        solver.add_constraint(assignments == 1)

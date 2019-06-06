@@ -30,6 +30,9 @@ def ilp(data: Data) -> State:
 
 
 def _setup_objective(data: Data, solver: Model):
+    """
+    Specifies the optimisation objective.
+    """
     preference_max = solver.sum(
         data.preferences[i, j] * solver.assignment[i, j]
         for i in range(len(data.learners))
@@ -43,6 +46,9 @@ def _setup_objective(data: Data, solver: Model):
 
 
 def _setup_decision_variables(data: Data, solver: Model):
+    """
+    Prepares and applies the decision variables to the model.
+    """
     assignment_problem = [list(range(len(data.learners))),
                           list(range(len(data.modules))),
                           list(range(len(data.classrooms))),
@@ -56,6 +62,10 @@ def _setup_decision_variables(data: Data, solver: Model):
 
 
 def _to_state(data: Data, solver: Model) -> State:
+    """
+    Turns the model's decision variables into an appropriate ``State`` object,
+    which may then be queried for the modelling outcomes.
+    """
     learner_assignments = [
         module
         for learner in range(len(data.learners))

@@ -7,7 +7,7 @@ from .validate import validate
 
 data = Data.from_instance(sys.argv[1], sys.argv[2])
 
-for method_type in MethodType:          # ILP, and heuristic
+for method_type in MethodType:                          # ILP, and heuristic
     path = file_location(sys.argv[1], sys.argv[2], method_type)
 
     try:

@@ -4,19 +4,40 @@ from utils import Data
 
 
 def teaching_qualification(data: Data, solver):
-    for j, l in itertools.product(range(len(data.modules) - 1),
-                                  range(len(data.teachers))):
-        assignment = solver.sum(solver.module_resources[j, k, l]
-                                for k in range(len(data.classrooms)))
+    """
+    The teaching qualification constraint ensures teacher-module assignments
+    are feasible. Each module has a teaching qualification requirement, and
+    each teacher has a qualification for each module. Qualifications are
+    ordinal as {0, 1, 2, 3}, where ``0`` indicates no qualification, and the
+    rest are in decreasing level of qualification: a ``1`` is better than a
+    ``2``.
 
-        q_m = data.modules[j]["qualification"]
+    Example
+    -------
+    Suppose a module requires a qualification of ``2``. Then any teacher with
+    an equal or better (in this case, ``2`` or ``1``) qualification is eligible
+    to teach this activity.
+
+    Note
+    ----
+    Since self-study has a required qualification of ``3``, every teacher is
+    eligible to supervise the activity. As such, we can ignore this assignment
+    here.
+    """
+    for module, teacher in itertools.product(range(len(data.modules) - 1),
+                                             range(len(data.teachers))):
+        is_assigned = solver.sum(
+            solver.module_resources[module, classroom, teacher]
+            for classroom in range(len(data.classrooms)))
+
+        module_qualification = data.modules[module]["qualification"]
+        teacher_qualification = data.qualifications[teacher, module]
 
         # Module requirement must be 'less' than teacher qualification.
-        # E.g. module needs 2, then teacher can be qualified as either 1
-        # or 2, but *not* 3.
-        solver.add_constraint((q_m - data.qualifications[l, j]) * assignment
-                              >= 0)
+        solver.add_constraint(module_qualification * is_assigned
+                              >= teacher_qualification * is_assigned)
 
-        # That is, greater than zero (the qualifications are {0, 1, 2, 3})
-        solver.add_constraint(data.qualifications[l, j] * assignment
-                              >= assignment)
+        # Zero implies the teacher is not qualified, so we should ensure those
+        # assignments cannot happen.
+        solver.add_constraint(teacher_qualification * is_assigned
+                              >= is_assigned)

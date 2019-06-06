@@ -2,14 +2,19 @@ from utils import Data
 
 
 def min_batch(data: Data, solver):
-    for j in range(len(data.modules)):
-        assignment = solver.sum(solver.assignment[i, j]
-                                for i in range(len(data.learners)))
+    """
+    This constraints guarantees the number of learners assigned to a module
+    are supported by a sufficient number of classroom-teacher activities, such
+    that the minimum batch constraint is satisfied. This constraint holds for
+    both instruction and self-study activities.
+    """
+    for module in range(len(data.modules)):
+        module_learners = solver.sum(solver.assignment[learner, module]
+                                     for learner in range(len(data.learners)))
 
-        resources_assigned = solver.sum(
-            solver.module_resources[j, k, l]
-            for k in range(len(data.classrooms))
-            for l in range(len(data.teachers)))
+        activities = solver.sum(
+            solver.module_resources[module, classroom, teacher]
+            for classroom in range(len(data.classrooms))
+            for teacher in range(len(data.teachers)))
 
-        solver.add_constraint(assignment
-                              >= data.min_batch * resources_assigned)
+        solver.add_constraint(module_learners >= data.min_batch * activities)

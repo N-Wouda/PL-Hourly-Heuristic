@@ -2,16 +2,23 @@ from utils import Data
 
 
 def singular_use(data: Data, solver):
-    for l in range(len(data.teachers)):
-        classroom_sum = solver.sum(solver.module_resources[j, k, l]
-                                   for j in range(len(data.modules))
-                                   for k in range(len(data.classrooms)))
+    """
+    Ensures each classroom and each teacher are used exactly once.
+    """
+    for teacher in range(len(data.teachers)):
+        classrooms = solver.sum(
+            solver.module_resources[module, teacher, teacher]
+            for module in range(len(data.modules))
+            for teacher in range(len(data.classrooms)))
 
-        solver.add_constraint(classroom_sum <= 1)  # eq. (9)
+        # Each teacher may be assigned to *at most* one classroom.
+        solver.add_constraint(classrooms <= 1)
 
-    for k in range(len(data.classrooms)):
-        teacher_sum = solver.sum(solver.module_resources[j, k, l]
-                                 for j in range(len(data.modules))
-                                 for l in range(len(data.teachers)))
+    for classroom in range(len(data.classrooms)):
+        teachers = solver.sum(
+            solver.module_resources[module, classroom, teacher]
+            for module in range(len(data.modules))
+            for teacher in range(len(data.teachers)))
 
-        solver.add_constraint(teacher_sum <= 1)  # eq. (10)
+        # Each classroom may be assigned to *at most* one teacher.
+        solver.add_constraint(teachers <= 1)

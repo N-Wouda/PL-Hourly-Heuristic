@@ -1,15 +1,23 @@
 # PL-Heuristic
 
-This repository exposes three executable packages: one for the
-heuristic, the integer linear model, and the validator respectively.
-The heuristic quickly solves a problem using a sub-optimal method
-(seconds). The ILP takes considerably longer (days), but does guarantee
-optimality. The validator is a tool that confirms a given solution
-satisfies the imposed constraints.
+This repository hosts all code used in the development of an hourly
+scheduling heuristic for personalised learning. The repository exposes
+three executable packages: one for the heuristic, the integer linear
+model, and the validator respectively. The heuristic quickly solves a
+problem using a sub-optimal method (seconds). The ILP takes considerably
+longer (days), but does guarantee optimality. The validator tool
+verifies a given solution satisfies the imposed constraints.
 
-## Paper
+> **Note** that this repository assumes an `/experiments` directory is
+set-up, and populated with the experiment data. This data is of
+considerable size, and as such not part of the repository itself. It is
+available upon request. TODO
 
-TODO
+## Article and analysis
+
+The `/analysis` directory hosts some Jupyter notebooks that contain
+all results presented in the paper. The paper itself is available in
+pre-print in the repository, as `article.pdf`. TODO
 
 ## How to use
 
@@ -24,7 +32,7 @@ pip install -r requirements.txt
 For the ILP formulation, more is needed: you need to ensure a valid
 instance of the CPLEX programme is installed on your machine, with the
 relevant Python bindings exposed. CPLEX is commercial software offered
-by IBM, so this cannot be done via `pip`.
+by IBM, so this cannot easily be done via `pip`.
 
 ## Heuristic
 

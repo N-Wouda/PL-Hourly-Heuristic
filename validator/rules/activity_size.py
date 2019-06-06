@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from utils import Data
+from utils import Data, max_capacity
 
 
 def activity_size(data: Data, solution: List[Tuple]) -> bool:
@@ -12,11 +12,12 @@ def activity_size(data: Data, solution: List[Tuple]) -> bool:
     classroom_learners = defaultdict(set)
 
     for assignment in solution:
-        learner, _, classroom, _ = assignment
-        classroom_learners[classroom].add(learner)
+        learner, module, classroom, _ = assignment
+        classroom_learners[classroom, module].add(learner)
 
-    # TODO max batch size for non self-study (how?)
     return all(data.min_batch
                <= len(learners)
-               <= data.classrooms[classroom]["capacity"]
-               for classroom, learners in classroom_learners.items())
+               <= max_capacity(data.max_batch,
+                               data.classrooms[classroom]["capacity"],
+                               module == len(data.modules) - 1)
+               for (classroom, module), learners in classroom_learners.items())

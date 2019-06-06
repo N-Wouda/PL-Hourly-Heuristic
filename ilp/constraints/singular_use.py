@@ -7,9 +7,9 @@ def singular_use(data: Data, solver):
     """
     for teacher in range(len(data.teachers)):
         classrooms = solver.sum(
-            solver.module_resources[module, teacher, teacher]
+            solver.module_resources[module, classroom, teacher]
             for module in range(len(data.modules))
-            for teacher in range(len(data.classrooms)))
+            for classroom in range(len(data.classrooms)))
 
         # Each teacher may be assigned to *at most* one classroom.
         solver.add_constraint(classrooms <= 1)

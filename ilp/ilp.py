@@ -24,6 +24,9 @@ def ilp(data: Data) -> State:
         solution = solver.solve()
 
         if solution is None:
+            # There is not much that can be done in this case, so we raise an
+            # error. Logging should pick this up, but it is nearly impossible
+            # for this to happen due to the problem structure.
             raise ValueError("Infeasible!")
 
         return _to_state(data, solver)

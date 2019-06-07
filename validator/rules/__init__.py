@@ -3,6 +3,7 @@ from .classroom_teacher_tuples_to_modules \
     import classroom_teacher_tuples_to_modules
 from .classrooms_to_modules import classrooms_to_modules
 from .classrooms_to_teachers import classrooms_to_teachers
+from .learner_preferences import learner_preferences
 from .learners_to_classrooms import learners_to_classrooms
 from .learners_to_modules import learners_to_modules
 from .learners_to_teachers import learners_to_teachers
@@ -16,6 +17,7 @@ RULES = [
     classroom_teacher_tuples_to_modules,
     classrooms_to_modules,
     classrooms_to_teachers,
+    learner_preferences,
     learners_to_classrooms,
     learners_to_modules,
     learners_to_teachers,

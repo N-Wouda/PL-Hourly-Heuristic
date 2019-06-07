@@ -102,7 +102,7 @@ class State:
         """
         Evaluates the current solution, and returns the objective value.
         """
-        assert len(self._learner_assignments) == len(self.learners), \
+        assert len(self.learner_assignments) == len(self.learners), \
             "Not all learners have been assigned!"
 
         modules = self.preferences[np.arange(len(self.preferences)),
@@ -126,14 +126,20 @@ class State:
         Computes a State from a previously serialised solution. To serialise
         the assignments, use the ``to_assignments`` method.
         """
-        learner_assignments = np.empty_like(data.learners)
+        learner_assignments = np.empty_like(data.learners, dtype=int)
         classroom_module_assignments = {}
 
         for assignment in solution:
             learner, module, classroom, teacher = assignment
 
-            learner_assignments[learner] = module
-            classroom_module_assignments[classroom, teacher] = module
+            # The heuristic uses ``-1``, whereas the ILP uses the actual
+            # offset, so ``len(modules) - 1``. Both evaluate to the same
+            # module, but we should make sure to standardise on the module
+            # ID here so as not to affect the analysis.
+            module = data.modules[module]
+
+            learner_assignments[learner] = module["id"]
+            classroom_module_assignments[classroom, teacher] = module["id"]
 
         return cls(data, learner_assignments, classroom_module_assignments)
 

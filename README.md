@@ -5,8 +5,8 @@ scheduling heuristic for personalised learning. The repository exposes
 three executable packages: one for the heuristic, the integer linear
 model, and the validator respectively. The heuristic quickly solves a
 problem using a sub-optimal method (seconds). The ILP takes considerably
-longer (days), but does guarantee optimality. The validator tool
-verifies a given solution satisfies the imposed constraints.
+longer (hours to days), but does guarantee optimality. The validator
+tool verifies a given solution satisfies the imposed constraints.
 
 > **Note** that this repository assumes an `/experiments` directory is
 set-up, and populated with the experiment data. This data is of

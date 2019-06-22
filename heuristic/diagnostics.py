@@ -17,7 +17,7 @@ def diagnostics(last: State,
     """
     print("Final result: {0}".format(last.objective()))
     print("Best observed: {0}".format(best.objective()),
-          "at iteration".format(history.index(best.objective())))
+          "at iteration {0}".format(history.index(best.objective())))
 
     # Plot of objective over time
     fig = plt.figure(figsize=(12, 8))

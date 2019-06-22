@@ -10,7 +10,12 @@ def accept(new: float, old: float) -> float:
     Computes the acceptance probability according to a simulated annealing
     scheme. <https://en.wikipedia.org/wiki/Simulated_annealing#Pseudocode>.
     """
-    return np.exp((old - new) / next(_get_temperature()))
+    temperature = next(_temp)
+
+    if temperature <= 1:
+        return 0
+
+    return np.exp((old - new) / temperature)
 
 
 def _get_temperature() -> Generator[float, None, None]:
@@ -23,3 +28,6 @@ def _get_temperature() -> Generator[float, None, None]:
     while True:
         yield temperature                                           # see p. 9
         temperature = temperature * Configuration.TEMPERATURE_DECAY
+
+
+_temp = _get_temperature()

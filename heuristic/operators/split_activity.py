@@ -1,5 +1,5 @@
-from utils import State
 from heuristic.utils import find_teacher, find_classroom, random_activity
+from utils import State
 
 
 def split_activity(state: State) -> State:
@@ -7,6 +7,8 @@ def split_activity(state: State) -> State:
     Splits an activity in two, if applicable.
     """
     classroom, teacher, module = random_activity(state)
+
+    # TODO make this operator work with splitting below min_batch
 
     other_classroom = find_classroom(state, module)
     other_teacher = find_teacher(state, module)

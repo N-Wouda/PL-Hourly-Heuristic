@@ -11,7 +11,7 @@ OPERATORS = [
     fold_in,
     #insert_learner,
     simplify_activity,
-    split_activity,
+    # split_activity,
     #swap_learner,
     swap_teacher
 ]

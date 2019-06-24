@@ -38,6 +38,7 @@ def adaptive_large_neighbourhood_search(data: Data) \
         method = OPERATORS[idx]
 
         state, weight = _update(method(state), state)
+
         # This is already the new state, if it was better than the previous.
         if state.objective() > global_best.objective():
             global_best = state

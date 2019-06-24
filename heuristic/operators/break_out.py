@@ -8,7 +8,7 @@ def break_out(state: State) -> State:
     """
     Breaks-out an activity from self-study, if possible.
     """
-    self_study_learners = state.learner_assignments == -1
+    self_study_learners = state.learner_assignments == len(state.modules) - 1
 
     # Gets all modules that are preferred by learners currently in self study,
     # and computes those that do not yet have an activity.

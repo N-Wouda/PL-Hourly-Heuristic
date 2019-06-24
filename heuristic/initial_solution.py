@@ -11,10 +11,10 @@ def initial_solution(data: Data) -> State:
     and sufficient classroom-teacher pairs have been assigned to supervise
     the activities.
     """
-    state = State(data)
-
     # Assign all learners to self-study.
-    state = State(data, np.full_like(state.learners, -1, dtype=int))
+    state = State(data, np.full_like(data.learners,
+                                     len(data.modules) - 1,
+                                     dtype=int))
 
     # Not all classrooms can host self-study, so we only select those that
     # can.
@@ -33,7 +33,7 @@ def initial_solution(data: Data) -> State:
 
         assignment = (classroom['id'], teacher['id'])
 
-        state.classroom_teacher_assignments[assignment] = -1
+        state.classroom_teacher_assignments[assignment] = len(data.modules) - 1
 
         # Since the maximum activity size does not come into play for
         # self-study assignments.

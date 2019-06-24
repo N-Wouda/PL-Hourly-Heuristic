@@ -9,8 +9,10 @@ def fold_in(state: State) -> State:
     """
     classroom, teacher, module = random_activity(state)
 
-    if module == -1:        # No need to fold-in self-study assignments, as
-        return state        # those are already simplified via another operator
+    # No need to fold-in self-study assignments, as those are already
+    # simplified via another operator
+    if module == len(state.modules) - 1:
+        return state
 
     # Total learners assigned to the module associated with this activity
     total_learners = np.count_nonzero(state.learner_assignments == module)
@@ -35,13 +37,15 @@ def fold_in(state: State) -> State:
 
     # We have some excess learners in this case. Let us try to move those back
     # into self-study.
-    if state.classrooms[classroom]['self_study_allowed'] and module != -1:
+    if state.classrooms[classroom]['self_study_allowed'] \
+            and module != len(state.modules) - 1:
         excess = total_learners - total_capacity
 
         module_learners = (state.learner_assignments == module)
         excess_learners = module_learners.nonzero()[0][:excess]
 
-        new_state.learner_assignments[excess_learners] = -1
-        new_state.classroom_teacher_assignments[(classroom, teacher)] = -1
+        new_state.learner_assignments[excess_learners] = len(state.modules) - 1
+        new_state.classroom_teacher_assignments[(classroom, teacher)] \
+            = len(state.modules) - 1
 
     return new_state

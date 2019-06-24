@@ -12,8 +12,9 @@ def find_teacher(state: State, module: int) -> Union[int, bool]:
     # Gets all teachers that are not currently in use.
     teachers = set(range(len(state.teachers))) - state.teacher_assignments
 
-    if module == -1 and len(teachers):  # since self-study does not actually
-        return next(iter(teachers))     # require any specific qualification
+    # Since self-study does not actually require any specific qualification
+    if module == len(state.modules) - 1 and len(teachers):
+        return next(iter(teachers))
 
     teachers = [                            # finds the first teacher that fits
         teacher for teacher in teachers     # the required qualification

@@ -108,7 +108,8 @@ class State:
         modules = self.preferences[np.arange(len(self.preferences)),
                                    self.learner_assignments]
 
-        num_self_study = np.count_nonzero(self.learner_assignments == -1)
+        num_self_study = np.count_nonzero(self.learner_assignments
+                                          == len(self.modules) - 1)
 
         # The total value of the object is the preference for each module
         # assignment, minus the penalty for self study, where applicable.
@@ -132,14 +133,8 @@ class State:
         for assignment in solution:
             learner, module, classroom, teacher = assignment
 
-            # The heuristic uses ``-1``, whereas the ILP uses the actual
-            # offset, so ``len(modules) - 1``. Both evaluate to the same
-            # module, but we should make sure to standardise on the module
-            # ID here so as not to affect the analysis.
-            module = data.modules[module]
-
-            learner_assignments[learner] = module["id"]
-            classroom_module_assignments[classroom, teacher] = module["id"]
+            learner_assignments[learner] = module
+            classroom_module_assignments[classroom, teacher] = module
 
         return cls(data, learner_assignments, classroom_module_assignments)
 

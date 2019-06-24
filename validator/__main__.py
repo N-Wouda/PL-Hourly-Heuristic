@@ -1,20 +1,9 @@
 import sys
-from typing import List
 
 import simplejson as json
 
-from utils import Data, file_location, MethodType
+from utils import Data, file_location, instances, MethodType
 from .validate import validate
-
-
-def instances() -> List[int]:
-    """
-    Returns a list of instances based on the passed-in CLI instance option.
-    """
-    if sys.argv[2] == '*':                  # wildcard results in validation
-        return list(range(1, 101))          # of all experiment instances.
-    else:
-        return [sys.argv[2]]
 
 
 def process(experiment: int, instance: int):

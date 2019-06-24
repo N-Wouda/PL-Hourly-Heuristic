@@ -53,7 +53,7 @@ def _classrooms_for_module(state: State, module: int) -> Set[int]:
     Returns those classrooms that are available for the given module,
     respecting the room type or self-study constraint.
     """
-    if module == -1:
+    if module == len(state.modules) - 1:
         return set(classroom['id'] for classroom in state.classrooms
                    if classroom['self_study_allowed'])
 
@@ -72,7 +72,8 @@ def _minimal_cover(state: State, module: int, available_rooms: List) -> List:
     variables = {idx: solver.BoolVar(f'x[{idx}]')
                  for idx, _ in enumerate(available_rooms)}
 
-    if module == -1:    # only capacity is of relevance for self-study modules
+    # Only capacity is of relevance for self-study modules
+    if module == len(state.modules) - 1:
         objective = [variables[idx] * available_rooms[idx]['capacity']
                      for idx in variables]
     else:

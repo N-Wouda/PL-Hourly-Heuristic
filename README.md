@@ -78,11 +78,11 @@ Solution (heuristic) satisfies constraints for exp. 1, inst. 5? True
 ```
 
 For experiment `1`, instance `5`. Since validating *all* instances in
-a given experiment quickly turns tedious, there is the option to pass
-in a wildcard, like so,
+a given experiment quickly turns tedious, there is the option not to
+pass in an instance number, like so,
 
 ```
-python -m validator 1 *
+python -m validator 1
 ```
 
 This will run the validator over all instances in the given experiment,

@@ -55,7 +55,7 @@ def _can_attend(state: State, module: int) -> bool:
 
     fellow_learners = np.count_nonzero(state.learner_assignments == module)
 
-    if module == -1:    # only capacity is of relevance for self-study modules
+    if module == len(state.modules) - 1:         # self-study
         # If it is strictly smaller, it will still be at least equal when one
         # learner joins.
         return fellow_learners < sum(state.classrooms[classroom]['capacity']

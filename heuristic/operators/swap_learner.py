@@ -26,9 +26,9 @@ def swap_learner(state: State) -> State:
                 continue
 
             # Either the current activity is self-study (then any learner
-            # can swap), or the other learner should hold a  preference.
+            # can swap), or the other learner should hold a preference.
             if np.any(state.most_preferred[other, :] == current) \
-                    or current == -1:
+                    or current == len(state.modules) - 1:
                 new_state = State.from_state(state)
 
                 new_state.learner_assignments[learner] = module

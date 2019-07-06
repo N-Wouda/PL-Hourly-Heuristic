@@ -8,7 +8,7 @@ def insert_learner(state: State, rnd: RandomState) -> State:
     """
     Inserts a learner into a different activity, or self-study.
     """
-    learner = np.random.choice(state.learners)['id']
+    learner = rnd.choice(state.learners)['id']
 
     # We include the self-study module, as the learner could also be inserted
     # into a self-study assignment.

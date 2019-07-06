@@ -11,7 +11,7 @@ def simplify_activity(state: State, rnd: RandomState) -> State:
     """
     Simplifies a module activity, if possible.
     """
-    module = np.random.choice(list(state.module_assignments))
+    module = rnd.choice(list(state.module_assignments))
 
     activities = [classroom_teacher for classroom_teacher, activity_module
                   in state.classroom_teacher_assignments.items()

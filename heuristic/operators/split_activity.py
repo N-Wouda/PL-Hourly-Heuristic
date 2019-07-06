@@ -8,7 +8,7 @@ def split_activity(state: State, rnd: RandomState) -> State:
     """
     Splits an activity in two, if applicable.
     """
-    classroom, teacher, module = random_activity(state)
+    classroom, teacher, module = random_activity(state, rnd)
 
     # TODO make this operator work with splitting below min_batch
 

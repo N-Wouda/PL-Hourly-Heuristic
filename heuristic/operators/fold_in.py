@@ -9,7 +9,7 @@ def fold_in(state: State, rnd: RandomState) -> State:
     """
     Folds-in an activity into self-study, if applicable.
     """
-    classroom, teacher, module = random_activity(state)
+    classroom, teacher, module = random_activity(state, rnd)
 
     # No need to fold-in self-study assignments, as those are already
     # simplified via another operator

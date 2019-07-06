@@ -8,7 +8,7 @@ def swap_learner(state: State, rnd: RandomState) -> State:
     """
     Swaps two selected learners, if applicable.
     """
-    learner = np.random.choice(state.learners)['id']
+    learner = rnd.choice(state.learners)['id']
     preferences = state.most_preferred[learner, :]
 
     for module in preferences:

@@ -1,10 +1,11 @@
-import numpy as np
-
-from utils import State
 from typing import Tuple
 
+from numpy.random import RandomState
 
-def random_activity(state: State) -> Tuple[int, int, int]:
+from utils import State
+
+
+def random_activity(state: State, rnd: RandomState) -> Tuple[int, int, int]:
     """
     Returns a random activity, currently scheduled in the passed-in state.
 
@@ -16,7 +17,7 @@ def random_activity(state: State) -> Tuple[int, int, int]:
     pairs = list(state.classroom_teacher_assignments)
 
     # Randomly selected activity pair
-    classroom, teacher = pairs[np.random.randint(0, len(pairs))]
+    classroom, teacher = pairs[rnd.randint(0, len(pairs))]
     module = state.classroom_teacher_assignments[(classroom, teacher)]
 
     return classroom, teacher, module

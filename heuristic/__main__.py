@@ -21,6 +21,7 @@ def run(experiment: int, instance: int):
     for operator in OPERATORS:
         alns.add_repair_operator(operator)
 
+    # TODO select a different acceptance criterion?
     criterion = HillClimbing()
 
     result = alns.iterate(initial_solution(data), [3, 2, 1, 0.5], 0.8,

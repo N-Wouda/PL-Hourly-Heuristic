@@ -9,7 +9,7 @@ def swap_teacher(state: State, rnd: RandomState) -> State:
     Swaps an activity teacher with one in self-study or unassigned,
     if applicable.
     """
-    classroom, teacher, module = random_activity(state)
+    classroom, teacher, module = random_activity(state, rnd)
     other_teacher = find_teacher(state, module)
 
     if other_teacher is not False:

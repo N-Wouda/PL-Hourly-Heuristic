@@ -1,12 +1,13 @@
 from typing import List, Set
 
 import numpy as np
+from numpy.random import RandomState
 from ortools.linear_solver.pywraplp import Solver
 
 from utils import State
 
 
-def simplify_activity(state: State) -> State:
+def simplify_activity(state: State, rnd: RandomState) -> State:
     """
     Simplifies a module activity, if possible.
     """
@@ -31,7 +32,7 @@ def simplify_activity(state: State) -> State:
                                    if classroom['id'] in available_classrooms])
 
     if len(needed_rooms) <= len(classrooms):    # this we can solve, since we
-        new_state = State.from_state(state)     # can free some rooms
+        new_state = state.copy()                # can free some rooms
 
         # First we remove all relevant existing activities.
         for activity in activities:

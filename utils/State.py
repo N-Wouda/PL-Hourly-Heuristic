@@ -15,13 +15,23 @@ class State:
                  classroom_teacher_assignments: Optional[Dict] = None):
         self._data = data
 
-        self._learner_assignments = np.empty_like(self.learners) \
-            if learner_assignments is None \
-            else learner_assignments.copy()
+        self._learner_assignments = np.empty_like(self.learners)
 
-        self._classroom_teacher_assignments = {} \
-            if classroom_teacher_assignments is None \
-            else classroom_teacher_assignments.copy()
+        if learner_assignments is not None:
+            self._learner_assignments = learner_assignments
+
+        self._classroom_teacher_assignments = {}
+
+        if classroom_teacher_assignments is not None:
+            self._classroom_teacher_assignments = classroom_teacher_assignments
+
+    def copy(self):
+        """
+        Returns a copy of the current state.
+        """
+        return State(self._data,
+                     self.learner_assignments.copy(),
+                     self.classroom_teacher_assignments.copy())
 
     @property
     def learner_assignments(self):
@@ -114,12 +124,6 @@ class State:
         # The total value of the object is the preference for each module
         # assignment, minus the penalty for self study, where applicable.
         return sum(modules) - self.penalty * num_self_study
-
-    @classmethod
-    def from_state(cls, state: "State") -> "State":
-        return cls(state._data,
-                   state.learner_assignments,
-                   state.classroom_teacher_assignments)
 
     @classmethod
     def from_assignments(cls, data: Data, solution: List[Tuple]) -> "State":

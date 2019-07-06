@@ -1,9 +1,11 @@
-from utils import State
 import numpy as np
+from numpy.random import RandomState
+
 from heuristic.utils import random_activity
+from utils import State
 
 
-def fold_in(state: State) -> State:
+def fold_in(state: State, rnd: RandomState) -> State:
     """
     Folds-in an activity into self-study, if applicable.
     """
@@ -24,7 +26,7 @@ def fold_in(state: State) -> State:
         if state.classroom_teacher_assignments[(classroom, teacher)] == module}
     classrooms.discard(classroom)
 
-    new_state = State.from_state(state)
+    new_state = state.copy()
 
     total_capacity = sum(min(state.classrooms[room]['capacity'],
                              state.max_batch)

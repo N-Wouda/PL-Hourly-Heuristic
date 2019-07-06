@@ -1,8 +1,10 @@
-from utils import State
 import numpy as np
+from numpy.random import RandomState
+
+from utils import State
 
 
-def insert_learner(state: State) -> State:
+def insert_learner(state: State, rnd: RandomState) -> State:
     """
     Inserts a learner into a different activity, or self-study.
     """
@@ -24,7 +26,7 @@ def insert_learner(state: State) -> State:
             continue
 
         if _can_leave(state, learner) and _can_attend(state, module):
-            new_state = State.from_state(state)
+            new_state = state.copy()
             new_state.learner_assignments[learner] = module
 
             return new_state

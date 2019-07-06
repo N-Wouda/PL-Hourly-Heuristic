@@ -3,6 +3,7 @@ from itertools import zip_longest
 import numpy as np
 
 from utils import Data, State
+from heuristic.utils import HeuristicState
 
 
 def initial_solution(data: Data) -> State:
@@ -12,9 +13,9 @@ def initial_solution(data: Data) -> State:
     the activities.
     """
     # Assign all learners to self-study.
-    state = State(data, np.full_like(data.learners,
-                                     len(data.modules) - 1,
-                                     dtype=int))
+    state = HeuristicState(data, np.full_like(data.learners,
+                                              len(data.modules) - 1,
+                                              dtype=int))
 
     # Not all classrooms can host self-study, so we only select those that
     # can.

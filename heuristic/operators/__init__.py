@@ -9,10 +9,10 @@ from .swap_teacher import swap_teacher
 OPERATORS = [
     break_out,
     fold_in,
-    #insert_learner,
+    # insert_learner,
     simplify_activity,
     # split_activity,
-    #swap_learner,
+    # swap_learner,
     swap_teacher
 ]
 """

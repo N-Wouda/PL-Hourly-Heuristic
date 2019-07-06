@@ -1,9 +1,10 @@
 import numpy as np
+from numpy.random import RandomState
 
 from utils import State
 
 
-def swap_learner(state: State) -> State:
+def swap_learner(state: State, rnd: RandomState) -> State:
     """
     Swaps two selected learners, if applicable.
     """
@@ -29,7 +30,7 @@ def swap_learner(state: State) -> State:
             # can swap), or the other learner should hold a preference.
             if np.any(state.most_preferred[other, :] == current) \
                     or current == len(state.modules) - 1:
-                new_state = State.from_state(state)
+                new_state = state.copy()
 
                 new_state.learner_assignments[learner] = module
                 new_state.learner_assignments[other] = current

@@ -1,9 +1,10 @@
-# List is up-to-date as of 24th of May, 2019.
-numpy == 1.16.2
-simplejson == 3.16.0
+# List is up-to-date as of 6th of July, 2019.
+numpy >= 1.16.2
+simplejson >= 3.16.0
 
 # Specifically for the heuristic
-ortools == 7.1.6722
-matplotlib == 3.0.2
-seaborn == 0.9.0
-pandas == 0.24.1
+alns >= 1.0.0
+ortools >= 7.1.6722
+matplotlib >= 3.0.2
+seaborn >= 0.9.0
+pandas >= 0.24.1

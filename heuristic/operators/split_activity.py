@@ -1,8 +1,10 @@
+from numpy.random import RandomState
+
 from heuristic.utils import find_teacher, find_classroom, random_activity
 from utils import State
 
 
-def split_activity(state: State) -> State:
+def split_activity(state: State, rnd: RandomState) -> State:
     """
     Splits an activity in two, if applicable.
     """
@@ -14,7 +16,7 @@ def split_activity(state: State) -> State:
     other_teacher = find_teacher(state, module)
 
     if other_teacher is not False and other_classroom is not False:
-        new_state = State.from_state(state)
+        new_state = state.copy()
         new_assignment = (other_classroom, other_teacher)
 
         new_state.classroom_teacher_assignments[new_assignment] = module

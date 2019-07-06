@@ -1,10 +1,11 @@
 import numpy as np
+from numpy.random import RandomState
 
 from heuristic.utils import find_classroom, find_teacher
 from utils import State
 
 
-def break_out(state: State) -> State:
+def break_out(state: State, rnd: RandomState) -> State:
     """
     Breaks-out an activity from self-study, if possible.
     """
@@ -33,7 +34,7 @@ def break_out(state: State) -> State:
 
         # We have all the ingredients to host an activity with this module, so
         # we can create a new state.
-        new_state = State.from_state(state)
+        new_state = state.copy()
 
         # Of these learners, we should make sure their assignment *improves*:
         # the newly selected preferences should be above what their current

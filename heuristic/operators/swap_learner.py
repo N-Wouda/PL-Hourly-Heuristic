@@ -1,10 +1,10 @@
 import numpy as np
 from numpy.random import RandomState
 
-from utils import State
+from heuristic.utils import HeuristicState
 
 
-def swap_learner(state: State, rnd: RandomState) -> State:
+def swap_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Swaps two selected learners, if applicable.
     """

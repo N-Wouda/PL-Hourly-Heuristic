@@ -4,10 +4,10 @@ import numpy as np
 from numpy.random import RandomState
 from ortools.linear_solver.pywraplp import Solver
 
-from utils import State
+from heuristic.utils import HeuristicState
 
 
-def simplify_activity(state: State, rnd: RandomState) -> State:
+def simplify_activity(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Simplifies a module activity, if possible.
     """
@@ -49,7 +49,7 @@ def simplify_activity(state: State, rnd: RandomState) -> State:
     return state
 
 
-def _classrooms_for_module(state: State, module: int) -> Set[int]:
+def _classrooms_for_module(state: HeuristicState, module: int) -> Set[int]:
     """
     Returns those classrooms that are available for the given module,
     respecting the room type or self-study constraint.
@@ -62,7 +62,8 @@ def _classrooms_for_module(state: State, module: int) -> Set[int]:
                if classroom['room_type'] == state.modules[module]['room_type'])
 
 
-def _minimal_cover(state: State, module: int, available_rooms: List) -> List:
+def _minimal_cover(state: HeuristicState, module: int,
+                   available_rooms: List) -> List:
     """
     Returns the rooms needed (from those available), such that a minimal
     amount of extra space is wasted.

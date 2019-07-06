@@ -1,10 +1,10 @@
 import numpy as np
 from numpy.random import RandomState
 
-from utils import State
+from heuristic.utils import HeuristicState
 
 
-def insert_learner(state: State, rnd: RandomState) -> State:
+def insert_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Inserts a learner into a different activity, or self-study.
     """
@@ -34,7 +34,7 @@ def insert_learner(state: State, rnd: RandomState) -> State:
     return state
 
 
-def _can_leave(state: State, learner: int) -> bool:
+def _can_leave(state: HeuristicState, learner: int) -> bool:
     # The learner must leave behind a valid activity (min_batch).
     current = state.learner_assignments[learner]
     classrooms = sum(1 for ct, mod
@@ -48,7 +48,7 @@ def _can_leave(state: State, learner: int) -> bool:
     return fellow_learners > classrooms * state.min_batch
 
 
-def _can_attend(state: State, module: int) -> bool:
+def _can_attend(state: HeuristicState, module: int) -> bool:
     # The learner must not exceed the maximum learners in the proposed activity
     # (max_batch).
     classrooms = {

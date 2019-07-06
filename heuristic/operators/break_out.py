@@ -1,11 +1,10 @@
 import numpy as np
 from numpy.random import RandomState
 
-from heuristic.utils import find_classroom, find_teacher
-from utils import State
+from heuristic.utils import find_classroom, find_teacher, HeuristicState
 
 
-def break_out(state: State, rnd: RandomState) -> State:
+def break_out(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Breaks-out an activity from self-study, if possible.
     """

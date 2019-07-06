@@ -1,10 +1,10 @@
 from numpy.random import RandomState
 
-from heuristic.utils import find_teacher, find_classroom, random_activity
-from utils import State
+from heuristic.utils import (find_teacher, find_classroom, HeuristicState,
+                             random_activity)
 
 
-def split_activity(state: State, rnd: RandomState) -> State:
+def split_activity(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Splits an activity in two, if applicable.
     """

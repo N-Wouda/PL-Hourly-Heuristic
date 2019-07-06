@@ -2,11 +2,11 @@ from itertools import zip_longest
 
 import numpy as np
 
-from utils import Data, State
 from heuristic.utils import HeuristicState
+from utils import Data
 
 
-def initial_solution(data: Data) -> State:
+def initial_solution(data: Data) -> HeuristicState:
     """
     Constructs an initial solution, where all learners are in self-study,
     and sufficient classroom-teacher pairs have been assigned to supervise

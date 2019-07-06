@@ -1,11 +1,10 @@
 import numpy as np
 from numpy.random import RandomState
 
-from heuristic.utils import random_activity
-from utils import State
+from heuristic.utils import random_activity, HeuristicState
 
 
-def fold_in(state: State, rnd: RandomState) -> State:
+def fold_in(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Folds-in an activity into self-study, if applicable.
     """

@@ -3,12 +3,13 @@ from functools import lru_cache
 from typing import Optional, Dict, List, Set, Tuple
 
 import numpy as np
+from alns import State as ALNSState
 
 from .Data import Data
 from .max_capacity import max_capacity
 
 
-class State:
+class State(ALNSState):
 
     def __init__(self, data: Data,
                  learner_assignments: Optional[np.ndarray] = None,
@@ -24,14 +25,6 @@ class State:
 
         if classroom_teacher_assignments is not None:
             self._classroom_teacher_assignments = classroom_teacher_assignments
-
-    def copy(self):
-        """
-        Returns a copy of the current state.
-        """
-        return State(self._data,
-                     self.learner_assignments.copy(),
-                     self.classroom_teacher_assignments.copy())
 
     @property
     def learner_assignments(self):

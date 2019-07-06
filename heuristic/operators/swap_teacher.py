@@ -1,10 +1,9 @@
 from numpy.random import RandomState
 
-from heuristic.utils import find_teacher, random_activity
-from utils import State
+from heuristic.utils import find_teacher, HeuristicState, random_activity
 
 
-def swap_teacher(state: State, rnd: RandomState) -> State:
+def swap_teacher(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     """
     Swaps an activity teacher with one in self-study or unassigned,
     if applicable.

@@ -24,7 +24,9 @@ def run(experiment: int, instance: int):
     # TODO select a different acceptance criterion?
     criterion = HillClimbing()
 
-    result = alns.iterate(initial_solution(data), [3, 2, 1, 0.5], 0.8,
+    result = alns.iterate(initial_solution(data),
+                          [3, 2, 1, 0.5],
+                          0.8,
                           criterion)
 
     write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)

@@ -12,10 +12,10 @@ from .operators import OPERATORS
 def run(experiment: int, instance: int):
     data = Data.from_instance(experiment, instance)
 
-    # E.g. for exp 72 and inst. 1, this becomes 72001. This way, even for
-    # inst. 100,  there will never be overlap between random number streams
-    # across experiments.
-    alns = ALNS(rnd.RandomState(10000 * experiment + instance))
+    # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
+    # 100, there will never be overlap between random number streams across
+    # experiments.
+    alns = ALNS(rnd.RandomState(100 * experiment + instance))
 
     # We don't use the destroy operators, as each operator maps from a feasible
     # state to a feasible state.

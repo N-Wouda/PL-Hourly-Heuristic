@@ -15,15 +15,22 @@ def compute_measures(experiment: int) -> List[Dict[str, float]]:
     for instance in range(1, 101):
         data = Data.from_instance(experiment, instance)
 
-        heuristic = _get_state(data, experiment, instance, MethodType.HEURISTIC)
-        ilp = _get_state(data, experiment, instance, MethodType.ILP)
+        result = {}
 
-        heuristic_result = {
-            'heuristic_' + func.__name__: func(heuristic) for func in MEASURES}
+        for method in [MethodType.HEURISTIC, MethodType.ILP]:
+            try:
+                state = _get_state(data, experiment, instance, method)
 
-        ilp_result = {'ilp_' + func.__name__: func(ilp) for func in MEASURES}
+                method_result = {
+                    method.value + '_' + func.__name__: func(state)
+                    for func in MEASURES}
 
-        results.append({**heuristic_result, **ilp_result})
+                result.update(method_result)
+            except:
+                print(f"Could not compute measures for exp. {experiment}, "
+                      f"inst. {instance}, method {method.value}.")
+
+        results.append(result)
 
     return results
 

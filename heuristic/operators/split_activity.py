@@ -22,7 +22,7 @@ def split_activity(state: HeuristicState, rnd: RandomState) -> HeuristicState:
 
     # A new activity assignment would result in insufficient learners for each
     # classroom activity.
-    if state.min_batch > num_learners / num_activities:
+    if state.min_batch * num_activities > num_learners:
         return state
 
     other_classroom = find_classroom(state, module)

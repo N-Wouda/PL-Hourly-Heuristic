@@ -22,13 +22,11 @@ def initial_solution(data: Data) -> HeuristicState:
     classrooms = [classroom for classroom in state.classrooms
                   if classroom['self_study_allowed']]
 
-    # In contrast, all teachers can supervise a self-study assignment.
-    teachers = state.teachers
-
     # Assign learners until we have none left to assign
     learners_to_assign = len(state.learners)
 
-    for classroom, teacher in zip_longest(classrooms, teachers):
+    # All teachers can supervise a self-study assignment.
+    for classroom, teacher in zip_longest(classrooms, state.teachers):
         assert classroom is not None, "Classroom is None!"
         assert teacher is not None, "Teacher is None!"
 

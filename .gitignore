@@ -65,3 +65,5 @@ experiments/
 
 # Virtualenv
 venv/
+
+.ipynb_checkpoints/

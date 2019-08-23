@@ -72,7 +72,7 @@ def _minimal_cover(state: HeuristicState, module: int,
 
     # Room at idx is used iff solution value > 0 (boolean True)
     variables = {idx: solver.BoolVar(f'x[{idx}]')
-                 for idx, _ in enumerate(available_rooms)}
+                 for idx in range(len(available_rooms))}
 
     # Only capacity is of relevance for self-study modules
     if module == len(state.modules) - 1:

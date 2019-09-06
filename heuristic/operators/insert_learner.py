@@ -20,12 +20,11 @@ def insert_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
         if module == state.learner_assignments[learner]:
             return state
 
-        # The selected learner holds a preference for this module, *and* we
-        # have an activity for this module.
+        # The module must already be scheduled in some assignment
         if module not in state.module_assignments:
             continue
 
-        if _can_leave(state, learner) and _can_attend(state, module):
+        if _can_leave(state, module) and _can_attend(state, module):
             new_state = state.copy()
             new_state.learner_assignments[learner] = module
 
@@ -34,14 +33,13 @@ def insert_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
     return state
 
 
-def _can_leave(state: HeuristicState, learner: int) -> bool:
+def _can_leave(state: HeuristicState, module: int) -> bool:
     # The learner must leave behind a valid activity (min_batch).
-    current = state.learner_assignments[learner]
     classrooms = sum(1 for ct, mod
                      in state.classroom_teacher_assignments.items()
-                     if mod == current)
+                     if mod == module)
 
-    fellow_learners = np.count_nonzero(state.learner_assignments == current)
+    fellow_learners = np.count_nonzero(state.learner_assignments == module)
 
     # If it is strictly larger, it will still be at least equal when one
     # learner leaves.

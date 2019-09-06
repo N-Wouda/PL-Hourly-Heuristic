@@ -2,6 +2,7 @@ import numpy as np
 from numpy.random import RandomState
 
 from heuristic.utils import random_activity, HeuristicState
+from .simplify_activity import simplify_activity
 
 
 def fold_in(state: HeuristicState, rnd: RandomState) -> HeuristicState:
@@ -49,4 +50,4 @@ def fold_in(state: HeuristicState, rnd: RandomState) -> HeuristicState:
         new_state.classroom_teacher_assignments[(classroom, teacher)] \
             = len(state.modules) - 1
 
-    return new_state
+    return simplify_activity(new_state, module)

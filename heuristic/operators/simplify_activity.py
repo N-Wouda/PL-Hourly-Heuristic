@@ -1,21 +1,28 @@
 from typing import List, Set
 
 import numpy as np
-from numpy.random import RandomState
 from ortools.linear_solver.pywraplp import Solver
 
 from heuristic.utils import HeuristicState
 
 
-def simplify_activity(state: HeuristicState, rnd: RandomState) -> HeuristicState:
+def simplify_activity(state: HeuristicState, module: int) -> HeuristicState:
     """
-    Simplifies a module activity, if possible.
+    Simplifies a module activity, if possible. This method is a helper operator
+    for fold_in and break_out, so it takes an additional module parameter.
     """
-    module = rnd.choice(list(state.module_assignments))
+    return _simplify_activity(
+        _simplify_activity(state, module),      # simplifies the given module
+        len(state.modules) - 1)                 # simplifies self-study
 
+
+def _simplify_activity(state: HeuristicState, module: int) -> HeuristicState:
     activities = [classroom_teacher for classroom_teacher, activity_module
                   in state.classroom_teacher_assignments.items()
                   if activity_module == module]
+
+    if len(activities) == 0:        # nothing to optimise in this case. This
+        return state                # can happen after a fold_in operation.
 
     classrooms, _ = zip(*activities)
 
@@ -74,22 +81,22 @@ def _minimal_cover(state: HeuristicState, module: int,
     variables = {idx: solver.BoolVar(f'x[{idx}]')
                  for idx in range(len(available_rooms))}
 
+    # Minimise the number of classroom assignments
+    solver.Minimize(solver.Sum(variables.values()))
+
     # Only capacity is of relevance for self-study modules
     if module == len(state.modules) - 1:
-        objective = [variables[idx] * available_rooms[idx]['capacity']
-                     for idx in variables]
+        constraint = [variables[idx] * available_rooms[idx]['capacity']
+                      for idx in variables]
     else:
-        objective = [variables[idx] * min(state.max_batch,
-                                          available_rooms[idx]['capacity'])
-                     for idx in variables]
-
-    # Minimise the empty overhead in classroom assignments
-    solver.Minimize(solver.Sum(objective))
+        constraint = [variables[idx] * min(state.max_batch,
+                                           available_rooms[idx]['capacity'])
+                      for idx in variables]
 
     # Total capacity of the provided rooms *must* be greater than the number
     # of learners
     total_learners = np.count_nonzero(state.learner_assignments == module)
-    solver.Add(solver.Sum(objective) >= total_learners)
+    solver.Add(solver.Sum(constraint) >= total_learners)
 
     assert solver.Solve() == Solver.OPTIMAL, "Solution is not optimal!"
 

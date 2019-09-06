@@ -2,6 +2,7 @@ import numpy as np
 from numpy.random import RandomState
 
 from heuristic.utils import find_classroom, find_teacher, HeuristicState
+from .simplify_activity import simplify_activity
 
 
 def break_out(state: HeuristicState, rnd: RandomState) -> HeuristicState:
@@ -57,6 +58,6 @@ def break_out(state: HeuristicState, rnd: RandomState) -> HeuristicState:
         new_state.learner_assignments[learners] = module
         new_state.classroom_teacher_assignments[(classroom, teacher)] = module
 
-        return new_state
+        return simplify_activity(new_state, module)
 
     return state        # we could not find an activity to schedule

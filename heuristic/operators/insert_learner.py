@@ -20,11 +20,14 @@ def insert_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
         if module == state.learner_assignments[learner]:
             return state
 
-        # The module must already be scheduled in some assignment
+        # The module must already be scheduled in some assignment.
         if module not in state.module_assignments:
             continue
 
-        if _can_leave(state, module) and _can_attend(state, module):
+        # The learner must be able to leave their current assignment, and join
+        # the new.
+        if _can_leave(state, state.learner_assignments[learner]) \
+                and _can_attend(state, module):
             new_state = state.copy()
             new_state.learner_assignments[learner] = module
 

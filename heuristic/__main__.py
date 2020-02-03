@@ -4,7 +4,7 @@ import numpy.random as rnd
 from alns import ALNS
 from alns.criteria import HillClimbing
 
-from utils import Data, instances, MethodType, write_result
+from utils import Data, MethodType, instances, write_result
 from .initial_solution import initial_solution
 from .operators import OPERATORS
 
@@ -25,7 +25,7 @@ def run(experiment: int, instance: int):
         alns.add_repair_operator(operator)
 
     result = alns.iterate(initial_solution(data),
-                          [3, 2, 1, 0.5],
+                          [25, 5, 1, 0.2],
                           0.8,
                           HillClimbing())
 

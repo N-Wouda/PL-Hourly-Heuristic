@@ -2,34 +2,34 @@ import numpy as np
 from numpy.random import RandomState
 
 from heuristic.utils import random_activity, HeuristicState
-from .simplify_activity import simplify_activity
+from heuristic.utils.simplify_activity import simplify_activity
 
 
-def fold_in(state: HeuristicState, rnd: RandomState) -> HeuristicState:
+def fold_in(current: HeuristicState, rnd_state: RandomState) -> HeuristicState:
     """
     Folds-in an activity into self-study, if applicable.
     """
-    classroom, teacher, module = random_activity(state, rnd)
+    classroom, teacher, module = random_activity(current, rnd_state)
 
     # No need to fold-in self-study assignments, as those are already
     # simplified via another operator
-    if module == len(state.modules) - 1:
-        return state
+    if module == len(current.modules) - 1:
+        return current
 
     # Total learners assigned to the module associated with this activity
-    total_learners = np.count_nonzero(state.learner_assignments == module)
+    total_learners = np.count_nonzero(current.learner_assignments == module)
 
     # All classrooms assigned to this module, excluding the currently selected
     # classroom
     classrooms = {
-        classroom for classroom, teacher in state.classroom_teacher_assignments
-        if state.classroom_teacher_assignments[(classroom, teacher)] == module}
+        classroom for classroom, teacher in current.classroom_teacher_assignments
+        if current.classroom_teacher_assignments[(classroom, teacher)] == module}
     classrooms.discard(classroom)
 
-    new_state = state.copy()
+    new_state = current.copy()
 
-    total_capacity = sum(min(state.classrooms[room]['capacity'],
-                             state.max_batch)
+    total_capacity = sum(min(current.classrooms[room]['capacity'],
+                             current.max_batch)
                          for room in classrooms)
 
     # This implies we can freely remove an activity, as there is sufficient
@@ -39,15 +39,15 @@ def fold_in(state: HeuristicState, rnd: RandomState) -> HeuristicState:
 
     # We have some excess learners in this case. Let us try to move those back
     # into self-study.
-    if state.classrooms[classroom]['self_study_allowed'] \
-            and module != len(state.modules) - 1:
+    if current.classrooms[classroom]['self_study_allowed'] \
+            and module != len(current.modules) - 1:
         excess = total_learners - total_capacity
 
-        module_learners = (state.learner_assignments == module)
+        module_learners = (current.learner_assignments == module)
         excess_learners = module_learners.nonzero()[0][:excess]
 
-        new_state.learner_assignments[excess_learners] = len(state.modules) - 1
+        new_state.learner_assignments[excess_learners] = len(current.modules) - 1
         new_state.classroom_teacher_assignments[(classroom, teacher)] \
-            = len(state.modules) - 1
+            = len(current.modules) - 1
 
     return simplify_activity(new_state, module)

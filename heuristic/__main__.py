@@ -1,12 +1,14 @@
 import sys
 
+import matplotlib.pyplot as plt
 import numpy.random as rnd
 from alns import ALNS
-from alns.criteria import HillClimbing
 
 from utils import Data, MethodType, instances, write_result
+from .constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
+from .destroy_operators import DESTROY_OPERATORS
 from .initial_solution import initial_solution
-from .operators import OPERATORS
+from .repair_operators import REPAIR_OPERATORS
 
 
 def run(experiment: int, instance: int):
@@ -17,17 +19,22 @@ def run(experiment: int, instance: int):
     # experiments.
     alns = ALNS(rnd.RandomState(100 * experiment + instance))
 
-    # We don't use the destroy operators, as each operator maps from a feasible
-    # state to a feasible state.
-    alns.add_destroy_operator(lambda state, *args: state)
+    for operator in DESTROY_OPERATORS:
+        alns.add_destroy_operator(operator)
 
-    for operator in OPERATORS:
+    for operator in REPAIR_OPERATORS:
         alns.add_repair_operator(operator)
 
-    result = alns.iterate(initial_solution(data),
-                          [25, 5, 1, 0.2],
-                          0.8,
-                          HillClimbing())
+    init = initial_solution(data)
+    result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
+
+    result.plot_operator_counts()
+    plt.show()
+
+    result.plot_objectives()
+    plt.show()
+
+    print(result.best_state.objective())
 
     write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
 

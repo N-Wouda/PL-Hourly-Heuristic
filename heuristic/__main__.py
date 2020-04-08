@@ -4,15 +4,16 @@ import matplotlib.pyplot as plt
 import numpy.random as rnd
 from alns import ALNS
 
-from utils import Data, MethodType, instances, write_result
-from .constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
+from heuristic.classes import Problem
+from heuristic.constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
+from heuristic.functions import initial_solution
+from utils import instances
 from .destroy_operators import DESTROY_OPERATORS
-from .initial_solution import initial_solution
 from .repair_operators import REPAIR_OPERATORS
 
 
 def run(experiment: int, instance: int):
-    data = Data.from_instance(experiment, instance)
+    Problem.from_instance(experiment, instance)
 
     # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
     # 100, there will never be overlap between random number streams across
@@ -25,18 +26,15 @@ def run(experiment: int, instance: int):
     for operator in REPAIR_OPERATORS:
         alns.add_repair_operator(operator)
 
-    init = initial_solution(data)
+    init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
-
-    result.plot_operator_counts()
-    plt.show()
 
     result.plot_objectives()
     plt.show()
-
-    print(result.best_state.objective())
-
-    write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
+    #
+    # print(result.best_state.objective())
+    #
+    # write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .Module import Module
 
 
-@dataclass
+@dataclass(frozen=True)
 class Teacher:
     id: int
 

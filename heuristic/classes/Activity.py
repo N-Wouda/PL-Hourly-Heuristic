@@ -1,7 +1,5 @@
 from typing import List
 
-import numpy as np
-
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
@@ -27,20 +25,41 @@ class Activity:
 
     @property
     def num_learners(self) -> int:
-        return len(self._learners)
+        return len(self.learners)
+
+    @property
+    def learners(self) -> List[Learner]:
+        return self._learners
+
+    @property
+    def classroom(self) -> Classroom:
+        return self._classroom
+
+    @property
+    def teacher(self) -> Teacher:
+        return self._teacher
+
+    @property
+    def module(self) -> Module:
+        return self._module
 
     def objective(self):
+        # TODO this can probably be cached.
+
         problem = Problem()
-        learner_ids = [learner.id for learner in self._learners]
+        learner_ids = [learner.id for learner in self.learners]
 
         if self.is_self_study():
-            # Preferences minus self-study penalty.
-            objective = np.sum(problem.most_preferred[learner_ids, 0])
-            objective -= len(self._learners) * problem.penalty
+            # In self-study, everyone works on their most-preferred module,
+            # but at the cost of a controlled penalty.
+            modules = problem.most_preferred[learner_ids, 0]
+
+            objective = problem.preferences[learner_ids, modules].sum()
+            objective -= len(self.learners) * problem.penalty
 
             return objective
 
-        return np.sum(problem.preferences[learner_ids, self._module.id])
+        return problem.preferences[learner_ids, self.module.id].sum()
 
     def is_feasible(self) -> bool:
         """
@@ -56,27 +75,45 @@ class Activity:
             if self.num_learners > problem.max_batch:
                 return False
 
-            if self._classroom.room_type != self._module.room_type:
+            if self.classroom.room_type != self.module.room_type:
                 return False
 
-            if not self._teacher.is_qualified_for(self._module):
+            if not self.teacher.is_qualified_for(self.module):
                 return False
 
         if self.is_self_study():
-            if not self._classroom.is_self_study_allowed():
+            if not self.classroom.is_self_study_allowed():
                 return False
 
-        if self.num_learners > self._classroom.capacity:
+        if self.num_learners > self.classroom.capacity:
             return False
 
-        if not all(problem.preferences[learner.id, self._module.id] > 0
-                   for learner in self._learners):
+        if not all(problem.preferences[learner.id, self.module.id] > 0
+                   for learner in self.learners):
             return False
 
         return True
 
     def is_self_study(self) -> bool:
-        return self._module.is_self_study()
+        return self.module.is_self_study()
 
     def is_instruction(self) -> bool:
         return not self.is_self_study()
+
+    def can_insert_learner(self) -> bool:
+        if self.is_self_study():
+            return self.num_learners < self.classroom.capacity
+
+        problem = Problem()
+        return self.num_learners < min(problem.max_batch,
+                                       self.classroom.capacity)
+
+    def insert_learner(self, learner: Learner):
+        self.learners.append(learner)
+
+    def can_remove_learner(self) -> bool:
+        problem = Problem()
+        return self.num_learners > problem.min_batch
+
+    def remove_learner(self, learner: Learner):
+        self.learners.remove(learner)

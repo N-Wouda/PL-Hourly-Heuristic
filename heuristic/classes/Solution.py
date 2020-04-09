@@ -4,11 +4,12 @@ from typing import List
 from alns import State
 
 from .Activity import Activity
+from .Learner import Learner
 
 
 class Solution(State):
     activities: List[Activity]
-    unassigned: List[int]
+    unassigned: List[Learner]
 
     def __init__(self, activities: List[Activity]):
         self.activities = activities
@@ -19,9 +20,3 @@ class Solution(State):
         # the problem is actually a maximisation problem, hence the trick with
         # the minus.
         return -sum(map(methodcaller("objective"), self.activities))
-
-    def remove_activity(self):
-        pass
-
-    def add_activity(self):
-        pass

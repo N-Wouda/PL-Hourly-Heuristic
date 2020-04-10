@@ -1,6 +1,5 @@
 import sys
 
-import matplotlib.pyplot as plt
 import numpy.random as rnd
 from alns import ALNS
 
@@ -29,10 +28,7 @@ def run(experiment: int, instance: int):
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
 
-    result.plot_objectives()
-    plt.show()
-    #
-    # print(result.best_state.objective())
+    print(result.best_state.objective())
     #
     # write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
 

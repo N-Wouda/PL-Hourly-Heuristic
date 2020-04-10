@@ -21,6 +21,12 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
     for activity in destroyed.activities:
         activities_by_module[activity.module.id].append(activity)
 
+    # TODO this is pretty nasty.
+    unused_teachers = set(problem.teachers) - destroyed.used_teachers()
+    unused_classrooms = set(problem.classrooms) - destroyed.used_classrooms()
+    unused_classrooms = {classroom for classroom in unused_classrooms
+                         if classroom.is_self_study_allowed()}
+
     while len(destroyed.unassigned) != 0:
         learner = destroyed.unassigned.pop()
 
@@ -34,12 +40,27 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
             if _insert(learner, activities_by_module[module]):
                 break
         else:
+            # TODO make all this nicer
+
             # Learner could not be inserted into a regular instruction activity,
             # so now we opt for self-study.
-            if not _insert(learner, activities_by_module[SELF_STUDY_MODULE_ID]):
-                # TODO create new activity for this case. Split an existing
-                #  activity to get this done?
-                pass
+            self_study_activities = activities_by_module[SELF_STUDY_MODULE_ID]
+
+            if not _insert(learner, self_study_activities):
+                for activity in self_study_activities:
+                    if activity.num_learners >= 2 * problem.min_batch:
+                        teacher = unused_teachers.pop()
+                        classroom = unused_classrooms.pop()
+
+                        new_activity = activity.split_with(classroom, teacher)
+                        new_activity.insert_learner(learner)
+                        destroyed.activities.append(new_activity)
+                        break
+                else:
+                    # This would be most curious, and warrant further
+                    # investigation.
+                    raise Exception("It should always be possible to "
+                                    "schedule a learner in self-study.")
 
     return destroyed
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 
 from .Classroom import Classroom
@@ -117,3 +119,19 @@ class Activity:
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
+
+    def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
+        """
+        Splits this activity into two activities, using the passed-in classroom
+        and teacher resources. The learners are halved, with each receiving
+        half the current activity's learners.
+
+        Does not check whether splitting is feasible, nor whether the passed-in
+        classroom and teacher are qualified for the activity's module.
+        """
+        splitter = self.num_learners // 2
+
+        learners = self.learners[splitter:]
+        self._learners = self.learners[:splitter]
+
+        return Activity(learners, classroom, teacher, self.module)

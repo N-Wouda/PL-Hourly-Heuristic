@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from heuristic.constants import SELF_STUDY_MODULE_ID
 
 
-@dataclass(frozen=True)
+@dataclass(order=True, frozen=True)
 class Module:
     id: int
     room_type: int

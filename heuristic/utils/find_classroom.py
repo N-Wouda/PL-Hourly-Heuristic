@@ -1,25 +1,20 @@
-from typing import Union
-from utils import State
+from heuristic.classes import Classroom, Module, Problem, Solution
 
 
-def find_classroom(state: State, module: int) -> Union[int, bool]:
+def find_classroom(solution: Solution, module: Module) -> Classroom:
     """
     Finds a classroom that can host the passed-in module. If none exist, this
-    function returns False, else an integer is returned (the classroom ID).
+    function raises a LookupError.
     """
-    room_type_needed = state.modules[module]['room_type']
-
-    # Gets all classrooms that are not currently in use.
-    classrooms = set(range(len(state.classrooms))) - state.classroom_assignments
+    problem = Problem()
 
     # Finds the first classroom that fits the required room type, if any.
-    for classroom in classrooms:
-        if state.classrooms[classroom]['room_type'] == room_type_needed:
+    for classroom in set(problem.classrooms) - solution.used_classrooms():
+        if classroom.room_type == module.room_type:
             return classroom
 
         # Since self-study is generally allowed in multiple room types.
-        if module == len(state.modules) - 1 \
-                and state.classrooms[classroom]['self_study_allowed']:
+        if module.is_self_study() and classroom.is_self_study_allowed():
             return classroom
 
-    return False
+    raise LookupError(f"No qualified, available classrooms for {module}.")

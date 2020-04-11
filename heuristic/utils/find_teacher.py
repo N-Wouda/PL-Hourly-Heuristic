@@ -1,28 +1,23 @@
-from typing import Union
-from utils import State
+from heuristic.classes import Module, Solution, Teacher, Problem
 
 
-def find_teacher(state: State, module: int) -> Union[int, bool]:
+def find_teacher(solution: Solution, module: Module) -> Teacher:
     """
     Finds a teacher that can teach the passed-in module. If none exist, this
-    function returns False, else an integer is returned (the teacher ID).
+    function raises a LookupError.
     """
-    qualification_needed = state.modules[module]['qualification']
+    problem = Problem()
 
-    # Gets all teachers that are not currently in use.
-    teachers = set(range(len(state.teachers))) - state.teacher_assignments
+    available_teachers = set(problem.teachers) - solution.used_teachers()
 
-    # Since self-study does not actually require any specific qualification
-    if module == len(state.modules) - 1 and len(teachers):
-        return next(iter(teachers))
+    # Since self-study does not actually require any specific qualification.
+    if module.is_self_study():
+        return next(iter(available_teachers))
 
-    teachers = [                            # finds the first teacher that fits
-        teacher for teacher in teachers     # the required qualification
-        if 0 < state.qualifications[teacher, module] <= qualification_needed]
+    qualified_teachers = [teacher for teacher in available_teachers
+                          if teacher.is_qualified_for(module)]
 
-    if not len(teachers):
-        return False
+    if not qualified_teachers:
+        raise LookupError(f"No qualified, available teachers for {module}.")
 
-    # Finds a teacher that meets the requirements with minimal overhead.
-    return min(teachers,
-               key=lambda teacher: state.qualifications[teacher, module])
+    return qualified_teachers[0]

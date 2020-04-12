@@ -12,42 +12,67 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
     """
     problem = Problem()
 
-    # Group learners by preference.
-    learners = [learner.id for learner in destroyed.unassigned]
-    not_assigned = set(problem.modules) - destroyed.used_modules()
+    histogram = []
 
-    histogram = [(problem.preferences[learners, module.id].sum(), module)
-                 for module in not_assigned]
-
-    for _, module in sorted(histogram, reverse=True):
+    for module in problem.modules:
         if module.is_self_study():
             continue
 
-        m_learners = [learner for learner in destroyed.unassigned
-                      if problem.preferences[learner.id, module.id] > 0]
+        aggregate = sum(problem.preferences[learner.id, module.id]
+                        for learner in destroyed.unassigned
+                        if _is_better_than_self_study(learner, module))
 
-        if len(m_learners) < problem.min_batch:
+        histogram.append((aggregate, module))
+
+    for _, module in sorted(histogram, reverse=True):
+        # We collect all unassigned learner that can be assigned to this module,
+        # and snoop off any self-study learner we can as well.
+        to_assign = [learner for learner in destroyed.unassigned
+                     if _is_better_than_self_study(learner, module)]
+
+        if len(to_assign) < problem.min_batch:
+            # TODO we can probably also grab a few from self-study for the
+            #   comparison.
             continue
 
         try:
-            teacher = find_teacher(destroyed, module)
             classroom = find_classroom(destroyed, module)
+            teacher = find_teacher(destroyed, module)
         except LookupError:
             continue
 
-        # Schedule the class, and continue with another iteration.
-        # TODO sort this by best learners (most preferred)
-        m_learners = m_learners[:min(problem.max_batch, classroom.capacity)]
-        m_set = set(m_learners)
+        max_size = min(classroom.capacity, problem.max_batch)
 
-        activity = Activity(m_learners, classroom, teacher, module)
+        for activity in destroyed.activities:
+            if activity.is_self_study():
+                # TODO sort by best?
+                learners = [learner for learner in activity.learners
+                            if _is_better_than_self_study(learner, module)]
+
+                while activity.can_remove_learner() \
+                        and len(to_assign) < max_size \
+                        and len(learners) != 0:
+                    learner = learners.pop()
+                    activity.remove_learner(learner)
+                    to_assign.append(learner)
+
+        if len(to_assign) > max_size:
+            # TODO sort by best?
+            to_assign = to_assign[:max_size]
+
+        activity = Activity(to_assign, classroom, teacher, module)
 
         destroyed.activities.append(activity)
         destroyed.unassigned = [learner for learner in destroyed.unassigned
-                                if learner not in m_set]
+                                if learner not in activity]
 
         return break_out(destroyed, rnd_state)
 
     # Insert final learners into existing activities, if no new activity
     # can be scheduled.
     return greedy_insert(destroyed, rnd_state)
+
+
+def _is_better_than_self_study(learner, module) -> bool:
+    preferences = Problem().preferences
+    return preferences[learner.id, module.id] > learner.self_study_objective()

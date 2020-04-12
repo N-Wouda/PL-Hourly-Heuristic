@@ -37,6 +37,10 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
             if module not in activities_by_module:
                 continue
 
+            if learner.self_study_objective() > problem.preferences[learner.id,
+                                                                    module]:
+                continue
+
             if _insert(learner, activities_by_module[module]):
                 break
         else:
@@ -49,6 +53,8 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
             if not _insert(learner, self_study_activities):
                 for activity in self_study_activities:
                     if activity.num_learners >= 2 * problem.min_batch:
+                        # TODO what if nothing's available? Then we might
+                        #  need to fold in one instruction activity!
                         teacher = unused_teachers.pop()
                         classroom = unused_classrooms.pop()
 

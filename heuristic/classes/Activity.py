@@ -21,9 +21,14 @@ class Activity:
                  teacher: Teacher,
                  module: Module):
         self._learners = learners
+        self._learners_set = set(learners)
+
         self._classroom = classroom
         self._teacher = teacher
         self._module = module
+
+    def __contains__(self, learner: Learner) -> bool:
+        return learner in self._learners_set
 
     @property
     def num_learners(self) -> int:
@@ -112,6 +117,7 @@ class Activity:
 
     def insert_learner(self, learner: Learner):
         self.learners.append(learner)
+        self._learners_set.add(learner)
 
     def can_remove_learner(self) -> bool:
         problem = Problem()
@@ -119,6 +125,7 @@ class Activity:
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
+        self._learners_set.remove(learner)
 
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """

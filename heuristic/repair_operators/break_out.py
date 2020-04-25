@@ -1,4 +1,3 @@
-import numpy as np
 from numpy.random import RandomState
 
 from heuristic.classes import Activity, Problem, Solution
@@ -41,6 +40,14 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
         except LookupError:
             continue
 
+        classrooms = set(problem.classrooms) - destroyed.used_classrooms()
+        classrooms.remove(classroom)
+
+        if classroom.is_self_study_allowed() \
+                and not _leaves_sufficient_for_self_study(destroyed,
+                                                          classrooms):
+            continue
+
         max_size = min(classroom.capacity, problem.max_batch)
 
         for activity in destroyed.activities:
@@ -76,3 +83,10 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
 def _is_better_than_self_study(learner, module) -> bool:
     preferences = Problem().preferences
     return preferences[learner.id, module.id] > learner.self_study_objective()
+
+
+def _leaves_sufficient_for_self_study(destroyed, classrooms):
+    capacity = sum(classroom.capacity for classroom in classrooms
+                   if classroom.is_self_study_allowed())
+
+    return len(destroyed.unassigned) < capacity

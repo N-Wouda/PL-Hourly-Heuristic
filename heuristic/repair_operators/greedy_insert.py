@@ -53,14 +53,15 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
             if not _insert(learner, self_study_activities):
                 for activity in self_study_activities:
                     if activity.num_learners >= 2 * problem.min_batch:
-                        # TODO what if nothing's available? Then we might
-                        #  need to fold in one instruction activity!
                         teacher = unused_teachers.pop()
                         classroom = unused_classrooms.pop()
 
                         new_activity = activity.split_with(classroom, teacher)
                         new_activity.insert_learner(learner)
                         destroyed.activities.append(new_activity)
+                        activities_by_module[SELF_STUDY_MODULE_ID].append(
+                            new_activity)
+
                         break
                 else:
                     # This would be most curious, and warrant further

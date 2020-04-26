@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from heuristic.constants import SELF_STUDY_MODULE_ID

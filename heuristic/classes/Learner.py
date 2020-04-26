@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from functools import lru_cache
+
+from .Module import Module
 
 
 @dataclass(frozen=True)
@@ -6,13 +9,19 @@ class Learner:
     id: int
     year: int
 
-    def self_study_objective(self) -> float:
+    @lru_cache(None)
+    def prefers_over_self_study(self, module: Module) -> bool:
         """
-        Objective value if this learner were assigned to self-study, that is,
-        the maximum preference minus the self-study penalty.
+        Tests if this learner prefers the passed-in module over the
+        self-study assignment (when comparing objectives).
         """
         from .Problem import Problem
+
         problem = Problem()
 
-        module = problem.most_preferred[self.id, 0]
-        return problem.preferences[self.id, module] - problem.penalty
+        self_study_mod = problem.most_preferred[self.id, 0]
+
+        self_study_pref = problem.preferences[self.id, self_study_mod]
+        self_study_pref -= problem.penalty
+
+        return problem.preferences[self.id, module.id] > self_study_pref

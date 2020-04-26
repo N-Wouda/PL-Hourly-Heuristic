@@ -1,3 +1,5 @@
+from heapq import heappop
+
 from numpy.random import RandomState
 
 from heuristic.classes import Activity, Problem, Solution
@@ -11,23 +13,10 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
     """
     problem = Problem()
 
-    histogram = []
+    histogram = destroyed.preferences_by_module()
 
-    for module in problem.modules:
-        if module.is_self_study():
-            continue
-
-        aggregate = sum(problem.preferences[learner.id, module.id]
-                        for learner in destroyed.unassigned
-                        if _is_better_than_self_study(learner, module))
-
-        histogram.append((aggregate, module))
-
-    for _, module in sorted(histogram, reverse=True):
-        # We collect all unassigned learner that can be assigned to this module,
-        # and snoop off any self-study learner we can as well.
-        to_assign = [learner for learner in destroyed.unassigned
-                     if _is_better_than_self_study(learner, module)]
+    while len(histogram) != 0:
+        _, module, to_assign = heappop(histogram)
 
         if len(to_assign) < problem.min_batch:
             # TODO we can probably also grab a few from self-study for the
@@ -52,9 +41,10 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
 
         for activity in destroyed.activities:
             if activity.is_self_study():
-                # TODO sort by best?
+                # We snoop off any self-study learner that can be assigned to
+                # this module as well.
                 learners = [learner for learner in activity.learners
-                            if _is_better_than_self_study(learner, module)]
+                            if learner.prefers_over_self_study(module)]
 
                 while activity.can_remove_learner() \
                         and len(to_assign) < max_size \
@@ -78,11 +68,6 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
     # Insert final learners into existing activities, if no new activity
     # can be scheduled.
     return greedy_insert(destroyed, rnd_state)
-
-
-def _is_better_than_self_study(learner, module) -> bool:
-    preferences = Problem().preferences
-    return preferences[learner.id, module.id] > learner.self_study_objective()
 
 
 def _leaves_sufficient_for_self_study(destroyed, classrooms):

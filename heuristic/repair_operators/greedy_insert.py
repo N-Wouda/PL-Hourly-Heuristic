@@ -37,8 +37,13 @@ def greedy_insert(destroyed: Solution, rnd_state: RandomState) -> Solution:
             if module not in activities_by_module:
                 continue
 
-            if learner.self_study_objective() > problem.preferences[learner.id,
-                                                                    module]:
+            self_study_mod = problem.most_preferred[learner.id, 0]
+            self_study_pref = problem.preferences[learner.id, self_study_mod]
+            self_study_pref -= problem.penalty
+
+            module_pref = problem.preferences[learner.id, module]
+
+            if self_study_pref > module_pref:
                 continue
 
             if _insert(learner, activities_by_module[module]):

@@ -1,42 +1,19 @@
 import numpy as np
 from numpy.random import RandomState
 
-from heuristic.utils import HeuristicState
+from heuristic.classes import Solution
 
 
-def insert_learner(state: HeuristicState, rnd: RandomState) -> HeuristicState:
+# TODO clean up this method, use it?
+
+def reinsert_learner(state: Solution, rnd: RandomState) -> Solution:
     """
     Inserts a learner into a different activity, or self-study.
     """
-    learner = rnd.choice(state.learners)['id']
-
-    # We include the self-study module, as the learner could also be inserted
-    # into a self-study assignment.
-    preferences = [*state.most_preferred[learner, :], -1]
-
-    for module in preferences:
-        # This is the currently assigned module - it is unlikely a new
-        # assignment will result in better performance.
-        if module == state.learner_assignments[learner]:
-            return state
-
-        # The module must already be scheduled in some assignment.
-        if module not in state.module_assignments:
-            continue
-
-        # The learner must be able to leave their current assignment, and join
-        # the new.
-        if _can_leave(state, state.learner_assignments[learner]) \
-                and _can_attend(state, module):
-            new_state = state.copy()
-            new_state.learner_assignments[learner] = module
-
-            return new_state
-
-    return state
+    pass
 
 
-def _can_leave(state: HeuristicState, module: int) -> bool:
+def _can_leave(state: Solution, module: int) -> bool:
     # The learner must leave behind a valid activity (min_batch).
     classrooms = sum(1 for ct, mod
                      in state.classroom_teacher_assignments.items()
@@ -49,7 +26,7 @@ def _can_leave(state: HeuristicState, module: int) -> bool:
     return fellow_learners > classrooms * state.min_batch
 
 
-def _can_attend(state: HeuristicState, module: int) -> bool:
+def _can_attend(state: Solution, module: int) -> bool:
     # The learner must not exceed the maximum learners in the proposed activity
     # (max_batch).
     classrooms = {

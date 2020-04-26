@@ -1,7 +1,7 @@
 from numpy.random import RandomState
 
 from heuristic.classes import Activity, Problem, Solution
-from heuristic.utils import find_classroom, find_teacher
+from heuristic.functions import find_classroom, find_teacher
 from .greedy_insert import greedy_insert
 
 

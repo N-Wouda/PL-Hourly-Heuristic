@@ -8,6 +8,8 @@ def find_classroom(solution: Solution, module: Module) -> Classroom:
     """
     problem = Problem()
 
+    # TODO minimal needed, move onto solution
+
     # Finds the first classroom that fits the required room type, if any.
     for classroom in set(problem.classrooms) - solution.used_classrooms():
         if classroom.room_type == module.room_type:

@@ -8,6 +8,8 @@ def find_teacher(solution: Solution, module: Module) -> Teacher:
     """
     problem = Problem()
 
+    # TODO minimal needed, move onto solution
+
     available_teachers = set(problem.teachers) - solution.used_teachers()
 
     # Since self-study does not actually require any specific qualification.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from heapq import heappush
 from operator import methodcaller
 from typing import List, Set, Tuple
@@ -34,26 +35,23 @@ class Solution(State):
         from .Problem import Problem
         problem = Problem()
 
-        # First we obtain the set of modules for which the unassigned learners
-        # hold preferences (i.e., there is at least one learner with positive
-        # preference). This saves a lot in meaningless work being done grouping
-        # them later.
-        module_ids = set()
+        learners_by_module = defaultdict(list)
 
         for learner in self.unassigned:
-            module_ids.update(problem.most_preferred[learner.id, :])
+            for module_id in problem.most_preferred[learner.id]:
+                module = problem.modules[module_id]
+
+                if not learner.prefers_over_self_study(module):
+                    # The modules are sorted by preference, so the first time
+                    # this happens we can break for this learner (all subsequent
+                    # modules will be even worse).
+                    break
+
+                learners_by_module[module].append(learner)
 
         histogram = []
 
-        for module_id in module_ids:
-            module = problem.modules[module_id]
-
-            if module.is_self_study():
-                continue
-
-            learners = [learner for learner in self.unassigned
-                        if learner.prefers_over_self_study(module)]
-
+        for module, learners in learners_by_module.items():
             aggregate = sum(problem.preferences[learner.id, module.id]
                             for learner in learners)
 

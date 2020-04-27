@@ -6,5 +6,4 @@ DESTROY_OPERATORS = [
     random_activities,
     random_learners,
     worst_learners,
-    # TODO
 ]

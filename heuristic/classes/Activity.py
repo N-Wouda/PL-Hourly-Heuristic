@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from typing import List
 
 from .Classroom import Classroom
@@ -14,6 +15,7 @@ class Activity:
     _classroom: Classroom
     _teacher: Teacher
     _module: Module
+    _objective: float
 
     def __init__(self,
                  learners: List[Learner],
@@ -27,8 +29,19 @@ class Activity:
         self._teacher = teacher
         self._module = module
 
+        self._objective = self._compute_objective()
+
     def __contains__(self, learner: Learner) -> bool:
         return learner in self._learners_set
+
+    def __deepcopy__(self, memo={}) -> Activity:
+        # This is not an *actual* deepcopy, but that's also not necessary
+        # - the objects themselves don't change, only their composition, and
+        # a shallow copy can account for that.
+        return Activity(copy(self.learners),
+                        self.classroom,
+                        self.teacher,
+                        self.module)
 
     @property
     def num_learners(self) -> int:
@@ -51,22 +64,7 @@ class Activity:
         return self._module
 
     def objective(self):
-        # TODO this can probably be cached.
-
-        problem = Problem()
-        learner_ids = [learner.id for learner in self.learners]
-
-        if self.is_self_study():
-            # In self-study, everyone works on their most-preferred module,
-            # but at the cost of a controlled penalty.
-            modules = problem.most_preferred[learner_ids, 0]
-
-            objective = problem.preferences[learner_ids, modules].sum()
-            objective -= len(self.learners) * problem.penalty
-
-            return objective
-
-        return problem.preferences[learner_ids, self.module.id].sum()
+        return self._objective
 
     def is_feasible(self) -> bool:
         """
@@ -119,6 +117,18 @@ class Activity:
         self.learners.append(learner)
         self._learners_set.add(learner)
 
+        problem = Problem()
+
+        if self.is_self_study():
+            module_id = problem.most_preferred[learner.id, 0]
+
+            objective = problem.preferences[learner.id, module_id]
+            objective -= problem.penalty
+
+            self._objective += objective
+        else:
+            self._objective += problem.preferences[learner.id, self.module.id]
+
     def can_remove_learner(self) -> bool:
         problem = Problem()
         return self.num_learners > problem.min_batch
@@ -126,6 +136,18 @@ class Activity:
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
         self._learners_set.remove(learner)
+
+        problem = Problem()
+
+        if self.is_self_study():
+            module_id = problem.most_preferred[learner.id, 0]
+
+            objective = problem.preferences[learner.id, module_id]
+            objective -= problem.penalty
+
+            self._objective -= objective
+        else:
+            self._objective -= problem.preferences[learner.id, self.module.id]
 
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """
@@ -142,3 +164,19 @@ class Activity:
         self._learners = self.learners[:splitter]
 
         return Activity(learners, classroom, teacher, self.module)
+
+    def _compute_objective(self):
+        problem = Problem()
+        learner_ids = [learner.id for learner in self.learners]
+
+        if self.is_self_study():
+            # In self-study, everyone works on their most-preferred module,
+            # but at the cost of a controlled penalty.
+            modules = problem.most_preferred[learner_ids, 0]
+
+            objective = problem.preferences[learner_ids, modules].sum()
+            objective -= len(self.learners) * problem.penalty
+
+            return objective
+
+        return problem.preferences[learner_ids, self.module.id].sum()

@@ -14,7 +14,7 @@ def random_activities(current: Solution, rnd_state: RandomState) -> Solution:
     destroyed = deepcopy(current)
 
     while len(destroyed.unassigned) < learners_to_remove():
-        idx = rnd_state.choice(len(destroyed.activities))
+        idx = rnd_state.randint(len(destroyed.activities))
         learners = destroyed.activities[idx].learners
 
         destroyed.unassigned.extend(learners)

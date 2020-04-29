@@ -28,9 +28,15 @@ class Solution(State):
         # the minus.
         return -sum(map(methodcaller("objective"), self.activities))
 
-    def preferences_by_module(self) -> List[Tuple[float, Module]]:
+    def preferences_by_module(self) \
+            -> List[Tuple[float, Module], List[Learner]]:
         """
-        Computes the unassigned learners preferences by module.
+        Computes the unassigned learners preferences by module. This list
+        consists only of modules and learners for which the minimum batch size
+        is respected.
+
+        The list forms a heap, ordered by aggregate learner preferences (high
+        to low). Use ``heapq`` for modification and access.
         """
         from .Problem import Problem
         problem = Problem()
@@ -52,6 +58,12 @@ class Solution(State):
         histogram = []
 
         for module, learners in learners_by_module.items():
+            if len(learners) < problem.min_batch:
+                # This cannot be scheduled (except maybe with self-study
+                # learners, but that's not considered currently), so there's
+                # no point in considering it further.
+                continue
+
             aggregate = sum(problem.preferences[learner.id, module.id]
                             for learner in learners)
 

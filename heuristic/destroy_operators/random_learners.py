@@ -17,12 +17,14 @@ def random_learners(current: Solution, rnd_state: RandomState) -> Solution:
     destroyed = deepcopy(current)
 
     while len(destroyed.unassigned) < learners_to_remove():
-        random_activity = rnd_state.choice(destroyed.activities)
+        activity_idx = rnd_state.randint(len(destroyed.activities))
+        activity = destroyed.activities[activity_idx]
 
-        if random_activity.can_remove_learner():
-            learner = rnd_state.choice(random_activity.learners)
+        if activity.can_remove_learner():
+            learner_idx = rnd_state.randint(len(activity.learners))
+            learner = activity.learners[learner_idx]
 
-            random_activity.remove_learner(learner)
+            activity.remove_learner(learner)
             destroyed.unassigned.append(learner)
 
     return destroyed

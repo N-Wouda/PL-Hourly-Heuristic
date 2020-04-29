@@ -9,7 +9,13 @@ from .greedy_insert import greedy_insert
 
 def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
     """
-    TODO.
+    Breaks out instruction activities based on the preferences of the unassigned
+    learners. Where possible, a new activity is formed from these learners,
+    along with some self-study learners that strictly prefer the new activity
+    over self-study.
+
+    If any learners remain that cannot be assigned to a new activity, those are
+    inserted into existing activities using ``greedy_insert``.
     """
     problem = Problem()
 
@@ -17,11 +23,6 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
 
     while len(histogram) != 0:
         _, module, to_assign = heappop(histogram)
-
-        if len(to_assign) < problem.min_batch:
-            # TODO we can probably also grab a few from self-study for the
-            #   comparison.
-            continue
 
         try:
             classroom = find_classroom(destroyed, module)
@@ -40,24 +41,25 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
         max_size = min(classroom.capacity, problem.max_batch)
 
         for activity in destroyed.activities:
-            if activity.is_self_study():
-                # We snoop off any self-study learner that can be assigned to
-                # this module as well.
-                learners = [learner for learner in activity.learners
-                            if learner.prefers_over_self_study(module)]
+            if activity.is_instruction():
+                continue
 
-                while activity.can_remove_learner() \
-                        and len(to_assign) < max_size \
-                        and len(learners) != 0:
-                    learner = learners.pop()
-                    activity.remove_learner(learner)
-                    to_assign.append(learner)
+            if len(to_assign) >= max_size:
+                break
 
-        if len(to_assign) > max_size:
-            # TODO sort by best?
-            to_assign = to_assign[:max_size]
+            # We snoop off any self-study learner that can be assigned to this
+            # module as well.
+            learners = [learner for learner in activity.learners
+                        if learner.prefers_over_self_study(module)]
 
-        activity = Activity(to_assign, classroom, teacher, module)
+            while activity.can_remove_learner() \
+                    and len(to_assign) < max_size \
+                    and len(learners) != 0:
+                learner = learners.pop()
+                activity.remove_learner(learner)
+                to_assign.append(learner)
+
+        activity = Activity(to_assign[:max_size], classroom, teacher, module)
 
         destroyed.activities.append(activity)
         destroyed.unassigned = [learner for learner in destroyed.unassigned

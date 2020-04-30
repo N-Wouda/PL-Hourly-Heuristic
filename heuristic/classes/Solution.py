@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from heapq import heappush
-from operator import methodcaller
+from operator import attrgetter, methodcaller
 from typing import List, Set, Tuple
 
 from alns import State
@@ -21,6 +21,41 @@ class Solution(State):
     def __init__(self, activities: List[Activity]):
         self.activities = activities
         self.unassigned = []
+
+    def leaves_sufficient_for_self_study(self,
+                                         classroom: Classroom,
+                                         teacher: Teacher) -> bool:
+        """
+        Determines if using the passed-in classroom and teacher still leaves
+        sufficient unused classrooms and teachers to schedule all unassigned
+        learners into self-study. This ensures there always remains a feasible
+        repair action.
+        """
+        from .Problem import Problem
+        problem = Problem()
+
+        avail_rooms = set(problem.classrooms) - self.used_classrooms()
+        avail_rooms.remove(classroom)
+
+        avail_rooms = filter(methodcaller("is_self_study_allowed"), avail_rooms)
+        avail_rooms = sorted(avail_rooms,
+                             key=attrgetter("capacity"),
+                             reverse=True)
+
+        avail_teachers = set(problem.teachers) - self.used_teachers()
+        avail_teachers.remove(teacher)
+
+        capacity = 0
+        rooms_needed = 0
+
+        for classroom in avail_rooms:
+            capacity += classroom.capacity
+            rooms_needed += 1
+
+            if capacity > len(self.unassigned):
+                return rooms_needed <= len(avail_teachers)
+
+        return False  # these is insufficient capacity
 
     def objective(self) -> float:
         # The ALNS algorithm solves a minimisation objective by default, but

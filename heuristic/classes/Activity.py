@@ -55,9 +55,17 @@ class Activity:
     def classroom(self) -> Classroom:
         return self._classroom
 
+    @classroom.setter
+    def classroom(self, classroom: Classroom):
+        self._classroom = classroom
+
     @property
     def teacher(self) -> Teacher:
         return self._teacher
+
+    @teacher.setter
+    def teacher(self, teacher: Teacher):
+        self._teacher = teacher
 
     @property
     def module(self) -> Module:
@@ -180,3 +188,12 @@ class Activity:
             return objective
 
         return problem.preferences[learner_ids, self.module.id].sum()
+
+    def __str__(self):
+        return (f"(#{self.num_learners},"
+                f" {self.module},"
+                f" {self.classroom},"
+                f" {self.teacher})")
+
+    def __repr__(self):
+        return "Activity" + str(self)

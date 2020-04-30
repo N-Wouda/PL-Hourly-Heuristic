@@ -1,13 +1,14 @@
 from heapq import heappop
+from operator import attrgetter, methodcaller
 
-from numpy.random import RandomState
+from numpy.random import Generator
 
 from heuristic.classes import Activity, Problem, Solution
 from heuristic.functions import find_classroom, find_teacher
 from .greedy_insert import greedy_insert
 
 
-def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
+def break_out(destroyed: Solution, generator: Generator) -> Solution:
     """
     Breaks out instruction activities based on the preferences of the unassigned
     learners. Where possible, a new activity is formed from these learners,
@@ -30,12 +31,7 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
         except LookupError:
             continue
 
-        classrooms = set(problem.classrooms) - destroyed.used_classrooms()
-        classrooms.remove(classroom)
-
-        if classroom.is_self_study_allowed() \
-                and not _leaves_sufficient_for_self_study(destroyed,
-                                                          classrooms):
+        if not destroyed.leaves_sufficient_for_self_study(classroom, teacher):
             continue
 
         max_size = min(classroom.capacity, problem.max_batch)
@@ -65,15 +61,8 @@ def break_out(destroyed: Solution, rnd_state: RandomState) -> Solution:
         destroyed.unassigned = [learner for learner in destroyed.unassigned
                                 if learner not in activity]
 
-        return break_out(destroyed, rnd_state)
+        return break_out(destroyed, generator)
 
     # Insert final learners into existing activities, if no new activity
     # can be scheduled.
-    return greedy_insert(destroyed, rnd_state)
-
-
-def _leaves_sufficient_for_self_study(destroyed, classrooms):
-    capacity = sum(classroom.capacity for classroom in classrooms
-                   if classroom.is_self_study_allowed())
-
-    return len(destroyed.unassigned) < capacity
+    return greedy_insert(destroyed, generator)

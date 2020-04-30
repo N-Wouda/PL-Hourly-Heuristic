@@ -1,11 +1,11 @@
 import numpy as np
-from numpy.random import RandomState
+from numpy.random import Generator
 
 from heuristic.classes import Problem
 from .learners_to_remove import learners_to_remove
 
 
-def random_selection(rnd_state: RandomState):
+def random_selection(generator: Generator):
     """
     Implements a random selection mechanism, which selects random indices for
     a certain list of num_learners length (e.g., for a cost computation),
@@ -19,7 +19,7 @@ def random_selection(rnd_state: RandomState):
     probabilities[:learners_to_remove()] = triangle
     probabilities = probabilities / np.sum(probabilities)
 
-    return rnd_state.choice(problem.num_learners,
+    return generator.choice(problem.num_learners,
                             learners_to_remove(),
                             replace=False,
                             p=probabilities)

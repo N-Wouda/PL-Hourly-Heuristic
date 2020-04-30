@@ -1,12 +1,13 @@
 from copy import deepcopy
 
 import numpy as np
+from numpy.random import Generator
 
 from heuristic.classes import Problem, Solution
 from heuristic.functions import learners_to_remove, random_selection
 
 
-def worst_learners(current: Solution, rnd_state):
+def worst_learners(current: Solution, generator: Generator):
     """
     Computes the costs for each learner, as the difference between their best
     and current assignments. Using a skewed distribution, q of the worst cost
@@ -37,7 +38,7 @@ def worst_learners(current: Solution, rnd_state):
                 costs[learner.id] -= problem.penalty
 
     learners = np.argsort(costs)
-    learners = learners[-random_selection(rnd_state)]
+    learners = learners[-random_selection(generator)]
 
     for learner_id in learners:
         activity = assigned_activities[learner_id]

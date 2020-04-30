@@ -18,7 +18,7 @@ def run(experiment: int, instance: int):
     # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
     # 100, there will never be overlap between random number streams across
     # experiments.
-    alns = ALNS(rnd.RandomState(100 * experiment + instance))
+    alns = ALNS(rnd.default_rng(100 * experiment + instance))
 
     for operator in DESTROY_OPERATORS:
         alns.add_destroy_operator(operator)
@@ -36,8 +36,12 @@ def run(experiment: int, instance: int):
     # write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
 
 
-if __name__ == "__main__":
+def main():
     # The implicit assumption is that the first argument is the experiment
     # number, and the second the instance. This is explained in the readme.
     for inst in instances():
         run(int(sys.argv[1]), int(inst))
+
+
+if __name__ == "__main__":
+    main()

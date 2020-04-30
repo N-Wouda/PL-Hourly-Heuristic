@@ -1,12 +1,12 @@
 from copy import deepcopy
 
-from numpy.random import RandomState
+from numpy.random import Generator
 
 from heuristic.classes import Solution
 from heuristic.functions import learners_to_remove
 
 
-def random_learners(current: Solution, rnd_state: RandomState) -> Solution:
+def random_learners(current: Solution, generator: Generator) -> Solution:
     """
     Randomly removes learners from the solution. The procedure randomly selects
     an activity, and checks if a learner can be removed from that activity. If
@@ -17,11 +17,11 @@ def random_learners(current: Solution, rnd_state: RandomState) -> Solution:
     destroyed = deepcopy(current)
 
     while len(destroyed.unassigned) < learners_to_remove():
-        activity_idx = rnd_state.randint(len(destroyed.activities))
+        activity_idx = generator.integers(len(destroyed.activities))
         activity = destroyed.activities[activity_idx]
 
         if activity.can_remove_learner():
-            learner_idx = rnd_state.randint(len(activity.learners))
+            learner_idx = generator.integers(len(activity.learners))
             learner = activity.learners[learner_idx]
 
             activity.remove_learner(learner)

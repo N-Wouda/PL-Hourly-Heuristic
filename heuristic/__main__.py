@@ -8,7 +8,7 @@ from heuristic.constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
 from heuristic.functions import initial_solution
 from utils import instances
 from .destroy_operators import DESTROY_OPERATORS
-from .local_search import reinsert_learner
+from .local_search import local_search
 from .repair_operators import REPAIR_OPERATORS
 
 
@@ -26,7 +26,7 @@ def run(experiment: int, instance: int):
     for operator in REPAIR_OPERATORS:
         alns.add_repair_operator(operator)
 
-    alns.on_best(reinsert_learner)
+    alns.on_best(local_search)
 
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)

@@ -1,1 +1,1 @@
-from .reinsert_learner import reinsert_learner
+from .local_search import local_search

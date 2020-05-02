@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from functools import lru_cache
 from typing import Any, Dict, List
 
@@ -100,8 +101,36 @@ class Problem(metaclass=Singleton):
 
     @property
     @lru_cache(1)
+    def teachers_by_module(self) -> Dict[Module, List[Teacher]]:
+        grouped = defaultdict(list)
+
+        by_module = np.argsort(-self.qualifications, axis=1)
+
+        for teacher in self.teachers:
+            for module_id in by_module[teacher.id]:
+                if self.qualifications[teacher.id, module_id] == 0:
+                    break
+
+                grouped[self.modules[module_id]].append(teacher)
+
+        return grouped
+
+    @property
+    @lru_cache(1)
     def classrooms(self) -> List[Classroom]:
         return [Classroom(**data) for data in self._data['classrooms']]
+
+    @property
+    @lru_cache(1)
+    def classrooms_by_module(self) -> Dict[Module, List[Classroom]]:
+        grouped = defaultdict(list)
+
+        for module in self.modules:
+            for classroom in self.classrooms:
+                if classroom.is_qualified_for(module):
+                    grouped[module].append(classroom)
+
+        return grouped
 
     @property
     @lru_cache(1)

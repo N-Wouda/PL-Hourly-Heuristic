@@ -1,23 +1,24 @@
-from collections import defaultdict
+from heapq import heappop, heappush
 
 from numpy.random import Generator
 
 from heuristic.classes import Problem, Solution
-from heapq import heappush, heappop
 
 
 def reinsert_learner(current: Solution, generator: Generator) -> Solution:
     """
-    TODO - explanation, and clean-up of the code (there's too much going on
-     here).
+    Computes the best reinsertion moves for each learner, stores these in order,
+    and executes them. This improves the solution further by moving learners
+    into strictly improving assignments, if possible.
     """
     problem = Problem()
 
-    activities_by_module = defaultdict(list)
-
-    for activity in current.activities:
-        if activity.is_instruction():
-            activities_by_module[activity.module.id].append(activity)
+    # Get all instruction activities, grouped by module. We only consider
+    # moves out of self-study (self-study could be better as well, but the
+    # structure of the repair operators makes it unlikely it is preferred over
+    # the current learner assignment).
+    activities_by_module = current.activities_by_module()
+    del activities_by_module[problem.self_study_module]
 
     moves = []
 
@@ -41,18 +42,21 @@ def reinsert_learner(current: Solution, generator: Generator) -> Solution:
 
                 for to_activity in activities_by_module[module_id]:
                     if to_activity.can_insert_learner():
-                        item = (-gain, learner, from_activity, to_activity)
+                        # Random value only to ensure this orders well -
+                        # learners and activities cannot be used to compare
+                        # the tuples, and gain is the same for many values.
+                        item = (-gain, generator.random(),
+                                learner, from_activity, to_activity)
                         heappush(moves, item)
-                        break
 
-    has_moved = set()
+    has_moved = set()  # tracks whether we've already moved a learner.
 
     while len(moves) != 0:
-        _, learner, from_activity, to_activity = heappop(moves)
+        *_, learner, from_activity, to_activity = heappop(moves)
 
-        if from_activity.can_remove_learner() \
-                and to_activity.can_insert_learner() \
-                and learner not in has_moved:
+        if learner not in has_moved \
+                and from_activity.can_remove_learner() \
+                and to_activity.can_insert_learner():
             from_activity.remove_learner(learner)
             to_activity.insert_learner(learner)
             has_moved.add(learner)

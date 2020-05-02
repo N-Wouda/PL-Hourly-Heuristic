@@ -20,6 +20,7 @@ class Teacher:
 
         # A teach is qualified only if its qualification degree is lower than
         # or equal to that required by the module. E.g. teacher is first (1),
-        # and module requires only second or third degree (2, resp. 3).
+        # and module requires only second or third degree (2, resp. 3).  A
+        # qualification of 0 indicates the teacher is *not* qualified.
         t_qualification = problem.qualifications[self.id, module.id]
-        return module.qualification >= t_qualification
+        return 0 < t_qualification <= module.qualification

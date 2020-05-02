@@ -1,10 +1,8 @@
 from heapq import heappop
-from operator import attrgetter, methodcaller
 
 from numpy.random import Generator
 
 from heuristic.classes import Activity, Problem, Solution
-from heuristic.functions import find_classroom, find_teacher
 from .greedy_insert import greedy_insert
 
 
@@ -26,8 +24,8 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
         _, module, to_assign = heappop(histogram)
 
         try:
-            classroom = find_classroom(destroyed, module)
-            teacher = find_teacher(destroyed, module)
+            classroom = destroyed.find_classroom_for(module)
+            teacher = destroyed.find_teacher_for(module)
         except LookupError:
             continue
 

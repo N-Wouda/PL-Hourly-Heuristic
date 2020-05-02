@@ -88,15 +88,11 @@ class Activity:
             if self.num_learners > problem.max_batch:
                 return False
 
-            if self.classroom.room_type != self.module.room_type:
-                return False
-
             if not self.teacher.is_qualified_for(self.module):
                 return False
 
-        if self.is_self_study():
-            if not self.classroom.is_self_study_allowed():
-                return False
+        if not self.classroom.is_qualified_for(self.module):
+            return False
 
         if self.num_learners > self.classroom.capacity:
             return False

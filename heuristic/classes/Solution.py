@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from heapq import heappush
 from operator import attrgetter, methodcaller
-from typing import List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 from alns import State
 
@@ -21,6 +21,56 @@ class Solution(State):
     def __init__(self, activities: List[Activity]):
         self.activities = activities
         self.unassigned = []
+
+    def find_classroom_for(self, module: Module) -> Classroom:
+        """
+        Finds a free classroom that can host the passed-in module. If none
+        exist, this function raises a LookupError.
+        """
+        from .Problem import Problem
+        problem = Problem()
+
+        available_classrooms = set(problem.classrooms_by_module[module])
+        available_classrooms -= self.used_classrooms()
+
+        for classroom in available_classrooms:
+            if classroom.is_qualified_for(module):
+                return classroom
+
+        raise LookupError(f"No qualified, available classrooms for {module}.")
+
+    def find_teacher_for(self, module: Module) -> Teacher:
+        """
+        Finds a teacher that can teach the passed-in module. If none exist, this
+        function raises a LookupError.
+        """
+        from .Problem import Problem
+        problem = Problem()
+
+        available_teachers = set(problem.teachers_by_module[module])
+        available_teachers -= self.used_teachers()
+
+        # Since self-study does not actually require any specific qualification.
+        # TODO do this smarter than just assigning teachers?
+        if module.is_self_study():
+            return next(iter(available_teachers))
+
+        # We select the worst qualifying teacher - e.g. for a second degree
+        # module, we would first want to exhaust second degree teachers rather
+        # than first degree, because those can be used to teach first degree
+        # modules as well.
+        qualified_teachers = []
+
+        for teacher in available_teachers:
+            if teacher.is_qualified_for(module):
+                qualification = problem.qualifications[teacher.id, module.id]
+                heappush(qualified_teachers,
+                         (-qualification, teacher.id, teacher))
+
+        if not qualified_teachers:
+            raise LookupError(f"No qualified, available teachers for {module}.")
+
+        return qualified_teachers[0][-1]
 
     def leaves_sufficient_for_self_study(self,
                                          classroom: Classroom,
@@ -76,6 +126,9 @@ class Solution(State):
         from .Problem import Problem
         problem = Problem()
 
+        # TODO make this faster. Vectorise parts with numpy? Especially
+        #  compare against self-study might be done faster.
+
         learners_by_module = defaultdict(list)
 
         for learner in self.unassigned:
@@ -107,6 +160,17 @@ class Solution(State):
             heappush(histogram, (-aggregate, module, learners))
 
         return histogram
+
+    def activities_by_module(self) -> Dict[Module, List[Activity]]:
+        """
+        Returns all activities, grouped by module.
+        """
+        grouped = defaultdict(list)
+
+        for activity in self.activities:
+            grouped[activity.module].append(activity)
+
+        return grouped
 
     def used_classrooms(self) -> Set[Classroom]:
         return {activity.classroom for activity in self.activities}

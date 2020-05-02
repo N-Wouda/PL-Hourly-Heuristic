@@ -17,6 +17,8 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     """
     generator.shuffle(destroyed.unassigned)
 
+    # TODO this thing is gnarly - clean it up
+
     problem = Problem()
 
     activities_by_module = defaultdict(list)

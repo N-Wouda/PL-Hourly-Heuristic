@@ -2,16 +2,15 @@ from numpy.random import Generator
 
 from heuristic.classes import Solution
 from .reinsert_learner import reinsert_learner
-from .simplify_activities import simplify_activities
 
 
 def local_search(current: Solution, generator: Generator) -> Solution:
     """
-    TODO.
+    Performs a local search procedure whenever a new best solution is found,
+    improving this solution further.
     """
     operators = [
         reinsert_learner,
-        simplify_activities,
         # TODO
     ]
 

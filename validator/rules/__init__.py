@@ -1,6 +1,4 @@
 from .activity_size import activity_size
-from .classroom_teacher_tuples_to_modules \
-    import classroom_teacher_tuples_to_modules
 from .classrooms_to_modules import classrooms_to_modules
 from .classrooms_to_teachers import classrooms_to_teachers
 from .learner_preferences import learner_preferences
@@ -14,7 +12,6 @@ from .teachers_to_modules import teachers_to_modules
 
 RULES = [
     activity_size,
-    classroom_teacher_tuples_to_modules,
     classrooms_to_modules,
     classrooms_to_teachers,
     learner_preferences,

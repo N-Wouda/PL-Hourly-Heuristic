@@ -1,12 +1,14 @@
-from utils import Data
+from heuristic.classes import Problem
 
 
-def learner_schedule(data: Data, solver):
+def learner_schedule(solver):
     """
     This constraint ensures learners are assigned to exact *one* module.
     """
-    for learner in range(len(data.learners)):
+    problem = Problem()
+
+    for learner in range(problem.num_learners):
         assignments = solver.sum(solver.assignment[learner, module]
-                                 for module in range(len(data.modules)))
+                                 for module in range(len(problem.modules)))
 
         solver.add_constraint(assignments == 1)

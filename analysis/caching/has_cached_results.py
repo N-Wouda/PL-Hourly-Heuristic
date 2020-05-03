@@ -2,6 +2,6 @@ import pathlib
 
 
 def has_cached_results(experiment: int) -> bool:
-    path = "experiments/{0}/stored_measures.json".format(experiment)
+    path = f"experiments/{experiment}/stored_measures.json"
 
     return pathlib.Path(path).is_file()

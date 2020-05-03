@@ -7,7 +7,5 @@ def store_results(experiment: int, results: List[Dict[str, float]]):
     """
     Saves the results for the given experiment to the filesystem.
     """
-    path = "experiments/{0}/stored_measures.json".format(experiment)
-
-    with open(path, "w") as file:
+    with open(f"experiments/{experiment}/stored_measures.json", "w") as file:
         json.dump(results, file)

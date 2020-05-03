@@ -1,21 +1,25 @@
 from typing import List, Tuple
 
-from utils import Data
+from heuristic.classes import Problem
 
 
-def teacher_module_qualifications(data: Data, solution: List[Tuple]) -> bool:
+def teacher_module_qualifications(solution: List[Tuple]) -> bool:
     """
     Verifies each teacher-module assignment satisfies the required teacher
     qualification.
     """
+    problem = Problem()
     teacher_modules = {}
 
     for assignment in solution:
         _, module, _, teacher = assignment
         teacher_modules[teacher] = module
 
-    return all(0
-               < data.qualifications[teacher, module]
-               <= data.modules[module]["qualification"]
-               for teacher, module in teacher_modules.items()
-               if module != len(data.modules) - 1)
+    for teacher_idx, module_idx in teacher_modules.items():
+        teacher = problem.teachers[teacher_idx]
+        module = problem.modules[module_idx]
+
+        if not teacher.is_qualified_for(module):
+            return False
+
+    return True

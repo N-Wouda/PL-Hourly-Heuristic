@@ -21,13 +21,8 @@ pre-print in the repository, as `article.pdf`. TODO
 
 ## How to use
 
-Ensure you have an environment with at least Python 3.6. Then, to run
-the validator and/or heuristic, you may install the required packages
-as,
-
-```
-pip install -r requirements.txt
-```
+Ensure you have an environment with at least Python 3.6. To run the validator
+and/or heuristic, you need to install the required packages via `pipenv`.
 
 For the ILP formulation, more is needed: you need to ensure a valid
 instance of the CPLEX programme is installed on your machine, with the
@@ -71,19 +66,10 @@ instance arguments, the validator confirms the ILP and heuristic
 solutions (where available) satisfy the problem constraints. Usage,
 
 ```
->>>python -m validator 1 5
-
-Solution (ilp) satisfies constraints for exp. 1, inst. 5? True
-Solution (heuristic) satisfies constraints for exp. 1, inst. 5? True
+python -m validator 1 5
 ```
 
-For experiment `1`, instance `5`. Since validating *all* instances in
-a given experiment quickly turns tedious, there is the option not to
-pass in an instance number, like so,
-
-```
-python -m validator 1
-```
-
-This will run the validator over all instances in the given experiment,
-`1` in this example.
+For experiment `1`, instance `5`. An exit code of `0` indicates the ILP and
+heuristic solutions both meet the problem constraints, `1` suggests one or more
+constraints fail. In this case output is printed hinting which constraint is
+violated.

@@ -1,10 +1,10 @@
+from collections import defaultdict
 from typing import List, Tuple
 
-import numpy as np
 from docplex.mp.model import Model
 
 from heuristic.classes import Problem
-from utils import State
+from heuristic.constants import SELF_STUDY_MODULE_ID
 from .constraints import CONSTRAINTS
 
 
@@ -32,7 +32,7 @@ def ilp() -> List[Tuple]:
             # for this to happen due to the problem structure.
             raise ValueError("Infeasible!")
 
-        return _to_state(solver).to_assignments()
+        return _to_assignments(solver)
 
 
 def _setup_objective(solver: Model):
@@ -71,10 +71,13 @@ def _setup_decision_variables(solver: Model):
         *assignment_problem[1:], name="module_resources")
 
 
-def _to_state(solver: Model) -> State:
+def _to_assignments(solver: Model) -> List[Tuple]:
     """
-    Turns the model's decision variables into an appropriate ``State`` object,
-    which may then be queried for the modelling outcomes.
+    Turns the solver's decision variables into a series of (learner, module,
+    classroom, teacher) assignments, which are then stored to the file system.
+
+    TODO this is legacy code, taken from the old State object. It's not the
+     prettiest, but it should work.
     """
     problem = Problem()
 
@@ -91,4 +94,46 @@ def _to_state(solver: Model) -> State:
         for module in range(len(problem.modules))
         if solver.module_resources[module, classroom, teacher].solution_value}
 
-    return State(np.array(learner_assignments), classroom_teacher_assignments)
+    assignments = []
+    counters = defaultdict(lambda: 0)
+
+    for module in range(len(problem.modules)):
+        # Select learners and activities belonging to each module, such
+        # that we can assign them below.
+        learners = [learner for learner in range(len(problem.learners))
+                    if learner_assignments[learner] == module]
+
+        activities = [activity for activity, activity_module
+                      in classroom_teacher_assignments.items()
+                      if module == activity_module]
+
+        # Assign at least min_batch number of learners to each activity.
+        # This ensures the minimum constraint is met for all activities.
+        for classroom, teacher in activities:
+            for _ in range(problem.min_batch):
+                if not learners:
+                    break
+
+                assignment = (learners.pop(), module, classroom, teacher)
+                assignments.append(list(assignment))
+
+                counters[classroom] += 1
+
+        # Next we flood-fill these activities with learners, until none
+        # remain to be assigned.
+        for classroom, teacher in activities:
+            capacity = problem.classrooms[classroom].capacity
+
+            if module != SELF_STUDY_MODULE_ID:
+                capacity = min(problem.max_batch, capacity)
+
+            while learners:
+                if counters[classroom] == capacity:  # classroom is full
+                    break
+
+                assignment = (learners.pop(), module, classroom, teacher)
+                assignments.append(list(assignment))
+
+                counters[classroom] += 1
+
+    return assignments

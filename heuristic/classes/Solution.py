@@ -164,15 +164,39 @@ class Solution(State):
     def used_modules(self) -> Set[Module]:
         return {activity.module for activity in self.activities}
 
-    def to_file(self, experiment: int, instance: int):
+    @classmethod
+    def from_file(cls, location: str) -> Solution:
+        from .Problem import Problem
+        problem = Problem()
+
+        with open(location) as file:
+            assignments = json.load(file)
+
+        resources = defaultdict(list)
+
+        for learner, module, classroom, teacher in assignments:
+            learner = problem.learners[learner]
+            resources[classroom, teacher, module].append(learner)
+
+        solution = cls([])
+
+        for (classroom, teacher, module), learners in resources.items():
+            classroom = problem.classrooms[classroom]
+            teacher = problem.teachers[teacher]
+            module = problem.modules[module]
+
+            activity = Activity(learners, classroom, teacher, module)
+            solution.activities.append(activity)
+
+        return solution
+
+    def to_file(self, location: str):
         assignments = [[learner.id,
                         activity.module.id,
                         activity.classroom.id,
                         activity.teacher.id]
                        for activity in self.activities
                        for learner in activity.learners]
-
-        location = f"experiments/{experiment}/{instance}-heuristic.json"
 
         with open(location, "w") as file:
             json.dump(assignments, file)

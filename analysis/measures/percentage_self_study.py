@@ -1,17 +1,13 @@
-import numpy as np
-
-from heuristic.classes import Problem
-from heuristic.constants import SELF_STUDY_MODULE_ID
-from utils import State
+from heuristic.classes import Problem, Solution
 
 
-def percentage_self_study(state: State) -> float:
+def percentage_self_study(solution: Solution) -> float:
     """
     Computes the percentage of learners doing self-study.
     """
     problem = Problem()
 
-    self_study_learners = np.count_nonzero(state.learner_assignments
-                                           == SELF_STUDY_MODULE_ID)
+    num_learners = sum(activity.num_learners
+                       for activity in solution.activities)
 
-    return 100 * self_study_learners / len(problem.learners)
+    return 100 * num_learners / len(problem.learners)

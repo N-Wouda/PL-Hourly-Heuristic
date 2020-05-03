@@ -1,8 +1,8 @@
-from utils import State
+from heuristic.classes import Solution
 
 
-def objective(state: State) -> float:
+def objective(solution: Solution) -> float:
     """
-    Computes the state's objective value.
+    Computes the objective value.
     """
-    return state.objective()
+    return -solution.objective()

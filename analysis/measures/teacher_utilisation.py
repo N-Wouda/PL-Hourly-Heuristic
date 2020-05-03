@@ -1,14 +1,10 @@
-from operator import truediv
-
-from heuristic.classes import Problem
-from utils import State
+from heuristic.classes import Problem, Solution
 
 
-def teacher_utilisation(state: State) -> float:
+def teacher_utilisation(solution: Solution) -> float:
     """
     Computes the percentage of teachers in use from the available teacher pool.
     """
     problem = Problem()
 
-    return 100 * truediv(len(state.classroom_teacher_assignments),
-                         len(problem.teachers))
+    return 100 * len(solution.activities) / len(problem.teachers)

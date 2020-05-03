@@ -1,19 +1,16 @@
-import numpy as np
-
-from heuristic.constants import SELF_STUDY_MODULE_ID
-from utils import State
+from heuristic.classes import Solution
 
 
-def instruction_size(state: State) -> float:
+def instruction_size(solution: Solution) -> float:
     """
     Computes the average instruction activity size.
     """
-    num_learners = np.count_nonzero(state.learner_assignments
-                                    != SELF_STUDY_MODULE_ID)
+    num_learners = num_classrooms = 0
 
-    num_classrooms = sum(1 for _, module
-                         in state.classroom_teacher_assignments.items()
-                         if module != SELF_STUDY_MODULE_ID)
+    for activity in solution.activities:
+        if activity.is_instruction():
+            num_learners += activity.num_learners
+            num_classrooms += 1
 
     if num_learners == 0:
         return 0

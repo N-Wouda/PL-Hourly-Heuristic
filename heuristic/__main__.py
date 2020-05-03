@@ -33,12 +33,8 @@ def main():
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
 
-    import matplotlib.pyplot as plt
-
-    result.plot_objectives()
-    plt.show()
-
-    result.best_state.to_file(experiment, instance)  # noqa
+    location = f"experiments/{experiment}/{instance}-heuristic.json"
+    result.best_state.to_file(location)  # noqa
 
 
 if __name__ == "__main__":

@@ -7,8 +7,9 @@ from alns import State as ALNSState
 
 from heuristic.constants import SELF_STUDY_MODULE_ID
 from .Data import Data
-from .max_capacity import max_capacity
 
+
+# TODO remove
 
 class State(ALNSState):
 
@@ -170,12 +171,13 @@ class State(ALNSState):
             # Next we flood-fill these activities with learners, until none
             # remain to be assigned.
             for classroom, teacher in activities:
-                capacity = max_capacity(self.classrooms[classroom]['capacity'],
-                                        self.max_batch,
-                                        module == SELF_STUDY_MODULE_ID)
+                capacity = self.classrooms[classroom]["capacity"]
+
+                if module != SELF_STUDY_MODULE_ID:
+                    capacity = min(self.max_batch, capacity)
 
                 while learners:
-                    if counters[classroom] == capacity:     # classroom is full
+                    if counters[classroom] == capacity:  # classroom is full
                         break
 
                     assignment = (learners.pop(), module, classroom, teacher)

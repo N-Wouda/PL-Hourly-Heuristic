@@ -1,4 +1,4 @@
-from utils import Data, max_capacity
+from utils import Data
 
 
 def max_batch(data: Data, solver):
@@ -17,7 +17,7 @@ def max_batch(data: Data, solver):
                                      for learner in range(len(data.learners)))
 
         activities = solver.sum(
-            solver.module_resources[module, classroom, teacher] * max_capacity(
+            solver.module_resources[module, classroom, teacher] * _max_capacity(
                 data.classrooms[classroom]["capacity"],
                 data.max_batch,
                 module == len(data.modules) - 1)
@@ -25,3 +25,13 @@ def max_batch(data: Data, solver):
             for teacher in range(len(data.teachers)))
 
         solver.add_constraint(module_learners <= activities)
+
+
+def _max_capacity(room_capacity: int, batch: int, is_self_study: bool) -> int:
+    """
+    Computes the maximum room capacity, subject to constraints.
+    """
+    if is_self_study:
+        return room_capacity
+
+    return min(batch, room_capacity)

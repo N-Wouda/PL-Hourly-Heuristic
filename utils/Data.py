@@ -4,8 +4,8 @@ from typing import List
 import numpy as np
 import simplejson as json
 
-from .file_location import file_location
 
+# TODO remove; use heuristic.classes.Problem instead
 
 class Data:
     """
@@ -21,10 +21,10 @@ class Data:
         Builds a Data object for the experiment data file associated with the
         given experiment and instance.
         """
-        with open(file_location(experiment, instance)) as file:
+        with open(f"experiments/{experiment}/{instance}.json") as file:
             data = json.load(file)
 
-        return Data(data)
+        return cls(data)
 
     @property
     @lru_cache(1)

@@ -69,6 +69,7 @@ class Activity:
         return self._module
 
     def objective(self):
+        # TODO cache this - problem was in split_with(), did not update.
         problem = Problem()
         learner_ids = [learner.id for learner in self.learners]
 

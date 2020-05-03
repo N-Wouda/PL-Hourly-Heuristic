@@ -1,10 +1,11 @@
 from collections import defaultdict
 from functools import lru_cache
-from typing import Optional, Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from alns import State as ALNSState
 
+from heuristic.constants import SELF_STUDY_MODULE_ID
 from .Data import Data
 from .max_capacity import max_capacity
 
@@ -171,7 +172,7 @@ class State(ALNSState):
             for classroom, teacher in activities:
                 capacity = max_capacity(self.classrooms[classroom]['capacity'],
                                         self.max_batch,
-                                        module == len(self.modules) - 1)
+                                        module == SELF_STUDY_MODULE_ID)
 
                 while learners:
                     if counters[classroom] == capacity:     # classroom is full

@@ -11,6 +11,7 @@ class Data:
     """
     These are the immutable data drawn from the experiment file.
     """
+
     def __init__(self, data):
         self._data = data
 
@@ -90,7 +91,7 @@ class Data:
         """
         modules = self._data['modules'].copy()
 
-        modules.append(dict(id=-1,                  # self-study module
+        modules.append(dict(id=576,  # self-study module
                             room_type=999,
                             qualification=3))
 

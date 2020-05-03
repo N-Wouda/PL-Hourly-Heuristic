@@ -5,6 +5,7 @@ from heapq import heappush
 from operator import attrgetter, methodcaller
 from typing import Dict, List, Set, Tuple
 
+import simplejson as json
 from alns import State
 
 from .Activity import Activity
@@ -126,21 +127,10 @@ class Solution(State):
         from .Problem import Problem
         problem = Problem()
 
-        # TODO make this faster. Vectorise parts with numpy? Especially
-        #  compare against self-study might be done faster.
-
         learners_by_module = defaultdict(list)
 
         for learner in self.unassigned:
-            for module_id in problem.most_preferred[learner.id]:
-                module = problem.modules[module_id]
-
-                if not learner.prefers_over_self_study(module):
-                    # The modules are sorted by preference, so the first time
-                    # this happens we can break for this learner (all subsequent
-                    # modules will be even worse).
-                    break
-
+            for module in problem.prefers_over_self_study[learner]:
                 learners_by_module[module].append(learner)
 
         histogram = []
@@ -155,8 +145,6 @@ class Solution(State):
             aggregate = sum(problem.preferences[learner.id, module.id]
                             for learner in learners)
 
-            # Negative aggregate, since Python's heap is a min heap but we need
-            # to get the largest value first.
             heappush(histogram, (-aggregate, module, learners))
 
         return histogram
@@ -180,3 +168,16 @@ class Solution(State):
 
     def used_modules(self) -> Set[Module]:
         return {activity.module for activity in self.activities}
+
+    def to_file(self, experiment: int, instance: int):
+        assignments = [[learner.id,
+                        activity.module.id,
+                        activity.classroom.id,
+                        activity.teacher.id]
+                       for activity in self.activities
+                       for learner in activity.learners]
+
+        location = f"experiments/{experiment}/{instance}-heuristic.json"
+
+        with open(location, "w") as file:
+            json.dump(assignments, file)

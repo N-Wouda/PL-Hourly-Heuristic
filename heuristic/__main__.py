@@ -18,7 +18,7 @@ def run(experiment: int, instance: int):
     # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
     # 100, there will never be overlap between random number streams across
     # experiments.
-    alns = ALNS(rnd.default_rng(100 * experiment + instance))
+    alns = ALNS(rnd.default_rng(100 * experiment + instance))  # noqa
 
     for operator in DESTROY_OPERATORS:
         alns.add_destroy_operator(operator)
@@ -31,9 +31,7 @@ def run(experiment: int, instance: int):
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
 
-    print(result.best_state.objective())
-    #
-    # write_result(result.best_state, MethodType.HEURISTIC, experiment, instance)
+    result.best_state.to_file(experiment, instance)  # noqa
 
 
 def main():

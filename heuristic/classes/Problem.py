@@ -8,7 +8,6 @@ import numpy as np
 import simplejson as json
 
 from heuristic.constants import SELF_STUDY_MODULE_ID
-from utils import file_location
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
@@ -27,7 +26,7 @@ class Problem(metaclass=Singleton):
         """
         cls.clear()
 
-        with open(file_location(experiment, instance)) as file:
+        with open(f"experiments/{experiment}/{instance}.json") as file:
             data = json.load(file)
 
         problem = cls()
@@ -76,6 +75,28 @@ class Problem(metaclass=Singleton):
         # Since only one module per course may be preferred, we can safely
         # discard all the others.
         return by_module[:, :self.num_courses]
+
+    @property
+    @lru_cache(1)
+    def prefers_over_self_study(self) -> Dict[Learner, List[Module]]:
+        """
+        Returns a dictionary with modules, per learner, that are preferred
+        over the self-study assignment.
+        """
+        most_preferred = self.most_preferred
+
+        grouped = defaultdict(list)
+
+        for learner in self.learners:
+            for module_id in most_preferred[learner.id]:
+                module = self.modules[module_id]
+
+                if not learner.prefers_over_self_study(module):
+                    break
+
+                grouped[learner].append(module)
+
+        return grouped
 
     @property
     @lru_cache(1)

@@ -12,8 +12,6 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     Greedily inserts learners into the best, feasible activities. If no
     activity can be found for a learner, (s)he is inserted into self-study
     instead.
-
-    TODO make all this nicer
     """
     generator.shuffle(destroyed.unassigned)
 
@@ -54,6 +52,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
             module_pref = problem.preferences[learner.id, module]
 
             if self_study_pref > module_pref:
+                # TODO ideally we would break here.
                 continue
 
             if _insert(learner, activities_by_module[module]):
@@ -79,7 +78,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                         classroom = unused_classrooms.pop()
 
                         new_activity = activity.split_with(classroom, teacher)
-                        new_activity.insert_learner(learner)
+                        activity.insert_learner(learner)
                         destroyed.activities.append(new_activity)
                         activities_by_module[SELF_STUDY_MODULE_ID].append(
                             new_activity)
@@ -95,7 +94,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                         # TODO select which learners more intelligently?
                         learners = destroyed.unassigned[-problem.min_batch:]
                         destroyed.unassigned = destroyed.unassigned[
-                                               :problem.min_batch]
+                                               :-problem.min_batch]
 
                         activity = Activity(learners, classroom, teacher,
                                             problem.self_study_module)

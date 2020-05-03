@@ -157,15 +157,23 @@ class Activity:
         """
         Splits this activity into two activities, using the passed-in classroom
         and teacher resources. The learners are halved, with each receiving
-        half the current activity's learners.
+        half the current activity's learners - or less, according to batching
+        requirements.
 
-        Does not check whether splitting is feasible, nor whether the passed-in
-        classroom and teacher are qualified for the activity's module.
+        Does not check whether whether the passed-in classroom and teacher are
+        qualified for the activity's module.
         """
-        splitter = self.num_learners // 2
+        problem = Problem()
 
-        learners = self.learners[splitter:]
-        self._learners = self.learners[:splitter]
+        if self.module.is_self_study():
+            splitter = min(self.num_learners // 2, classroom.capacity)
+        else:
+            splitter = min(self.num_learners // 2,
+                           classroom.capacity,
+                           problem.max_batch)
+
+        learners = self.learners[-splitter:]
+        self._learners = self.learners[:-splitter]
 
         return Activity(learners, classroom, teacher, self.module)
 

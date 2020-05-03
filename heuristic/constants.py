@@ -1,7 +1,7 @@
 from alns.criteria import SimulatedAnnealing
 
-
-SELF_STUDY_MODULE_ID = -1
+# 12 * 48 = 576 regular modules, so the final index/ID for self-study is 576.
+SELF_STUDY_MODULE_ID = 576
 
 WEIGHTS = [25, 10, 1, 0.5]
 ITERATIONS = 10000

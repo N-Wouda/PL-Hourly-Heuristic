@@ -6,10 +6,10 @@ from heuristic.classes import Problem
 from validator.rules import RULES
 
 
-def process(experiment: int, instance: int):
-    """
-    Validates the given experiment instance.
-    """
+def main():
+    experiment = int(sys.argv[1])
+    instance = int(sys.argv[2])
+
     Problem.from_instance(experiment, instance)
 
     valid = True
@@ -28,16 +28,7 @@ def process(experiment: int, instance: int):
                     valid = False
                     print(f"{path}: solution violates {rule.__name__}.")
 
-    return valid
-
-
-def main():
-    if len(sys.argv) < 3:
-        instances = list(range(1, 101))
-    else:
-        instances = [sys.argv[2]]
-
-    exit(0 if all(process(sys.argv[1], inst) for inst in instances) else 1)
+    exit(0 if valid else 1)
 
 
 if __name__ == "__main__":

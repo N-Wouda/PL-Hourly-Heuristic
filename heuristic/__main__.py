@@ -6,13 +6,15 @@ from alns import ALNS
 from heuristic.classes import Problem
 from heuristic.constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
 from heuristic.functions import initial_solution
-from utils import instances
 from .destroy_operators import DESTROY_OPERATORS
 from .local_search import local_search
 from .repair_operators import REPAIR_OPERATORS
 
 
-def run(experiment: int, instance: int):
+def main():
+    experiment = int(sys.argv[1])
+    instance = int(sys.argv[2])
+
     Problem.from_instance(experiment, instance)
 
     # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
@@ -31,22 +33,8 @@ def run(experiment: int, instance: int):
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
 
-    import matplotlib.pyplot as plt
-
-    result.plot_objectives()
-    plt.show()
-
-    result.best_state.to_file(experiment, instance)  # noqa
-
-
-def main():
-    if len(sys.argv) < 3:
-        instances = list(range(1, 101))
-    else:
-        instances = [sys.argv[2]]
-
-    for inst in instances:
-        run(int(sys.argv[1]), int(inst))
+    location = f"experiments/{experiment}/{instance}-heuristic.json"
+    result.best_state.to_file(location)  # noqa
 
 
 if __name__ == "__main__":

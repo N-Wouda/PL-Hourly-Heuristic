@@ -1,18 +1,20 @@
 import itertools
 
-from utils import Data
+from heuristic.classes import Problem
 
 
-def strictly_positive_assignment(data: Data, solver):
+def strictly_positive_assignment(solver):
     """
     Ensures learners are assigned only to modules for which they hold a
     strictly positive preference. This guarantees learners are not assigned
     to modules they are currently ineligible to take.
     """
-    for learner, module in itertools.product(range(len(data.learners)),
-                                             range(len(data.modules))):
-        preference = data.preferences[learner, module] \
-            * solver.assignment[learner, module]
+    problem = Problem()
+
+    for learner, module in itertools.product(range(len(problem.learners)),
+                                             range(len(problem.modules))):
+        preference = problem.preferences[learner, module] \
+                     * solver.assignment[learner, module]
 
         grace = solver.B * (1 - solver.assignment[learner, module])
 

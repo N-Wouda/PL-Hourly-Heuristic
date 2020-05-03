@@ -1,9 +1,10 @@
 import itertools
 
 from utils import Data
+from heuristic.classes import Problem
 
 
-def teaching_qualification(data: Data, solver):
+def teaching_qualification(solver):
     """
     The teaching qualification constraint ensures teacher-module assignments
     are feasible. Each module has a teaching qualification requirement, and
@@ -24,14 +25,16 @@ def teaching_qualification(data: Data, solver):
     eligible to supervise the activity. As such, we can ignore this assignment
     here.
     """
-    for module, teacher in itertools.product(range(len(data.modules) - 1),
-                                             range(len(data.teachers))):
+    problem = Problem()
+
+    for module, teacher in itertools.product(range(len(problem.modules) - 1),
+                                             range(len(problem.teachers))):
         is_assigned = solver.sum(
             solver.module_resources[module, classroom, teacher]
-            for classroom in range(len(data.classrooms)))
+            for classroom in range(len(problem.classrooms)))
 
-        module_qualification = data.modules[module]["qualification"]
-        teacher_qualification = data.qualifications[teacher, module]
+        module_qualification = problem.modules[module].qualification
+        teacher_qualification = problem.qualifications[teacher, module]
 
         # Module requirement must be 'less' than teacher qualification.
         solver.add_constraint(module_qualification * is_assigned

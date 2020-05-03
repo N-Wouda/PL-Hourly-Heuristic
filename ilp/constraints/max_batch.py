@@ -1,7 +1,7 @@
-from utils import Data
+from heuristic.classes import Classroom, Module, Problem
 
 
-def max_batch(data: Data, solver):
+def max_batch(solver):
     """
     This constraints guarantees the number of learners assigned to a module
     are supported by a sufficient number of classroom-teacher activities, such
@@ -12,26 +12,26 @@ def max_batch(data: Data, solver):
     The ``max_batch`` constraint only holds for regular instruction activities,
     for self-study the constraint defaults to a capacity requirement.
     """
-    for module in range(len(data.modules)):
-        module_learners = solver.sum(solver.assignment[learner, module]
-                                     for learner in range(len(data.learners)))
+    problem = Problem()
+
+    for module in problem.modules:
+        module_learners = solver.sum(solver.assignment[learner.id, module.id]
+                                     for learner in problem.learners)
 
         activities = solver.sum(
-            solver.module_resources[module, classroom, teacher] * _max_capacity(
-                data.classrooms[classroom]["capacity"],
-                data.max_batch,
-                module == len(data.modules) - 1)
-            for classroom in range(len(data.classrooms))
-            for teacher in range(len(data.teachers)))
+            solver.module_resources[module.id, classroom.id, teacher.id]
+            * _max_capacity(classroom, module)
+            for classroom in problem.classrooms
+            for teacher in problem.teachers)
 
         solver.add_constraint(module_learners <= activities)
 
 
-def _max_capacity(room_capacity: int, batch: int, is_self_study: bool) -> int:
+def _max_capacity(classroom: Classroom, module: Module) -> int:
     """
     Computes the maximum room capacity, subject to constraints.
     """
-    if is_self_study:
-        return room_capacity
+    if module.is_self_study():
+        return classroom.capacity
 
-    return min(batch, room_capacity)
+    return min(classroom.capacity, Problem().max_batch)

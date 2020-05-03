@@ -51,11 +51,6 @@ class Solution(State):
         available_teachers = set(problem.teachers_by_module[module])
         available_teachers -= self.used_teachers()
 
-        # Since self-study does not actually require any specific qualification.
-        # TODO do this smarter than just assigning teachers?
-        if module.is_self_study():
-            return next(iter(available_teachers))
-
         # We select the worst qualifying teacher - e.g. for a second degree
         # module, we would first want to exhaust second degree teachers rather
         # than first degree, because those can be used to teach first degree

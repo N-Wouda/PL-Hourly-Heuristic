@@ -1,10 +1,8 @@
-from collections import defaultdict
 from operator import attrgetter
 
 from numpy.random import Generator
 
 from heuristic.classes import Activity, Problem, Solution
-from heuristic.constants import SELF_STUDY_MODULE_ID
 
 
 def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
@@ -13,16 +11,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     activity can be found for a learner, (s)he is inserted into self-study
     instead.
     """
-    generator.shuffle(destroyed.unassigned)
-
-    # TODO this thing is gnarly - clean it up
-
     problem = Problem()
-
-    activities_by_module = defaultdict(list)
-
-    for activity in destroyed.activities:
-        activities_by_module[activity.module.id].append(activity)
 
     unused_teachers = set(problem.teachers) - destroyed.used_teachers()
 
@@ -30,83 +19,71 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     unused_classrooms = [classroom for classroom in unused_classrooms
                          if classroom.is_self_study_allowed()]
 
-    # Ensures we always first use the largest classrooms for self-study. This is
-    # typically a good idea, as it leaves the smaller classrooms to more
-    # specific instruction activities.
+    # It is typically a good idea to prefers using larger rooms for self-study.
     unused_classrooms.sort(key=attrgetter("capacity"))
+
+    activities = destroyed.activities_by_module()
 
     while len(destroyed.unassigned) != 0:
         learner = destroyed.unassigned.pop()
+        inserted = False
 
         # Attempts to insert the learner into the most preferred, feasible
-        # instruction activity. If no such activities exist the learner is
-        # inserted into a self-study activity instead.
-        for module in problem.most_preferred[learner.id]:
-            if module not in activities_by_module:
+        # instruction activity.
+        for module_id in problem.most_preferred[learner.id]:
+            module = problem.modules[module_id]
+
+            if module not in activities:
                 continue
 
-            self_study_mod = problem.most_preferred[learner.id, 0]
-            self_study_pref = problem.preferences[learner.id, self_study_mod]
-            self_study_pref -= problem.penalty
-
-            module_pref = problem.preferences[learner.id, module]
-
-            if self_study_pref > module_pref:
-                # TODO ideally we would break here.
-                continue
-
-            if _insert(learner, activities_by_module[module]):
+            if not learner.prefers_over_self_study(module):
                 break
-        else:
-            # Learner could not be inserted into a regular instruction activity,
-            # so now we opt for self-study.
-            if not _insert(learner, activities_by_module[SELF_STUDY_MODULE_ID]):
-                for activity in activities_by_module[SELF_STUDY_MODULE_ID]:
-                    biggest_classroom = unused_classrooms[-1]
 
-                    if activity.classroom.capacity < biggest_classroom.capacity:
-                        current = activity.classroom
-                        activity.classroom = unused_classrooms.pop()
-                        unused_classrooms.insert(0, current)
+            if inserted := _insert(learner, activities[module]):
+                break
 
-                        activity.insert_learner(learner)
+            # Could not insert, so the module activities must be exhausted.
+            del activities[module]
 
-                        break
+        # Learner could not be inserted into a regular instruction activity,
+        # so now we opt for self-study.
+        if not inserted and not _insert(learner,
+                                        activities[problem.self_study_module]):
+            for activity in activities[problem.self_study_module]:
+                biggest_classroom = unused_classrooms[-1]
 
-                    if activity.num_learners >= 2 * problem.min_batch:
-                        teacher = unused_teachers.pop()
-                        classroom = unused_classrooms.pop()
+                if activity.classroom.capacity < biggest_classroom.capacity:
+                    current = activity.classroom
+                    activity.classroom = unused_classrooms.pop()
+                    unused_classrooms.insert(0, current)
 
-                        new_activity = activity.split_with(classroom, teacher)
-                        activity.insert_learner(learner)
-                        destroyed.activities.append(new_activity)
-                        activities_by_module[SELF_STUDY_MODULE_ID].append(
-                            new_activity)
+                    activity.insert_learner(learner)
+                    break
 
-                        break
-                else:
-                    # It could be that there is no self-study activity. In that
-                    # case we should make one.
-                    if len(activities_by_module[SELF_STUDY_MODULE_ID]) == 0:
-                        classroom = unused_classrooms.pop()
-                        teacher = unused_teachers.pop()
+                if activity.can_split():
+                    teacher = unused_teachers.pop()
+                    classroom = unused_classrooms.pop()
 
-                        # TODO select which learners more intelligently?
-                        learners = destroyed.unassigned[-problem.min_batch:]
-                        destroyed.unassigned = destroyed.unassigned[
-                                               :-problem.min_batch]
+                    new = activity.split_with(classroom, teacher)
+                    activity.insert_learner(learner)
 
-                        activity = Activity(learners, classroom, teacher,
-                                            problem.self_study_module)
+                    destroyed.activities.append(new)
+                    activities[problem.self_study_module].insert(0, new)
+                    break
+            else:
+                # It could be that there is no self-study activity. In that
+                # case we should make one. This does not happen often.
+                classroom = unused_classrooms.pop()
+                teacher = unused_teachers.pop()
 
-                        destroyed.activities.append(activity)
-                        activities_by_module[SELF_STUDY_MODULE_ID].append(
-                            activity)
-                    else:
-                        # This would be most curious, and warrant further
-                        # investigation.
-                        raise Exception("It should always be possible to "
-                                        "schedule a learner in self-study.")
+                learners = destroyed.unassigned[-problem.min_batch:]
+                destroyed.unassigned = destroyed.unassigned[:-problem.min_batch]
+
+                activity = Activity(learners, classroom, teacher,
+                                    problem.self_study_module)
+
+                destroyed.activities.append(activity)
+                activities[problem.self_study_module].append(activity)
 
     return destroyed
 

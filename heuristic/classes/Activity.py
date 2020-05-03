@@ -153,6 +153,28 @@ class Activity:
         else:
             self._objective -= problem.preferences[learner.id, self.module.id]
 
+    def remove_learners(self, learners: List[Learner]) -> int:
+        """
+        Attempts to remove the learners in the passed-in list. Returns the
+        actual number removed (from the start of the list).
+        """
+        problem = Problem()
+        removable = self.num_learners - problem.min_batch
+
+        for learner in learners[:removable]:
+            self.remove_learner(learner)
+
+        return min(removable, len(learners))
+
+    def can_split(self) -> bool:
+        """
+        Tests if this activity can be split, that is, there are sufficient
+        learners to break the activity up into two activities.
+        """
+        problem = Problem()
+
+        return self.num_learners >= 2 * problem.min_batch
+
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """
         Splits this activity into two activities, using the passed-in classroom

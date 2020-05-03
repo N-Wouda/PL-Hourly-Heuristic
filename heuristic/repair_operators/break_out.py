@@ -46,12 +46,9 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
             learners = [learner for learner in activity.learners
                         if learner.prefers_over_self_study(module)]
 
-            while activity.can_remove_learner() \
-                    and len(to_assign) < max_size \
-                    and len(learners) != 0:
-                learner = learners.pop()
-                activity.remove_learner(learner)
-                to_assign.append(learner)
+            learners = learners[:max_size - len(to_assign)]
+            num_removed = activity.remove_learners(learners)
+            to_assign.extend(learners[:num_removed])
 
         activity = Activity(to_assign[:max_size], classroom, teacher, module)
 

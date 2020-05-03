@@ -31,13 +31,21 @@ def run(experiment: int, instance: int):
     init = initial_solution()
     result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
 
+    import matplotlib.pyplot as plt
+
+    result.plot_objectives()
+    plt.show()
+
     result.best_state.to_file(experiment, instance)  # noqa
 
 
 def main():
-    # The implicit assumption is that the first argument is the experiment
-    # number, and the second the instance. This is explained in the readme.
-    for inst in instances():
+    if len(sys.argv) < 3:
+        instances = list(range(1, 101))
+    else:
+        instances = [sys.argv[2]]
+
+    for inst in instances:
         run(int(sys.argv[1]), int(inst))
 
 

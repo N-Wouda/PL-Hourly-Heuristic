@@ -2,7 +2,8 @@ from typing import Dict, List
 
 import simplejson as json
 
-from utils import Data, State
+from heuristic.classes import Problem
+from utils import State
 from . import MEASURES
 
 
@@ -13,13 +14,13 @@ def compute_measures(experiment: int) -> List[Dict[str, float]]:
     results = []
 
     for instance in range(1, 101):
-        data = Data.from_instance(experiment, instance)
+        Problem.from_instance(experiment, instance)
 
         result = {}
 
         for method in ["ilp", "heuristic"]:
             try:
-                state = _get_state(data, experiment, instance, method)
+                state = _get_state(experiment, instance, method)
 
                 method_result = {method + '_' + func.__name__: func(state)
                                  for func in MEASURES}
@@ -34,9 +35,8 @@ def compute_measures(experiment: int) -> List[Dict[str, float]]:
     return results
 
 
-def _get_state(data: Data, experiment: int, instance: int,
-               method: str) -> State:
+def _get_state(experiment: int, instance: int, method: str) -> State:
     with open(f"experiments/{experiment}/{instance}-{method}.json") as file:
         assignments = json.load(file)
 
-    return State.from_assignments(data, assignments)
+    return State.from_assignments(assignments)

@@ -1,6 +1,5 @@
 import itertools
 
-from utils import Data
 from heuristic.classes import Problem
 
 

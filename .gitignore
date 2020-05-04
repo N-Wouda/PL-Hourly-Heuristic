@@ -68,3 +68,4 @@ venv/
 
 .ipynb_checkpoints/
 _analysis/
+analysis/cache/*.csv

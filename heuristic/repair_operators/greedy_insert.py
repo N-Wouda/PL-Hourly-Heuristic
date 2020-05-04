@@ -1,4 +1,4 @@
-from operator import attrgetter
+from operator import attrgetter, methodcaller
 
 from numpy.random import Generator
 
@@ -63,8 +63,10 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                             if activity.classroom.is_self_study_allowed()
                             if activity.can_insert_learner()]
 
-                activity = min(iterable,
-                               key=lambda activity: activity.objective())
+                activity = min(iterable, key=methodcaller("objective"))
+
+                activities[problem.self_study_module].insert(0, activity)
+                activities[activity.module].remove(activity)
 
                 activity.switch_to_self_study()
                 activity.insert_learner(learner)

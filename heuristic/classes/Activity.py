@@ -205,6 +205,12 @@ class Activity:
 
         return activity
 
+    def switch_to_self_study(self):
+        problem = Problem()
+
+        self._module = problem.self_study_module
+        self._objective -= problem.penalty * self.num_learners
+
     def _compute_objective(self):
         problem = Problem()
         learner_ids = [learner.id for learner in self.learners]

@@ -52,6 +52,24 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
         # so now we opt for self-study.
         if not inserted and not _insert(learner,
                                         activities[problem.self_study_module]):
+            if len(unused_classrooms) == 0 or len(unused_teachers) == 0:
+                # This implies we need to remove one or more instruction
+                # activities. Let's do the naive and greedy thing, and switch
+                # the instruction activity with lowest objective value into a
+                # self-study assignment. Should be rare.
+                iterable = [activity
+                            for activity in destroyed.activities
+                            if activity.is_instruction()
+                            if activity.classroom.is_self_study_allowed()
+                            if activity.can_insert_learner()]
+
+                activity = min(iterable,
+                               key=lambda activity: activity.objective())
+
+                activity.switch_to_self_study()
+                activity.insert_learner(learner)
+                continue
+
             for activity in activities[problem.self_study_module]:
                 biggest_classroom = unused_classrooms[-1]
 
@@ -76,7 +94,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                     break
             else:
                 # It could be that there is no self-study activity. In that
-                # case we should make one. This does not happen often.
+                # case we should make one. Should be rare.
                 classroom = unused_classrooms.pop()
                 teacher = unused_teachers.pop()
 

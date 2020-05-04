@@ -143,7 +143,7 @@ class Solution(State):
             capacity += classroom.capacity
             rooms_needed += 1
 
-            if capacity > len(self.unassigned):
+            if capacity >= len(self.unassigned):
                 return rooms_needed <= len(avail_teachers)
 
         return False  # these is insufficient capacity

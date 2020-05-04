@@ -106,6 +106,12 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                 activity = Activity(learners, classroom, teacher,
                                     problem.self_study_module)
 
+                if learner not in activity:
+                    # We already popped this learner from the unassigned list,
+                    # so we should explicitly make sure they end up in the
+                    # activity.
+                    activity.insert_learner(learner)
+
                 destroyed.add_activity(activity)
                 activities[problem.self_study_module].append(activity)
 

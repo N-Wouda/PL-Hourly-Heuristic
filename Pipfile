@@ -7,6 +7,3 @@ verify_ssl = true
 numpy = ">=1.18.0"
 alns = ">=1.2.5"
 simplejson = ">=3.17.0"
-
-[requires]
-python_version = "3.8.1"

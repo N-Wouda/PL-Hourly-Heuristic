@@ -39,7 +39,10 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
             if not learner.prefers_over_self_study(module):
                 break
 
-            if inserted := _insert(learner, activities[module]):
+            # TODO Py3.8: use assignment expression in if-statement.
+            inserted = _insert(learner, activities[module])
+
+            if inserted:
                 break
 
             # Could not insert, so the module activities must be exhausted.

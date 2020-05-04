@@ -21,7 +21,7 @@ def main():
             with open(path) as file:
                 solution = [tuple(assignment) for assignment in json.load(file)]
         except IOError:
-            pass
+            print(f"{path}: solution file does not exist.")
         else:
             for rule in RULES:
                 if not rule(solution):

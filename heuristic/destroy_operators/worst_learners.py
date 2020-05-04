@@ -35,7 +35,10 @@ def worst_learners(current: Solution, generator: Generator):
             costs[learner.id] -= problem.preferences[learner.id, curr_module_id]
 
             if activity.is_self_study():
-                costs[learner.id] -= problem.penalty
+                # Per the paper:
+                #     pref(best) - (pref(curr) - <maybe penalty>)
+                #   = pref(best) - pref(curr) + <maybe penalty>.
+                costs[learner.id] += problem.penalty
 
     learners = np.argsort(costs)
     learners = learners[-random_selection(generator)]

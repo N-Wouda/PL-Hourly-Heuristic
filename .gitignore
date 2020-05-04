@@ -67,3 +67,4 @@ experiments/
 venv/
 
 .ipynb_checkpoints/
+_analysis/

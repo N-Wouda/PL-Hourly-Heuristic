@@ -32,7 +32,7 @@ def initial_solution() -> Solution:
                             teacher,
                             problem.self_study_module)
 
-        solution.activities.append(activity)
+        solution.add_activity(activity)
 
         learners_to_assign = learners_to_assign[:-activity.num_learners]
 

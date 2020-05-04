@@ -52,7 +52,7 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
 
         activity = Activity(to_assign[:max_size], classroom, teacher, module)
 
-        destroyed.activities.append(activity)
+        destroyed.add_activity(activity)
         destroyed.unassigned = [learner for learner in destroyed.unassigned
                                 if learner not in activity]
 

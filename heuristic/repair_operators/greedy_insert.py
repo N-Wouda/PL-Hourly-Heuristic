@@ -57,6 +57,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                     activity.classroom = unused_classrooms.pop()
                     unused_classrooms.insert(0, current)
 
+                    destroyed.switch_classrooms(current, activity.classroom)
                     activity.insert_learner(learner)
                     break
 
@@ -67,7 +68,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                     new = activity.split_with(classroom, teacher)
                     activity.insert_learner(learner)
 
-                    destroyed.activities.append(new)
+                    destroyed.add_activity(new)
                     activities[problem.self_study_module].insert(0, new)
                     break
             else:
@@ -82,7 +83,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                 activity = Activity(learners, classroom, teacher,
                                     problem.self_study_module)
 
-                destroyed.activities.append(activity)
+                destroyed.add_activity(activity)
                 activities[problem.self_study_module].append(activity)
 
     return destroyed

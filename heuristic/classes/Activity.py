@@ -15,6 +15,7 @@ class Activity:
     _classroom: Classroom
     _teacher: Teacher
     _module: Module
+    _objective: float
 
     def __init__(self,
                  learners: List[Learner],
@@ -27,6 +28,8 @@ class Activity:
         self._classroom = classroom
         self._teacher = teacher
         self._module = module
+
+        self._objective = self._compute_objective()
 
     def __contains__(self, learner: Learner) -> bool:
         return learner in self._learners_set
@@ -69,21 +72,7 @@ class Activity:
         return self._module
 
     def objective(self):
-        # TODO cache this - problem was in split_with(), did not update.
-        problem = Problem()
-        learner_ids = [learner.id for learner in self.learners]
-
-        if self.is_self_study():
-            # In self-study, everyone works on their most-preferred module,
-            # but at the cost of a controlled penalty.
-            modules = problem.most_preferred[learner_ids, 0]
-
-            objective = problem.preferences[learner_ids, modules].sum()
-            objective -= len(self.learners) * problem.penalty
-
-            return objective
-
-        return problem.preferences[learner_ids, self.module.id].sum()
+        return self._objective
 
     def is_feasible(self) -> bool:
         """
@@ -132,6 +121,18 @@ class Activity:
         self.learners.append(learner)
         self._learners_set.add(learner)
 
+        problem = Problem()
+
+        if self.is_self_study():
+            module_id = problem.most_preferred[learner.id, 0]
+
+            objective = problem.preferences[learner.id, module_id]
+            objective -= problem.penalty
+
+            self._objective += objective
+        else:
+            self._objective += problem.preferences[learner.id, self.module.id]
+
     def can_remove_learner(self) -> bool:
         problem = Problem()
         return self.num_learners > problem.min_batch
@@ -139,6 +140,18 @@ class Activity:
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
         self._learners_set.remove(learner)
+
+        problem = Problem()
+
+        if self.is_self_study():
+            module_id = problem.most_preferred[learner.id, 0]
+
+            objective = problem.preferences[learner.id, module_id]
+            objective -= problem.penalty
+
+            self._objective -= objective
+        else:
+            self._objective -= problem.preferences[learner.id, self.module.id]
 
     def remove_learners(self, learners: List[Learner]) -> int:
         """
@@ -184,7 +197,29 @@ class Activity:
         learners = self.learners[-splitter:]
         self._learners = self.learners[:-splitter]
 
-        return Activity(learners, classroom, teacher, self.module)
+        activity = Activity(learners, classroom, teacher, self.module)
+
+        # Since we split the learners, we should update our objective value
+        # by subtracting the difference.
+        self._objective -= activity.objective()
+
+        return activity
+
+    def _compute_objective(self):
+        problem = Problem()
+        learner_ids = [learner.id for learner in self.learners]
+
+        if self.is_self_study():
+            # In self-study, everyone works on their most-preferred module,
+            # but at the cost of a controlled penalty.
+            modules = problem.most_preferred[learner_ids, 0]
+
+            objective = problem.preferences[learner_ids, modules].sum()
+            objective -= len(self.learners) * problem.penalty
+
+            return objective
+
+        return problem.preferences[learner_ids, self.module.id].sum()
 
     def __str__(self):
         return (f"(#{self.num_learners},"

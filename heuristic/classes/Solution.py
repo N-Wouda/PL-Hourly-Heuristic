@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from copy import copy, deepcopy
 from heapq import heappush
 from operator import attrgetter, methodcaller
 from typing import Dict, List, Set, Tuple
@@ -19,9 +20,53 @@ class Solution(State):
     activities: List[Activity]
     unassigned: List[Learner]
 
+    _used_classrooms: Set[Classroom]
+    _used_teachers: Set[Teacher]
+
     def __init__(self, activities: List[Activity]):
         self.activities = activities
         self.unassigned = []
+
+        self._used_classrooms = {activity.classroom for activity in activities}
+        self._used_teachers = {activity.teacher for activity in activities}
+
+    def __deepcopy__(self, memo={}):
+        # Not every part of a solution needs to be deep-copied - for the cached
+        # attributes a shallow copy suffices. For the activities, see also the
+        # motivation in Activity.
+        sol = Solution([])
+        sol.activities = deepcopy(self.activities)
+        sol._used_classrooms = copy(self._used_classrooms)
+        sol._used_teachers = copy(self._used_teachers)
+
+        return sol
+
+    def add_activity(self, activity: Activity):
+        """
+        Adds the passed-in activity to the solution.
+        """
+        self.activities.append(activity)
+
+        self._used_classrooms.add(activity.classroom)
+        self._used_teachers.add(activity.teacher)
+
+    def remove_activity(self, idx: int):
+        """
+        Removes the activity at idx from the solution.
+        """
+        activity = self.activities[idx]
+
+        self._used_classrooms.remove(activity.classroom)
+        self._used_teachers.remove(activity.teacher)
+
+        del self.activities[idx]
+
+    def switch_classrooms(self, from_room: Classroom, to_room: Classroom):
+        """
+        Updates the solution's cache when a classroom switch is performed.
+        """
+        self._used_classrooms.remove(from_room)
+        self._used_classrooms.add(to_room)
 
     def find_classroom_for(self, module: Module) -> Classroom:
         """
@@ -31,10 +76,10 @@ class Solution(State):
         from .Problem import Problem
         problem = Problem()
 
-        available_classrooms = set(problem.classrooms_by_module[module])
-        available_classrooms -= self.used_classrooms()
+        avail_rooms = set(problem.classrooms_by_module[module])
+        avail_rooms -= self.used_classrooms()
 
-        for classroom in available_classrooms:
+        for classroom in avail_rooms:
             if classroom.is_qualified_for(module):
                 return classroom
 
@@ -156,13 +201,10 @@ class Solution(State):
         return grouped
 
     def used_classrooms(self) -> Set[Classroom]:
-        return {activity.classroom for activity in self.activities}
+        return self._used_classrooms
 
     def used_teachers(self) -> Set[Teacher]:
-        return {activity.teacher for activity in self.activities}
-
-    def used_modules(self) -> Set[Module]:
-        return {activity.module for activity in self.activities}
+        return self._used_teachers
 
     @classmethod
     def from_file(cls, location: str) -> Solution:
@@ -186,7 +228,7 @@ class Solution(State):
             module = problem.modules[module]
 
             activity = Activity(learners, classroom, teacher, module)
-            solution.activities.append(activity)
+            solution.add_activity(activity)
 
         return solution
 

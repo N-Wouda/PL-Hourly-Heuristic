@@ -18,6 +18,6 @@ def random_activities(current: Solution, generator: Generator) -> Solution:
         learners = destroyed.activities[idx].learners
 
         destroyed.unassigned.extend(learners)
-        del destroyed.activities[idx]
+        destroyed.remove_activity(idx)
 
     return destroyed

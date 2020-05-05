@@ -44,6 +44,7 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
             # We snoop off any self-study learner that can be assigned to this
             # module as well.
             learners = [learner for learner in activity.learners
+                        if learner.is_eligible_for(module)
                         if learner.prefers_over_self_study(module)]
 
             learners = learners[:max_size - len(to_assign)]

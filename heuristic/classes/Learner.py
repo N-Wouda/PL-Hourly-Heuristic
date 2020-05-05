@@ -10,13 +10,22 @@ class Learner:
     year: int
 
     @lru_cache(None)
+    def is_eligible_for(self, module: Module) -> bool:
+        """
+        Tests if the learner is eligible to take the passed-in module.
+        """
+        from .Problem import Problem
+        problem = Problem()
+
+        return problem.preferences[self.id, module.id] > 0
+
+    @lru_cache(None)
     def prefers_over_self_study(self, module: Module) -> bool:
         """
         Tests if this learner prefers the passed-in module over the
         self-study assignment (when comparing objectives).
         """
         from .Problem import Problem
-
         problem = Problem()
 
         self_study_mod = problem.most_preferred[self.id, 0]

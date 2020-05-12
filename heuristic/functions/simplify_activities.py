@@ -64,7 +64,7 @@ def _simplify(solution: Solution, activities: List[Activity], module: Module):
     indices = [idx for idx, activity in enumerate(solution.activities)
                if activity.module is module]
 
-    for idx in reversed(indices):
+    for idx in reversed(indices):  # reversed so the indices don't shift
         solution.remove_activity(idx)
 
     learners = [learner
@@ -73,12 +73,14 @@ def _simplify(solution: Solution, activities: List[Activity], module: Module):
 
     activities = []
 
+    # First fill with the minimal required number of learners, per room.
     for room in rooms:
         min_learners = learners[:problem.min_batch]
         learners = learners[problem.min_batch:]
 
         activities.append(Activity(min_learners, room, teachers.pop(), module))
 
+    # Then flood-fill with the remaining learners.
     for activity in activities:
         while len(learners) != 0 and activity.can_insert_learner():
             activity.insert_learner(learners.pop())

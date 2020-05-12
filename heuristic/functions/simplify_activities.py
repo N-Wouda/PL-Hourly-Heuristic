@@ -53,10 +53,11 @@ def _simplify(solution: Solution, activities: List[Activity], module: Module):
 
     assert solver.Solve() == Solver.OPTIMAL, "Solution is not optimal!"
 
-    rooms = [classroom for variable, classroom in zip(variables, classrooms)
-             if variable.solution_value()]
+    used_rooms = [classroom
+                  for variable, classroom in zip(variables, classrooms)
+                  if variable.solution_value()]
 
-    if len(rooms) == len(activities):
+    if len(used_rooms) == len(activities):
         return  # no improvement.
 
     teachers = {activity.teacher for activity in activities}
@@ -74,7 +75,7 @@ def _simplify(solution: Solution, activities: List[Activity], module: Module):
     activities = []
 
     # First fill with the minimal required number of learners, per room.
-    for room in rooms:
+    for room in used_rooms:
         min_learners = learners[:problem.min_batch]
         learners = learners[problem.min_batch:]
 

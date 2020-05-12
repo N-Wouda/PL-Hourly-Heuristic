@@ -3,10 +3,8 @@ from operator import attrgetter, methodcaller
 from numpy.random import Generator
 
 from heuristic.classes import Activity, Problem, Solution
-from heuristic.functions import simplify_activities
 
 
-@simplify_activities
 def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     """
     Greedily inserts learners into the best, feasible activities. If no

@@ -136,7 +136,12 @@ class Solution(State):
         avail_teachers = set(problem.teachers) - self.used_teachers()
         avail_teachers.remove(teacher)
 
-        capacity = 0
+        # Excess capacity in current self-study assignments; these can be
+        # re-used before new activities are required.
+        capacity = sum(activity.classroom.capacity - activity.num_learners
+                       for activity in self.activities
+                       if activity.is_self_study())
+
         rooms_needed = 0
 
         for classroom in avail_rooms:
@@ -146,7 +151,7 @@ class Solution(State):
             if capacity >= len(self.unassigned):
                 return rooms_needed <= len(avail_teachers)
 
-        return False  # these is insufficient capacity
+        return False  # there is insufficient capacity
 
     def objective(self) -> float:
         # The ALNS algorithm solves a minimisation objective by default, but

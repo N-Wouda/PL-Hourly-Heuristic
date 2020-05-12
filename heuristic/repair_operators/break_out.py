@@ -23,6 +23,8 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
     while len(histogram) != 0:
         _, module, to_assign = heappop(histogram)
 
+        # TODO look if the learners can fit into existing activities?
+
         try:
             classroom = destroyed.find_classroom_for(module)
             teacher = destroyed.find_teacher_for(module)

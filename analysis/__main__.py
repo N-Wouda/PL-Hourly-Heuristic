@@ -20,7 +20,9 @@ def parse_args():
                         help="Solution method to analyse."
                              " One of {ilp, heuristic}.")
 
-    parser.add_argument("experiment", type=int, help="experiment number")
+    parser.add_argument("experiment", type=int, help="Experiment number.")
+    parser.add_argument("-f", "--force", action="store_true",
+                        help="Force computation; do not use cache.")
 
     return parser, parser.parse_args()
 
@@ -31,7 +33,7 @@ def main():
 
     cache = Path(f"analysis/cache/{args.experiment}-{args.method}.csv")
 
-    if cache.exists():
+    if cache.exists() and not args.force:
         print(f"{parser.prog}: re-using {cache}.")
         data = pd.read_csv(cache)
     else:

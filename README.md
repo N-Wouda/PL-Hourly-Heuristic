@@ -4,24 +4,22 @@ This repository hosts all code used in the development of an hourly
 scheduling heuristic for personalised learning. The repository exposes
 three executable packages: one for the heuristic, the integer linear
 model, and the validator respectively. The heuristic quickly solves a
-problem using a sub-optimal method (seconds). The ILP takes considerably
+problem using a sub-optimal method (minutes). The ILP takes considerably
 longer (hours to days), but does guarantee optimality. The validator
 tool verifies a given solution satisfies the imposed constraints.
 
 > **Note** that this repository assumes an `/experiments` directory is
 set-up, and populated with the experiment data. This data is of
 considerable size, and as such not part of the repository itself. It is
-available upon request. TODO
+available upon request. TODO maybe link?
 
 ## Article and analysis
 
-The `/analysis` directory hosts some Jupyter notebooks that contain
-all results presented in the paper. The paper itself is available in
-pre-print in the repository, as `article.pdf`. TODO
+TODO
 
 ## How to use
 
-Ensure you have an environment with at least Python 3.6. To run the validator
+Ensure you have an environment with at least Python 3.7. To run the validator
 and/or heuristic, you need to install the required packages via `pipenv`.
 
 For the ILP formulation, more is needed: you need to ensure a valid
@@ -37,7 +35,7 @@ operators to achieve a reasonable solution in little time. No
 optimality guarantees are made. Usage,
 
 ```
-python -m heuristic 1 5
+pipenv run python -m heuristic 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -53,7 +51,7 @@ to ensure your Python installation is configured with the CPLEX
 bindings for Python. Usage,
 
 ```
-python -m ilp 1 5
+pipenv run python -m ilp 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -66,7 +64,7 @@ instance arguments, the validator confirms the ILP and heuristic
 solutions (where available) satisfy the problem constraints. Usage,
 
 ```
-python -m validator 1 5
+pipenv run python -m validator 1 5
 ```
 
 For experiment `1`, instance `5`. An exit code of `0` indicates the ILP and

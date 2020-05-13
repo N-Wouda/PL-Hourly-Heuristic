@@ -160,7 +160,7 @@ class Solution(State):
         return -sum(map(methodcaller("objective"), self.activities))
 
     def preferences_by_module(self) \
-            -> List[Tuple[float, Module], List[Learner]]:
+            -> List[Tuple[float, Module, List[Learner]]]:
         """
         Computes the unassigned learners preferences by module. This list
         consists only of modules and learners for which the minimum batch size

@@ -4,7 +4,7 @@ import numpy.random as rnd
 from alns import ALNS
 
 from heuristic.classes import Problem
-from heuristic.constants import CRITERION, DECAY, ITERATIONS, WEIGHTS
+from heuristic.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
 from heuristic.functions import initial_solution
 from .destroy_operators import DESTROY_OPERATORS
 from .local_search import local_search
@@ -31,7 +31,8 @@ def main():
     alns.on_best(local_search)
 
     init = initial_solution()
-    result = alns.iterate(init, WEIGHTS, DECAY, CRITERION, ITERATIONS)
+    criterion = get_criterion(init.objective())
+    result = alns.iterate(init, WEIGHTS, DECAY, criterion, ITERATIONS)
 
     location = f"experiments/{experiment}/{instance}-heuristic.json"
     result.best_state.to_file(location)  # noqa

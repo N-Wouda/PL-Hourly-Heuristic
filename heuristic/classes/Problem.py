@@ -36,6 +36,11 @@ class Problem(metaclass=Singleton):
 
     @property
     @lru_cache(1)
+    def instance(self) -> int:
+        return int(self._data['instance'])
+
+    @property
+    @lru_cache(1)
     def num_learners(self) -> int:
         return len(self._data['learners'])
 

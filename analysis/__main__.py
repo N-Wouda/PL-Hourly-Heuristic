@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from heuristic.classes import Problem, Solution
+from .measures import MEASURES
 
 pd.set_option('display.max_rows', None)  # display all rows.
 pd.set_option('display.float_format', '{:.2f}'.format)  # two decimals.
@@ -47,10 +48,10 @@ def main():
                 continue
 
             solution = Solution.from_file(location)
-            objectives.append((instance, -solution.objective()))
+            objectives.append({name: func(solution)
+                               for name, func in MEASURES.items()})
 
-        data = pd.DataFrame.from_records(objectives,
-                                         columns=("instance", "objective"))
+        data = pd.DataFrame.from_records(objectives, columns=MEASURES.keys())
 
     data.set_index("instance", inplace=True)
 

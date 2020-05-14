@@ -24,21 +24,23 @@ def worst_learners(current: Solution, generator: Generator):
         for learner in activity.learners:
             assigned_activities[learner.id] = activity
 
-            best_module_id = problem.most_preferred[learner.id, 0]
-            curr_module_id = activity.module.id
+        learner_ids = activity.learner_ids()
 
-            # The cost is the cost of the best possible assignment for this
-            # learner, minus the cost of the current assignment (including
-            # self-study penalty, if applicable). The larger the cost, the more
-            # suboptimal the current assignment.
-            costs[learner.id] = problem.preferences[learner.id, best_module_id]
-            costs[learner.id] -= problem.preferences[learner.id, curr_module_id]
+        # The cost is the cost of the best possible assignment for this
+        # learner, minus the cost of the current assignment (including
+        # self-study penalty, if applicable). The larger the cost, the more
+        # suboptimal the current assignment.
+        most_preferred = problem.most_preferred[learner_ids, 0]
+        curr_module_id = activity.module.id
 
-            if activity.is_self_study():
-                # Per the paper:
-                #     pref(best) - (pref(curr) - <maybe penalty>)
-                #   = pref(best) - pref(curr) + <maybe penalty>.
-                costs[learner.id] += problem.penalty
+        costs[learner_ids] = problem.preferences[learner_ids, most_preferred]
+        costs[learner_ids] -= problem.preferences[learner_ids, curr_module_id]
+
+        if activity.is_self_study():
+            # Per the paper:
+            #     pref(best) - (pref(curr) - <maybe penalty>)
+            #   = pref(best) - pref(curr) + <maybe penalty>.
+            costs[learner_ids] += problem.penalty
 
     learners = np.argsort(costs)
     learners = learners[-random_selection(generator)]

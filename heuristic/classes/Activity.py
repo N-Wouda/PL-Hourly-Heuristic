@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import List
+from typing import List, Optional
+
+import numpy as np
 
 from .Classroom import Classroom
 from .Learner import Learner
@@ -16,12 +18,14 @@ class Activity:
     _teacher: Teacher
     _module: Module
     _objective: float
+    _excess_capacity: int  # num learners that can be added to this activity
 
     def __init__(self,
                  learners: List[Learner],
                  classroom: Classroom,
                  teacher: Teacher,
-                 module: Module):
+                 module: Module,
+                 objective: Optional[float] = None):
         self._learners = learners
         self._learners_set = set(learners)
 
@@ -29,7 +33,19 @@ class Activity:
         self._teacher = teacher
         self._module = module
 
-        self._objective = self._compute_objective()
+        if objective is None:
+            self._objective = self._compute_objective()
+        else:
+            self._objective = objective
+
+        problem = Problem()
+
+        if self.is_instruction():
+            self._excess_capacity = min(classroom.capacity, problem.max_batch)
+        else:
+            self._excess_capacity = classroom.capacity
+
+        self._excess_capacity -= self.num_learners
 
     def __contains__(self, learner: Learner) -> bool:
         return learner in self._learners_set
@@ -41,7 +57,8 @@ class Activity:
         return Activity(copy(self.learners),
                         self.classroom,
                         self.teacher,
-                        self.module)
+                        self.module,
+                        self._objective)
 
     @property
     def num_learners(self) -> int:
@@ -71,37 +88,11 @@ class Activity:
     def module(self) -> Module:
         return self._module
 
+    def learner_ids(self) -> np.ndarray:
+        return np.array([learner.id for learner in self.learners])
+
     def objective(self):
         return self._objective
-
-    def is_feasible(self) -> bool:
-        """
-        Tests if this activity is feasible. There are several constraints that
-        must be satisfied, and this method tests if that is the case.
-        """
-        problem = Problem()
-
-        if self.num_learners < problem.min_batch:
-            return False
-
-        if self.is_instruction():
-            if self.num_learners > problem.max_batch:
-                return False
-
-            if not self.teacher.is_qualified_for(self.module):
-                return False
-
-        if not self.classroom.is_qualified_for(self.module):
-            return False
-
-        if self.num_learners > self.classroom.capacity:
-            return False
-
-        if not all(problem.preferences[learner.id, self.module.id] > 0
-                   for learner in self.learners):
-            return False
-
-        return True
 
     def is_self_study(self) -> bool:
         return self.module.is_self_study()
@@ -110,12 +101,7 @@ class Activity:
         return not self.is_self_study()
 
     def can_insert_learner(self) -> bool:
-        if self.is_self_study():
-            return self.num_learners < self.classroom.capacity
-
-        problem = Problem()
-        return self.num_learners < min(problem.max_batch,
-                                       self.classroom.capacity)
+        return self._excess_capacity > 0
 
     def insert_learner(self, learner: Learner):
         self.learners.append(learner)
@@ -132,6 +118,8 @@ class Activity:
             self._objective += objective
         else:
             self._objective += problem.preferences[learner.id, self.module.id]
+
+        self._excess_capacity -= 1
 
     def can_remove_learner(self) -> bool:
         problem = Problem()
@@ -153,6 +141,8 @@ class Activity:
         else:
             self._objective -= problem.preferences[learner.id, self.module.id]
 
+        self._excess_capacity += 1
+
     def remove_learners(self, learners: List[Learner]) -> int:
         """
         Attempts to remove the learners in the passed-in list. Returns the
@@ -171,9 +161,7 @@ class Activity:
         Tests if this activity can be split, that is, there are sufficient
         learners to break the activity up into two activities.
         """
-        problem = Problem()
-
-        return self.num_learners >= 2 * problem.min_batch
+        return self.num_learners >= 2 * Problem().min_batch
 
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """
@@ -213,7 +201,7 @@ class Activity:
 
     def _compute_objective(self):
         problem = Problem()
-        learner_ids = [learner.id for learner in self.learners]
+        learner_ids = self.learner_ids()
 
         if self.is_self_study():
             # In self-study, everyone works on their most-preferred module,

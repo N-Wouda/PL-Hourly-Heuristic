@@ -23,7 +23,6 @@ def initial_solution() -> Solution:
         assert classroom is not None
         assert teacher is not None
 
-        # TODO this might not respect the min batch constraint.
         learners = learners_to_assign[-min(len(learners_to_assign),
                                            classroom.capacity):]
 
@@ -38,7 +37,5 @@ def initial_solution() -> Solution:
 
         if len(learners_to_assign) == 0:
             break
-
-    assert all(activity.is_feasible() for activity in solution.activities)
 
     return solution

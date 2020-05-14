@@ -5,7 +5,7 @@ from alns.criteria import SimulatedAnnealing
 SELF_STUDY_MODULE_ID = 576
 
 WEIGHTS = [40, 10, 1, 1]
-ITERATIONS = 10000
+ITERATIONS = 15000
 DECAY = 0.95
 DEGREE_OF_DESTRUCTION = 0.2
 

@@ -65,7 +65,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
 
                 activity = min(iterable, key=methodcaller("objective"))
 
-                activities[problem.self_study_module].insert(0, activity)
+                activities[problem.self_study_module].append(activity)
                 activities[activity.module].remove(activity)
 
                 activity.switch_to_self_study()
@@ -88,11 +88,11 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                     teacher = unused_teachers.pop()
                     classroom = unused_classrooms.pop()
 
-                    new = activity.split_with(classroom, teacher)
+                    new_activity = activity.split_with(classroom, teacher)
                     activity.insert_learner(learner)
 
-                    destroyed.add_activity(new)
-                    activities[problem.self_study_module].insert(0, new)
+                    destroyed.add_activity(new_activity)
+                    activities[problem.self_study_module].append(new_activity)
                     break
             else:
                 # It could be that there is no self-study activity. In that
@@ -119,9 +119,13 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
 
 
 def _insert(learner, activities):
-    for activity in activities:
+    for idx, activity in enumerate(activities):
         if activity.can_insert_learner():
             activity.insert_learner(learner)
+
+            # Ensures the next traversal finds an activity that we could just
+            # insert into (so probably can for several more activities).
+            activities[0], activities[idx] = activity, activities[0]
             return True
 
     return False

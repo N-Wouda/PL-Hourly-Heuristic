@@ -56,7 +56,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                 # This implies we need to remove one or more instruction
                 # activities. Let's do the naive and greedy thing, and switch
                 # the instruction activity with lowest objective value into a
-                # self-study assignment. Should be rare.
+                # self-study assignment.
                 iterable = [activity
                             for activity in destroyed.activities
                             if activity.is_instruction()
@@ -100,17 +100,16 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                 classroom = unused_classrooms.pop()
                 teacher = unused_teachers.pop()
 
-                learners = destroyed.unassigned[-problem.min_batch:]
-                destroyed.unassigned = destroyed.unassigned[:-problem.min_batch]
+                # TODO what if there are insufficient learners left?
+                learners = [destroyed.unassigned.pop()
+                            for _ in range(problem.min_batch)]
 
                 activity = Activity(learners, classroom, teacher,
                                     problem.self_study_module)
 
-                if learner not in activity:
-                    # We already popped this learner from the unassigned list,
-                    # so we should explicitly make sure they end up in the
-                    # activity.
-                    activity.insert_learner(learner)
+                # Since we popped this learner from the unassigned list before,
+                # it is not yet in the new activity.
+                activity.insert_learner(learner)
 
                 destroyed.add_activity(activity)
                 activities[problem.self_study_module].append(activity)

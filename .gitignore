@@ -68,4 +68,7 @@ venv/
 
 .ipynb_checkpoints/
 _analysis/
+
+# Data files
 analysis/cache/*.csv
+*.xlsx

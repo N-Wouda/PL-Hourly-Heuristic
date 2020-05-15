@@ -25,6 +25,6 @@ def random_learners(current: Solution, generator: Generator) -> Solution:
             learner = activity.learners[learner_idx]
 
             activity.remove_learner(learner)
-            destroyed.unassigned.append(learner)
+            destroyed.unassigned.add(learner)
 
     return destroyed

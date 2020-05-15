@@ -7,7 +7,7 @@ from heuristic.classes import Problem
 from heuristic.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
 from heuristic.functions import initial_solution
 from .destroy_operators import DESTROY_OPERATORS
-from .local_search import local_search
+from .local_search import reinsert_learner
 from .repair_operators import REPAIR_OPERATORS
 
 
@@ -28,7 +28,7 @@ def main():
     for operator in REPAIR_OPERATORS:
         alns.add_repair_operator(operator)
 
-    alns.on_best(local_search)
+    alns.on_best(reinsert_learner)
 
     init = initial_solution()
     criterion = get_criterion(init.objective())

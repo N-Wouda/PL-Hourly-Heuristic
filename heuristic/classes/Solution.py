@@ -18,14 +18,14 @@ from .Teacher import Teacher
 
 class Solution(State):
     activities: List[Activity]
-    unassigned: List[Learner]
+    unassigned: Set[Learner]
 
     _used_classrooms: Set[Classroom]
     _used_teachers: Set[Teacher]
 
     def __init__(self, activities: List[Activity]):
         self.activities = activities
-        self.unassigned = []
+        self.unassigned = set()
 
         self._used_classrooms = {activity.classroom for activity in activities}
         self._used_teachers = {activity.teacher for activity in activities}
@@ -112,46 +112,6 @@ class Solution(State):
             raise LookupError(f"No qualified, available teachers for {module}.")
 
         return qualified_teachers[0][-1]
-
-    def leaves_sufficient_for_self_study(self,
-                                         classroom: Classroom,
-                                         teacher: Teacher) -> bool:
-        """
-        Determines if using the passed-in classroom and teacher still leaves
-        sufficient unused classrooms and teachers to schedule all unassigned
-        learners into self-study. This ensures there always remains a feasible
-        repair action.
-        """
-        from .Problem import Problem
-        problem = Problem()
-
-        avail_rooms = set(problem.classrooms) - self.used_classrooms()
-        avail_rooms.remove(classroom)
-
-        avail_rooms = filter(methodcaller("is_self_study_allowed"), avail_rooms)
-        avail_rooms = sorted(avail_rooms,
-                             key=attrgetter("capacity"),
-                             reverse=True)
-
-        avail_teachers = set(problem.teachers) - self.used_teachers()
-        avail_teachers.remove(teacher)
-
-        # Excess capacity in current self-study assignments; these can be
-        # re-used before new activities are required.
-        capacity = sum(activity.classroom.capacity - activity.num_learners
-                       for activity in self.activities
-                       if activity.is_self_study())
-
-        rooms_needed = 0
-
-        for classroom in avail_rooms:
-            capacity += classroom.capacity
-            rooms_needed += 1
-
-            if capacity >= len(self.unassigned):
-                return rooms_needed <= len(avail_teachers)
-
-        return False  # there is insufficient capacity
 
     def objective(self) -> float:
         # The ALNS algorithm solves a minimisation objective by default, but

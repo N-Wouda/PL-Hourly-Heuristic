@@ -23,15 +23,10 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
     while len(histogram) != 0:
         _, module, to_assign = heappop(histogram)
 
-        # TODO look if the learners can fit into existing activities?
-
         try:
             classroom = destroyed.find_classroom_for(module)
             teacher = destroyed.find_teacher_for(module)
         except LookupError:
-            continue
-
-        if not destroyed.leaves_sufficient_for_self_study(classroom, teacher):
             continue
 
         max_size = min(classroom.capacity, problem.max_batch)
@@ -43,8 +38,8 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
             if len(to_assign) >= max_size:
                 break
 
-            # We snoop off any self-study learner that can be assigned to this
-            # module as well.
+            # We snoop off any self-study learners that can be assigned to
+            # this module as well.
             learners = [learner for learner in activity.learners
                         if learner.is_qualified_for(module)
                         if learner.prefers_over_self_study(module)]
@@ -56,8 +51,7 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
         activity = Activity(to_assign[:max_size], classroom, teacher, module)
 
         destroyed.add_activity(activity)
-        destroyed.unassigned = [learner for learner in destroyed.unassigned
-                                if learner not in activity]
+        destroyed.unassigned -= set(activity.learners)
 
         return break_out(destroyed, generator)
 

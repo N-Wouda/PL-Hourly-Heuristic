@@ -30,16 +30,15 @@ def worst_learners(current: Solution, generator: Generator):
         # learner, minus the cost of the current assignment (including
         # self-study penalty, if applicable). The larger the cost, the more
         # suboptimal the current assignment.
-        most_preferred = problem.most_preferred[learner_ids, 0]
+        best_module_id = problem.most_preferred[learner_ids, 0]
         curr_module_id = activity.module.id
 
-        costs[learner_ids] = problem.preferences[learner_ids, most_preferred]
+        costs[learner_ids] = problem.preferences[learner_ids, best_module_id]
         costs[learner_ids] -= problem.preferences[learner_ids, curr_module_id]
 
         if activity.is_self_study():
-            # Per the paper:
-            #     pref(best) - (pref(curr) - <maybe penalty>)
-            #   = pref(best) - pref(curr) + <maybe penalty>.
+            # Per the paper:   pref(best) - (pref(curr) - <maybe penalty>)
+            #                = pref(best) - pref(curr) + <maybe penalty>.
             costs[learner_ids] += problem.penalty
 
     learners = np.argsort(costs)
@@ -51,7 +50,7 @@ def worst_learners(current: Solution, generator: Generator):
         if activity.can_remove_learner():
             learner = problem.learners[learner_id]
 
-            destroyed.unassigned.append(learner)
+            destroyed.unassigned.add(learner)
             activity.remove_learner(learner)
 
         if len(destroyed.unassigned) == learners_to_remove():

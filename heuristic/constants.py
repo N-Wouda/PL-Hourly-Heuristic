@@ -4,10 +4,10 @@ from alns.criteria import SimulatedAnnealing
 # 12 * 48 = 576 regular modules, so the final index/ID for self-study is 576.
 SELF_STUDY_MODULE_ID = 576
 
-WEIGHTS = [40, 10, 1, 1]
+WEIGHTS = [50, 10, 1, 1]
 ITERATIONS = 10000
-DECAY = 0.95
-DEGREE_OF_DESTRUCTION = 0.2
+DECAY = 0.8
+DEGREE_OF_DESTRUCTION = 0.35
 
 MAX_WORSE = 0.05
 ACCEPTANCE_PROBABILITY = 0.5
@@ -21,6 +21,6 @@ def get_criterion(init_objective: float) -> SimulatedAnnealing:
     the set number of iterations.
     """
     start_temp = MAX_WORSE * init_objective / np.log(ACCEPTANCE_PROBABILITY)
-    step = (1 / (start_temp - 1)) ** (1 / ITERATIONS)
+    step = (1 / start_temp) ** (1 / ITERATIONS)
 
     return SimulatedAnnealing(start_temp, 1, step, method="exponential")

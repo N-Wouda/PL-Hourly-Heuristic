@@ -7,7 +7,7 @@ from validator.rules import RULES
 
 
 def main():
-    experiment = int(sys.argv[1])
+    experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
     instance = int(sys.argv[2])
 
     Problem.from_instance(experiment, instance)

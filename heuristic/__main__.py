@@ -12,15 +12,20 @@ from .repair_operators import REPAIR_OPERATORS
 
 
 def main():
-    experiment = int(sys.argv[1])
+    experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
     instance = int(sys.argv[2])
 
     Problem.from_instance(experiment, instance)
 
-    # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for inst.
-    # 100, there will never be overlap between random number streams across
-    # experiments.
-    alns = ALNS(rnd.default_rng(100 * experiment + instance))  # noqa
+    if experiment == "tuning":
+        generator = rnd.default_rng(instance)
+    else:
+        # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for
+        # inst. 100, there will never be overlap between random number streams
+        # across experiments.
+        generator = rnd.default_rng(100 * experiment + instance)
+
+    alns = ALNS(generator)  # noqa
 
     for operator in DESTROY_OPERATORS:
         alns.add_destroy_operator(operator)
@@ -33,6 +38,12 @@ def main():
     init = initial_solution()
     criterion = get_criterion(init.objective())
     result = alns.iterate(init, WEIGHTS, DECAY, criterion, ITERATIONS)
+
+    import matplotlib.pyplot as plt
+
+    print(result.best_state.objective())
+    result.plot_objectives()
+    plt.show()
 
     location = f"experiments/{experiment}/{instance}-heuristic.json"
     result.best_state.to_file(location)  # noqa

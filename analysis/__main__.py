@@ -16,11 +16,10 @@ def parse_args():
                                      description="Analyse experiment results.")
 
     parser.add_argument("method",
-                        type=str,
                         help="Solution method to analyse."
                              " One of {ilp, heuristic}.")
 
-    parser.add_argument("experiment", type=int, help="Experiment number.")
+    parser.add_argument("experiment", help="Experiment number.")
     parser.add_argument("-f", "--force", action="store_true",
                         help="Force computation; do not use cache.")
 

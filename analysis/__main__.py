@@ -39,8 +39,6 @@ def main():
         objectives = []
 
         for instance in instances:  # gather stats for each instance in exp.
-            Problem.from_instance(args.experiment, instance)
-
             location = Path(f"experiments/{args.experiment}/"
                             f"{instance}-{args.method}.json")
 
@@ -48,7 +46,9 @@ def main():
                 print(f"{parser.prog}: {location} does not exist; skipping.")
                 continue
 
+            Problem.from_instance(args.experiment, instance)
             solution = Solution.from_file(location)
+
             objectives.append({name: func(solution)
                                for name, func in MEASURES.items()})
 

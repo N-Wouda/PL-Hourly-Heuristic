@@ -190,6 +190,7 @@ class Activity:
         # Since we split the learners, we should update our objective value
         # by subtracting the difference.
         self._objective -= activity.objective()
+        self._excess_capacity += len(learners)
 
         return activity
 

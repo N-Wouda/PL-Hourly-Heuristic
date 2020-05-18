@@ -61,7 +61,9 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                             for activity in destroyed.activities
                             if activity.is_instruction()
                             if activity.classroom.is_self_study_allowed()
-                            if activity.can_insert_learner()]
+                            # After switching to self-study, the max_batch
+                            # constraint is longer applicable - only capacity.
+                            if activity.num_learners < activity.classroom.capacity]
 
                 activity = min(iterable, key=methodcaller("objective"))
 

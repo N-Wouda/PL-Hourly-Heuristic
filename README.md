@@ -2,20 +2,38 @@
 
 This repository hosts all code used in the development of an hourly
 scheduling heuristic for personalised learning. The repository exposes
-three executable packages: one for the heuristic, the integer linear
-model, and the validator respectively. The heuristic quickly solves a
-problem using a sub-optimal method (minutes). The ILP takes considerably
-longer (hours to days), but does guarantee optimality. The validator
-tool verifies a given solution satisfies the imposed constraints.
+several executable packages: one for the heuristic, the integer linear program
+model, the validator, and an analysis tools for the heuristic and ILP results.
+The heuristic quickly solves a problem using a sub-optimal method (minutes). 
+The ILP takes considerably longer (hours to days), but does guarantee 
+optimality. The validator tool verifies a given solution satisfies the imposed 
+constraints.
 
 > **Note** that this repository assumes an `/experiments` directory is
-set-up, and populated with the experiment data. This data is of
-considerable size, and as such not part of the repository itself. It is
-available upon request. TODO maybe link?
+set-up, and populated with the experimental data. The data is of considerable
+size, and as such not part of the repository itself. The data may be downloaded
+from [Google Drive](https://drive.google.com/file/d/1arilS4hHqVuCN0C_pfNXTuXj1SW9u_XW/view?usp=sharing).
+This archive also contains the heuristic and ILP results analysed in the paper.
 
 ## Article and analysis
 
-TODO
+TODO preprint?
+
+The analysis tool is available in `/analysis`. It can be used to analyse results
+from an ILP or heuristic run on an entire experiment. Usage,
+
+```
+pipenv run python -m analysis heuristic 1
+```
+
+Which analyses the heuristic output in experiment `1`. If an output does not
+exist, it is skipped - you are informed of this. After analysing all files in an
+experiment, a cached file is created in `analysis/cache` to speed-up subsequent
+analyses - this can be overridden using the `--force` flag. Use the `--help`
+flag to see all options. 
+
+A notebook analysing the cached files is available in the repository root as
+`analysis.ipynb`. This contains most results described in the paper.
 
 ## How to use
 
@@ -29,7 +47,7 @@ by IBM, so this cannot easily be done via `pip`.
 
 ## Heuristic
 
-Available in `/heuristic`. The heuristic is inspired by the adaptive
+Available in `/heuristic`. The heuristic is based on the adaptive
 large neighbourhood search (ALNS) metaheuristic, and performs several
 operators to achieve a reasonable solution in little time. No
 optimality guarantees are made. Usage,

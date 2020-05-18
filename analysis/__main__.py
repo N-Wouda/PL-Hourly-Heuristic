@@ -26,9 +26,28 @@ def parse_args():
     return parser, parser.parse_args()
 
 
+def compute(parser, args):
+    measures = []
+
+    for instance in np.arange(1, 101):
+        location = Path(f"experiments/{args.experiment}/"
+                        f"{instance}-{args.method}.json")
+
+        if not location.exists():
+            print(f"{parser.prog}: {location} does not exist; skipping.")
+            continue
+
+        Problem.from_instance(args.experiment, instance)
+        solution = Solution.from_file(location)
+
+        measures.append({name: func(solution)
+                         for name, func in MEASURES.items()})
+
+    return pd.DataFrame.from_records(measures, columns=MEASURES.keys())
+
+
 def main():
     parser, args = parse_args()
-    instances = np.arange(1, 101)
 
     cache = Path(f"analysis/cache/{args.experiment}-{args.method}.csv")
 
@@ -36,23 +55,7 @@ def main():
         print(f"{parser.prog}: re-using {cache}.")
         data = pd.read_csv(cache)
     else:
-        objectives = []
-
-        for instance in instances:  # gather stats for each instance in exp.
-            location = Path(f"experiments/{args.experiment}/"
-                            f"{instance}-{args.method}.json")
-
-            if not location.exists():
-                print(f"{parser.prog}: {location} does not exist; skipping.")
-                continue
-
-            Problem.from_instance(args.experiment, instance)
-            solution = Solution.from_file(location)
-
-            objectives.append({name: func(solution)
-                               for name, func in MEASURES.items()})
-
-        data = pd.DataFrame.from_records(objectives, columns=MEASURES.keys())
+        data = compute(parser, args)
 
     data.set_index("instance", inplace=True)
 

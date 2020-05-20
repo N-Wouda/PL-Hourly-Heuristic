@@ -39,12 +39,6 @@ def main():
     criterion = get_criterion(init.objective())
     result = alns.iterate(init, WEIGHTS, DECAY, criterion, ITERATIONS)
 
-    import matplotlib.pyplot as plt
-
-    print(result.best_state.objective())
-    result.plot_objectives()
-    plt.show()
-
     location = f"experiments/{experiment}/{instance}-heuristic.json"
     result.best_state.to_file(location)  # noqa
 

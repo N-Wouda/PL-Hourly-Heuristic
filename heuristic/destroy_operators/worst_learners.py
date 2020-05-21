@@ -53,7 +53,4 @@ def worst_learners(current: Solution, generator: Generator):
             destroyed.unassigned.add(learner)
             activity.remove_learner(learner)
 
-        if len(destroyed.unassigned) == learners_to_remove():
-            break
-
     return destroyed

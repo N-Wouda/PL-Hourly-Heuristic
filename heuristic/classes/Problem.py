@@ -21,7 +21,7 @@ class Problem(metaclass=Singleton):
     @classmethod
     def from_instance(cls, experiment: int, instance: int) -> Problem:
         """
-        Builds a Data object for the experiment data file associated with the
+        Builds a Problem object for the experiment data file associated with the
         given experiment and instance.
         """
         cls.clear()

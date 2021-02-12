@@ -72,3 +72,6 @@ _analysis/
 # Data files
 analysis/cache/*.csv
 *.xlsx
+
+# Analysis output files
+out/

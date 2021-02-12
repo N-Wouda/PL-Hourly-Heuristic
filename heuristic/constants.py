@@ -1,7 +1,8 @@
 import numpy as np
 from alns.criteria import SimulatedAnnealing
 
-# 12 * 48 = 576 regular modules, so the final index/ID for self-study is 576.
+# 12 (# courses) * 48 (# modules per course) = 576 regular modules, so the final
+# index/ID for self-study is 576.
 SELF_STUDY_MODULE_ID = 576
 
 WEIGHTS = [50, 10, 1, 1]

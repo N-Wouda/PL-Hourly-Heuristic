@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import Generator
 
 from heuristic.classes import Problem, Solution
-from heuristic.functions import learners_to_remove, random_selection
+from heuristic.functions import random_selection
 
 
 def worst_learners(current: Solution, generator: Generator):

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy, deepcopy
 from heapq import heappush
-from operator import attrgetter, methodcaller
+from operator import methodcaller
 from typing import Dict, List, Set, Tuple
 
 import simplejson as json

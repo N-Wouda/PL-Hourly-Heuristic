@@ -1,4 +1,4 @@
-import sys
+import argparse
 
 import numpy.random as rnd
 from alns import ALNS
@@ -9,7 +9,6 @@ from heuristic.functions import initial_solution
 from .destroy_operators import DESTROY_OPERATORS
 from .local_search import reinsert_learner
 from .repair_operators import REPAIR_OPERATORS
-import argparse
 
 
 def parse_args():

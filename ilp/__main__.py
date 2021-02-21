@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 import simplejson as json
@@ -6,15 +7,27 @@ from heuristic.classes import Problem
 from .ilp import ilp
 
 
-def main():
-    experiment = int(sys.argv[1])
-    instance = int(sys.argv[2])
+def parse_args():
+    parser = argparse.ArgumentParser(prog="heuristic")
 
-    Problem.from_instance(experiment, instance)
+    parser.add_argument("experiment", type=str)
+    parser.add_argument("instance", type=int)
+
+    args = parser.parse_args()
+    args.experiment = "tuning" if args.experiment == "tuning" else int(args.experiment)
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    Problem.from_instance(args.experiment, args.instance)
 
     result = ilp()
+    res_loc = f"experiments/{args.experiment}/{args.instance}-ilp.json"
 
-    with open(f"experiments/{experiment}/{instance}-ilp.json", "w") as file:
+    with open(res_loc, "w") as file:
         json.dump(result, file)
 
 

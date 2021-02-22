@@ -38,10 +38,9 @@ def compute(parser, args):
             continue
 
         Problem.from_instance(args.experiment, instance)
-        solution = Solution.from_file(location)
+        sol = Solution.from_file(location)
 
-        measures.append({name: func(solution)
-                         for name, func in MEASURES.items()})
+        measures.append({name: fn(sol) for name, fn in MEASURES.items()})
 
     return pd.DataFrame.from_records(measures, columns=MEASURES.keys())
 

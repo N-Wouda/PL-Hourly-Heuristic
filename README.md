@@ -12,12 +12,10 @@ constraints.
 > **Note** that this repository assumes an `/experiments` directory is
 set-up, and populated with the experimental data. The data is of considerable
 size, and as such not part of the repository itself. The data may be downloaded
-from [Google Drive](https://drive.google.com/file/d/1arilS4hHqVuCN0C_pfNXTuXj1SW9u_XW/view?usp=sharing).
-This archive also contains the heuristic and ILP results analysed in the paper.
+from [the data repository](https://doi.org/10.34894/E2L6WC).
+This archive also contains a static version of the code hosted here.
 
-## Article and analysis
-
-TODO preprint?
+## Analysis
 
 The analysis tool is available in `/analysis`. It can be used to analyse results
 from an ILP or heuristic run on an entire experiment. Usage,

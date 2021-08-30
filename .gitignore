@@ -61,7 +61,9 @@ target/
 .idea/
 
 # Data
-experiments/
+experiments/**/*.json
+experiments/**/*.yaml
+experiments/**/parameters.txt
 
 # Virtualenv
 venv/

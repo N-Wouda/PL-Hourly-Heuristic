@@ -65,15 +65,10 @@ experiments/**/*.json
 experiments/**/*.yaml
 experiments/**/parameters.txt
 
-# Virtualenv
-venv/
-
 .ipynb_checkpoints/
 _analysis/
 
-# Data files
-analysis/cache/*.csv
+# Data and output files
 *.xlsx
-
-# Analysis output files
 out/
+cache/*.csv

@@ -17,16 +17,16 @@ This archive also contains a static version of the code hosted here.
 
 ## Analysis
 
-The analysis tool is available in `/analysis`. It can be used to analyse results
+The analysis tool is available in `src/analyse.py`. It can be used to analyse results
 from an ILP or heuristic run on an entire experiment. Usage,
 
 ```
-pipenv run python -m analysis heuristic 1
+pipenv run python -m src.analyse heuristic 1
 ```
 
 Which analyses the heuristic output in experiment `1`. If an output does not
 exist, it is skipped - you are informed of this. After analysing all files in an
-experiment, a cached file is created in `analysis/cache` to speed-up subsequent
+experiment, a cached file is created in `cache/` to speed-up subsequent
 analyses - this can be overridden using the `--force` flag. Use the `--help`
 flag to see all options. 
 
@@ -35,23 +35,21 @@ A notebook analysing the cached files is available in the repository root as
 
 ## How to use
 
-Ensure you have an environment with at least Python 3.7. To run the validator
-and/or heuristic, you need to install the required packages via `pipenv`.
+Ensure you have a recent Python environment (e.g. Python 3.9) and install the
+packages indicated in the `pyproject.toml` file.
 
-For the ILP formulation, more is needed: you need to ensure a valid
-instance of the CPLEX programme is installed on your machine, with the
-relevant Python bindings exposed. CPLEX is commercial software offered
-by IBM, so this cannot easily be done via `pip`.
+For the ILP formulation, more is needed: you need to have Gurobi installed on
+your machine, with the relevant Python bindings exposed.
 
 ## Heuristic
 
-Available in `/heuristic`. The heuristic is based on the adaptive
+Available in `src/heuristic.py`. The heuristic is based on the adaptive
 large neighbourhood search (ALNS) metaheuristic, and performs several
 operators to achieve a reasonable solution in little time. No
 optimality guarantees are made. Usage,
 
 ```
-pipenv run python -m heuristic 1 5
+pipenv run python -m src.heuristic 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -59,15 +57,13 @@ to the `experiments` directory, as `experiments/1/5-heuristic.json`.
 
 ## ILP
 
-Available in `/ilp`. The ILP solves the indicated experiment instance
+Available in `src/ilp.py`. The ILP solves the indicated experiment instance
 to optimality, but might take a considerable amount of time to achieve
-this. Furthermore, the ILP relies on IBM CPLEX, which is commercial
-software. Should you wish to run the ILP formulation yourself, you need
-to ensure your Python installation is configured with the CPLEX
-bindings for Python. Usage,
+this. Furthermore, the ILP relies on Gurobi, which is commercial
+software. Usage,
 
 ```
-pipenv run python -m ilp 1 5
+pipenv run python -m src.ilp 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -75,12 +71,12 @@ to the `experiments` directory, as `experiments/1/5-ilp.json`.
 
 ## Validator
 
-Available in `/validator`. Given the by now familiar experiment and
+Available in `src/validator.py`. Given the by now familiar experiment and
 instance arguments, the validator confirms the ILP and heuristic
 solutions (where available) satisfy the problem constraints. Usage,
 
 ```
-pipenv run python -m validator 1 5
+pipenv run python -m src.validator 1 5
 ```
 
 For experiment `1`, instance `5`. An exit code of `0` indicates the ILP and

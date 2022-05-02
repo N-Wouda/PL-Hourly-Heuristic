@@ -1,8 +1,6 @@
 import sys
 
-import simplejson as json
-
-from src.classes import Problem
+from src.classes import Problem, Result
 from src.rules import RULES
 
 
@@ -18,13 +16,12 @@ def main():
         path = f"experiments/{experiment}/{instance}-{method}.json"
 
         try:
-            with open(path) as file:
-                solution = [tuple(assignment) for assignment in json.load(file)]
+            result = Result.from_file(path)
         except IOError:
             print(f"{path}: solution file does not exist.")
         else:
             for rule in RULES:
-                if not rule(solution):
+                if not rule(result.assignments):
                     valid = False
                     print(f"{path}: solution violates {rule.__name__}.")
 

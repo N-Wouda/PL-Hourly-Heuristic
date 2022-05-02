@@ -13,8 +13,7 @@ def classrooms_to_modules(solution: List[Tuple]) -> bool:
     problem = Problem()
     classroom_modules = defaultdict(set)
 
-    for assignment in solution:
-        _, module, classroom, _ = assignment
+    for _, module, classroom, _ in solution:
         classroom_modules[classroom].add(module)
 
     if len(classroom_modules) > len(problem.classrooms):

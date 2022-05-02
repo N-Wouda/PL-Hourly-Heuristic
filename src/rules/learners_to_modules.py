@@ -12,8 +12,7 @@ def learners_to_modules(solution: List[Tuple]) -> bool:
     problem = Problem()
     learner_modules = defaultdict(set)
 
-    for assignment in solution:
-        learner, module, *_ = assignment
+    for learner, module, *_ in solution:
         learner_modules[learner].add(module)
 
     if len(learner_modules) != problem.num_learners:

@@ -11,8 +11,7 @@ def teacher_module_qualifications(solution: List[Tuple]) -> bool:
     problem = Problem()
     teacher_modules = {}
 
-    for assignment in solution:
-        _, module, _, teacher = assignment
+    for _, module, _, teacher in solution:
         teacher_modules[teacher] = module
 
     for teacher_idx, module_idx in teacher_modules.items():

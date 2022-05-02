@@ -13,8 +13,7 @@ def activity_size(solution: List[Tuple]) -> bool:
     problem = Problem()
     classroom_learners = defaultdict(set)
 
-    for assignment in solution:
-        learner, module, classroom, _ = assignment
+    for learner, module, classroom, _ in solution:
         classroom_learners[classroom, module].add(learner)
 
     for (classroom, module), learners in classroom_learners.items():

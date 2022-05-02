@@ -11,8 +11,7 @@ def module_classroom_room_type(solution: List[Tuple]) -> bool:
     problem = Problem()
     classrooms = {}
 
-    for assignment in solution:
-        _, module, classroom, _ = assignment
+    for _, module, classroom, _ in solution:
         classrooms[classroom] = module
 
     for classroom_idx, module_idx in classrooms.items():

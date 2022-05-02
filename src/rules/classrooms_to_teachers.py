@@ -11,8 +11,7 @@ def classrooms_to_teachers(solution: List[Tuple]) -> bool:
     problem = Problem()
     classroom_teachers = defaultdict(set)
 
-    for assignment in solution:
-        *_, classroom, teacher = assignment
+    for *_, classroom, teacher in solution:
         classroom_teachers[classroom].add(teacher)
 
     if len(classroom_teachers) > len(problem.classrooms):

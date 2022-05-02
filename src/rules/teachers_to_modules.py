@@ -8,8 +8,7 @@ def teachers_to_modules(solution: List[Tuple]) -> bool:
     """
     teacher_modules = defaultdict(set)
 
-    for assignment in solution:
-        _, module, _, teacher = assignment
+    for _, module, _, teacher in solution:
         teacher_modules[teacher].add(module)
 
     return all(len(value) == 1 for value in teacher_modules.values())

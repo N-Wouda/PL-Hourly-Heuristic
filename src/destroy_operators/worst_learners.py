@@ -15,7 +15,7 @@ def worst_learners(current: Solution, generator: Generator):
     """
     destroyed = deepcopy(current)
 
-    problem = Problem()
+    problem = get_problem()
     costs = np.zeros(problem.num_learners)
 
     assigned_activities = {}

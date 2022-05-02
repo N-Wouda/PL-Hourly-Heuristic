@@ -8,7 +8,7 @@ from alns.weight_schemes import SimpleWeights
 from src.classes import Problem, Result
 from src.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
-from src.functions import initial_solution
+from src.functions import initial_solution, set_problem
 from src.local_search import reinsert_learner
 from src.repair_operators import REPAIR_OPERATORS
 
@@ -29,7 +29,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    Problem.from_instance(args.experiment, args.instance)
+    problem = Problem.from_instance(args.experiment, args.instance)
+    set_problem(problem)
 
     if args.experiment == "tuning":
         generator = rnd.default_rng(args.instance)

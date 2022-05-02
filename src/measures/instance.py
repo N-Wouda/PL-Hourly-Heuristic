@@ -1,5 +1,6 @@
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def instance(_):
-    return Problem().instance
+    problem = get_problem()
+    return problem.instance

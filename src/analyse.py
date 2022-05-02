@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from src.classes import Problem, Result
+from src.functions import set_problem
 from src.measures import MEASURES
 
 pd.set_option('display.max_rows', None)  # display all rows.
@@ -37,7 +38,9 @@ def compute(parser, args):
             print(f"{parser.prog}: {location} does not exist; skipping.")
             continue
 
-        Problem.from_instance(args.experiment, instance)
+        problem = Problem.from_instance(args.experiment, instance)
+        set_problem(problem)
+
         res = Result.from_file(location)
         sol = res.solution
 

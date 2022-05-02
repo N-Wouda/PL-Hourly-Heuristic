@@ -3,11 +3,11 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy, deepcopy
 from heapq import heappush
-from operator import methodcaller
 from typing import Dict, List, Set, Tuple
 
 from alns import State
 
+from src.functions import get_problem
 from .Activity import Activity
 from .Classroom import Classroom
 from .Learner import Learner
@@ -72,8 +72,7 @@ class Solution(State):
         Finds a free classroom that can host the passed-in module. If none
         exist, this function raises a LookupError.
         """
-        from .Problem import Problem
-        problem = Problem()
+        problem = get_problem()
 
         avail_rooms = set(problem.classrooms_by_module[module])
         avail_rooms -= self.used_classrooms()
@@ -89,8 +88,7 @@ class Solution(State):
         Finds a teacher that can teach the passed-in module. If none exist, this
         function raises a LookupError.
         """
-        from .Problem import Problem
-        problem = Problem()
+        problem = get_problem()
 
         available_teachers = set(problem.teachers_by_module[module])
         available_teachers -= self.used_teachers()
@@ -128,8 +126,7 @@ class Solution(State):
         The list forms a heap, ordered by aggregate learner preferences (high
         to low). Use ``heapq`` for modification and access.
         """
-        from .Problem import Problem
-        problem = Problem()
+        problem = get_problem()
 
         learners_by_module = defaultdict(list)
 
@@ -189,9 +186,7 @@ class Solution(State):
         Reconstructs a Solution object from a list of (learner, module,
         classroom, teacher) assignments.
         """
-        from .Problem import Problem
-
-        problem = Problem()
+        problem = get_problem()
         resources = defaultdict(list)
 
         for learner, module, classroom, teacher in assignments:

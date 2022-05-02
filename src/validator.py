@@ -1,6 +1,7 @@
 import sys
 
 from src.classes import Problem, Result
+from src.functions import set_problem
 from src.rules import RULES
 
 
@@ -8,7 +9,8 @@ def main():
     experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
     instance = int(sys.argv[2])
 
-    Problem.from_instance(experiment, instance)
+    problem = Problem.from_instance(experiment, instance)
+    set_problem(problem)
 
     valid = True
 

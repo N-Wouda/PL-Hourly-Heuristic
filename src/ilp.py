@@ -8,6 +8,7 @@ from gurobipy import GRB, MVar, Model
 
 from src.classes import Problem, Result
 from src.constants import SELF_STUDY_MODULE_ID
+from src.functions import get_problem, set_problem
 
 
 def ilp() -> Result:
@@ -44,7 +45,7 @@ def ilp() -> Result:
 
 def _make_model() -> Tuple[Model, MVar, MVar]:
     m = Model()
-    problem = Problem()
+    problem = get_problem()
 
     x = m.addMVar((len(problem.modules),
                    len(problem.classrooms),
@@ -107,7 +108,7 @@ def _to_assignments(x, y) -> List[List[int, int, int, int]]:
     TODO this is legacy code, taken from the old State object. It's not the
      prettiest, but it should work.
     """
-    problem = Problem()
+    problem = get_problem()
 
     learner_assignments = [module
                            for learner in range(len(problem.learners))
@@ -181,7 +182,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    Problem.from_instance(args.experiment, args.instance)
+    problem = Problem.from_instance(args.experiment, args.instance)
+    set_problem(problem)
 
     result = ilp()
     result.to_file(f"experiments/{args.experiment}/{args.instance}-ilp.json")

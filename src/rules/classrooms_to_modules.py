@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def classrooms_to_modules(solution: List[Tuple]) -> bool:
@@ -10,7 +10,7 @@ def classrooms_to_modules(solution: List[Tuple]) -> bool:
     of classrooms available, and each classroom is assigned to *one* module
     only.
     """
-    problem = Problem()
+    problem = get_problem()
     classroom_modules = defaultdict(set)
 
     for _, module, classroom, _ in solution:

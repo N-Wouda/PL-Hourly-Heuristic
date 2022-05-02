@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Dict, List
 
@@ -11,11 +12,11 @@ from src.constants import SELF_STUDY_MODULE_ID
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
-from .Singleton import Singleton
 from .Teacher import Teacher
 
 
-class Problem(metaclass=Singleton):
+@dataclass
+class Problem:
     _data: Dict[str, Any]
 
     @classmethod
@@ -24,15 +25,10 @@ class Problem(metaclass=Singleton):
         Builds a Problem object for the experiment data file associated with the
         given experiment and instance.
         """
-        cls.clear()
-
         with open(f"experiments/{experiment}/{instance}.json") as file:
             data = json.load(file)
 
-        problem = cls()
-        problem._data = data
-
-        return problem
+        return cls(data)
 
     @property
     @lru_cache(1)

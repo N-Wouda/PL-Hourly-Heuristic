@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import numpy as np
 
+from src.functions import get_problem
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
@@ -38,7 +39,7 @@ class Activity:
         else:
             self._objective = objective
 
-        problem = Problem()
+        problem = get_problem()
 
         if self.is_instruction():
             self._excess_capacity = min(classroom.capacity, problem.max_batch)
@@ -107,20 +108,20 @@ class Activity:
         self.learners.append(learner)
         self._learners_set.add(learner)
 
-        problem = Problem()
+        problem = get_problem()
 
         self._objective += problem.preferences[learner.id, self.module.id]
         self._excess_capacity -= 1
 
     def can_remove_learner(self) -> bool:
-        problem = Problem()
+        problem = get_problem()
         return self.num_learners > problem.min_batch
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
         self._learners_set.remove(learner)
 
-        problem = Problem()
+        problem = get_problem()
 
         self._objective -= problem.preferences[learner.id, self.module.id]
         self._excess_capacity += 1
@@ -130,7 +131,7 @@ class Activity:
         Attempts to remove the learners in the passed-in list. Returns the
         actual number removed (from the start of the list).
         """
-        problem = Problem()
+        problem = get_problem()
         removable = self.num_learners - problem.min_batch
 
         for learner in learners[:removable]:
@@ -143,7 +144,8 @@ class Activity:
         Tests if this activity can be split, that is, there are sufficient
         learners to break the activity up into two activities.
         """
-        return self.num_learners >= 2 * Problem().min_batch
+        problem = get_problem()
+        return self.num_learners >= 2 * problem.min_batch
 
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """
@@ -155,7 +157,7 @@ class Activity:
         Does not check whether whether the passed-in classroom and teacher are
         qualified for the activity's module.
         """
-        problem = Problem()
+        problem = get_problem()
 
         if self.module.is_self_study():
             splitter = min(self.num_learners // 2, classroom.capacity)
@@ -175,13 +177,13 @@ class Activity:
         return activity
 
     def switch_to_self_study(self):
-        problem = Problem()
+        problem = get_problem()
 
         self._module = problem.self_study_module
         self._objective = self._compute_objective()
 
     def _compute_objective(self):
-        problem = Problem()
+        problem = get_problem()
 
         learner_ids = self.learner_ids()
         return problem.preferences[learner_ids, self.module.id].sum()

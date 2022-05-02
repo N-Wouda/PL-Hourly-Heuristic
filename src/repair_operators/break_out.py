@@ -2,7 +2,8 @@ from heapq import heappop
 
 from numpy.random import Generator
 
-from src.classes import Activity, Problem, Solution
+from src.classes import Activity, Solution
+from src.functions import get_problem
 from .greedy_insert import greedy_insert
 
 
@@ -16,7 +17,7 @@ def break_out(destroyed: Solution, generator: Generator) -> Solution:
     If any learners remain that cannot be assigned to a new activity, those are
     inserted into existing activities using ``greedy_insert``.
     """
-    problem = Problem()
+    problem = get_problem()
 
     histogram = destroyed.preferences_by_module()
 

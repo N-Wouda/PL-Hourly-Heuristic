@@ -2,7 +2,8 @@ from operator import attrgetter, methodcaller
 
 from numpy.random import Generator
 
-from src.classes import Activity, Problem, Solution
+from src.classes import Activity, Solution
+from src.functions import get_problem
 
 
 def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
@@ -11,7 +12,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
     activity can be found for a learner, (s)he is inserted into self-study
     instead.
     """
-    problem = Problem()
+    problem = get_problem()
 
     unused_teachers = set(problem.teachers) - destroyed.used_teachers()
 

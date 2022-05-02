@@ -1,6 +1,7 @@
 from itertools import zip_longest
 
-from src.classes import Activity, Problem, Solution
+from src.classes import Activity, Solution
+from src.functions import get_problem
 
 
 def initial_solution() -> Solution:
@@ -9,7 +10,7 @@ def initial_solution() -> Solution:
     activities, in appropriate classrooms (and with some random teacher
     assigned to supervise).
     """
-    problem = Problem()
+    problem = get_problem()
     solution = Solution([])
 
     # Not all classrooms are suitable for self-study. Such a restriction does,

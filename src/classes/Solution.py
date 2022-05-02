@@ -6,7 +6,6 @@ from heapq import heappush
 from operator import methodcaller
 from typing import Dict, List, Set, Tuple
 
-import simplejson as json
 from alns import State
 
 from .Activity import Activity
@@ -171,14 +170,28 @@ class Solution(State):
     def used_teachers(self) -> Set[Teacher]:
         return self._used_teachers
 
+    def get_assignments(self) -> List[List[int, int, int, int]]:
+        """
+        Returns a list of (learner, module, classroom, teacher) assignments.
+        """
+        return [[learner.id,
+                 activity.module.id,
+                 activity.classroom.id,
+                 activity.teacher.id]
+                for activity in self.activities
+                for learner in activity.learners]
+
     @classmethod
-    def from_file(cls, location: str) -> Solution:
+    def from_assignments(
+            cls,
+            assignments: List[List[int, int, int, int]]) -> Solution:
+        """
+        Reconstructs a Solution object from a list of (learner, module,
+        classroom, teacher) assignments.
+        """
         from .Problem import Problem
+
         problem = Problem()
-
-        with open(location) as file:
-            assignments = json.load(file)
-
         resources = defaultdict(list)
 
         for learner, module, classroom, teacher in assignments:
@@ -196,14 +209,3 @@ class Solution(State):
             solution.add_activity(activity)
 
         return solution
-
-    def to_file(self, location: str):
-        assignments = [[learner.id,
-                        activity.module.id,
-                        activity.classroom.id,
-                        activity.teacher.id]
-                       for activity in self.activities
-                       for learner in activity.learners]
-
-        with open(location, "w") as file:
-            json.dump(assignments, file)

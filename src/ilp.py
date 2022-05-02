@@ -1,22 +1,51 @@
 import argparse
+import time
 from collections import defaultdict
 from typing import List, Tuple
 
-import simplejson as json
-from gurobipy import GRB, Model
+import numpy as np
+from gurobipy import GRB, MVar, Model
 
-from src.classes import Problem
+from src.classes import Problem, Result
 from src.constants import SELF_STUDY_MODULE_ID
 
 
-def ilp() -> List[Tuple]:
+def ilp() -> Result:
     """
     Solves the integer linear programming (ILP) formulation of the hourly
     learner preference problem.
     """
-    m = Model()
+    m, x, y = _make_model()
 
+    start_time = time.perf_counter()
+    run_times = []
+    lower_bounds = []
+    incumbent_objs = []
+
+    def callback(model: Model, where: int):
+        if where != GRB.Callback.MIPSOL:
+            return
+
+        obj = model.cbGet(GRB.Callback.MIPSOL_OBJ)
+        bnd = model.cbGet(GRB.Callback.MIPSOL_OBJBND)
+
+        lower_bounds.append(bnd)
+        incumbent_objs.append(obj)
+        run_times.append((time.perf_counter() - start_time))
+
+    m.optimize(callback)  # type: ignore
+
+    assignments = _to_assignments(x.getAttr('X'), y.getAttr('X'))
+    return Result(assignments,
+                  np.diff(run_times, prepend=run_times[0]),  # type: ignore
+                  lower_bounds,
+                  incumbent_objs)
+
+
+def _make_model() -> Tuple[Model, MVar, MVar]:
+    m = Model()
     problem = Problem()
+
     x = m.addMVar((len(problem.modules),
                    len(problem.classrooms),
                    len(problem.teachers)),
@@ -67,18 +96,10 @@ def ilp() -> List[Tuple]:
     for classroom in problem.classrooms:
         m.addConstr(x[:, classroom.id, :].sum() <= 1, "single use classroom")
 
-    status = m.optimize()
-
-    if status != GRB.Status.OPTIMAL:
-        # There is not much that can be done in this case, so we raise an
-        # error. Logging should pick this up, but it is nearly impossible
-        # for this to happen due to the problem structure.
-        raise ValueError("Infeasible!")
-
-    return _to_assignments(x.getAttr('X'), y.getAttr('X'))
+    return m, x, y
 
 
-def _to_assignments(x, y) -> List[Tuple]:
+def _to_assignments(x, y) -> List[List[int, int, int, int]]:
     """
     Turns the solver's decision variables into a series of (learner, module,
     classroom, teacher) assignments, which are then stored to the file system.
@@ -146,7 +167,7 @@ def _to_assignments(x, y) -> List[Tuple]:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog="heuristic")
+    parser = argparse.ArgumentParser(prog="ilp")
 
     parser.add_argument("experiment", type=str)
     parser.add_argument("instance", type=int)
@@ -163,10 +184,7 @@ def main():
     Problem.from_instance(args.experiment, args.instance)
 
     result = ilp()
-    res_loc = f"experiments/{args.experiment}/{args.instance}-ilp.json"
-
-    with open(res_loc, "w") as file:
-        json.dump(result, file)
+    result.to_file(f"experiments/{args.experiment}/{args.instance}-ilp.json")
 
 
 if __name__ == "__main__":

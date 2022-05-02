@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.classes import Problem, Solution
+from src.classes import Problem, Result
 from src.measures import MEASURES
 
 pd.set_option('display.max_rows', None)  # display all rows.
@@ -38,7 +38,8 @@ def compute(parser, args):
             continue
 
         Problem.from_instance(args.experiment, instance)
-        sol = Solution.from_file(location)
+        res = Result.from_file(location)
+        sol = res.solution
 
         measures.append({name: fn(sol) for name, fn in MEASURES.items()})
 

@@ -1,10 +1,11 @@
 import argparse
+import time
 
 import numpy.random as rnd
 from alns import ALNS
 from alns.weight_schemes import SimpleWeights
 
-from src.classes import Problem
+from src.classes import Problem, Result
 from src.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
 from src.functions import initial_solution
@@ -62,10 +63,15 @@ def main():
                             len(alns.repair_operators),
                             DECAY)
 
-    result = alns.iterate(init, weights, criterion, ITERATIONS)
+    start = time.perf_counter()
 
-    location = f"experiments/{args.experiment}/{args.instance}-heuristic.json"
-    result.best_state.to_file(location)  # noqa
+    res = alns.iterate(init, weights, criterion, ITERATIONS)
+    res = Result(res.best_state.get_assignments(),  # noqa
+                 [time.perf_counter() - start],
+                 [res.best_state.objective()],
+                 [float("inf")])
+
+    res.to_file(f"experiments/{args.experiment}/{args.instance}-heuristic.json")
 
 
 if __name__ == "__main__":

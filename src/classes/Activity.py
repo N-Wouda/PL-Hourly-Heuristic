@@ -109,16 +109,7 @@ class Activity:
 
         problem = Problem()
 
-        if self.is_self_study():
-            module_id = problem.most_preferred[learner.id, 0]
-
-            objective = problem.preferences[learner.id, module_id]
-            objective -= problem.penalty
-
-            self._objective += objective
-        else:
-            self._objective += problem.preferences[learner.id, self.module.id]
-
+        self._objective += problem.preferences[learner.id, self.module.id]
         self._excess_capacity -= 1
 
     def can_remove_learner(self) -> bool:
@@ -131,16 +122,7 @@ class Activity:
 
         problem = Problem()
 
-        if self.is_self_study():
-            module_id = problem.most_preferred[learner.id, 0]
-
-            objective = problem.preferences[learner.id, module_id]
-            objective -= problem.penalty
-
-            self._objective -= objective
-        else:
-            self._objective -= problem.preferences[learner.id, self.module.id]
-
+        self._objective -= problem.preferences[learner.id, self.module.id]
         self._excess_capacity += 1
 
     def remove_learners(self, learners: List[Learner]) -> int:
@@ -187,7 +169,7 @@ class Activity:
 
         activity = Activity(learners, classroom, teacher, self.module)
 
-        self._objective -= activity.objective()  # book-keeping on cached vars.
+        self._objective -= activity.objective()  # bookkeeping on cached vars.
         self._excess_capacity += len(learners)
 
         return activity
@@ -196,22 +178,12 @@ class Activity:
         problem = Problem()
 
         self._module = problem.self_study_module
-        self._objective -= problem.penalty * self.num_learners
+        self._objective = self._compute_objective()
 
     def _compute_objective(self):
         problem = Problem()
+
         learner_ids = self.learner_ids()
-
-        if self.is_self_study():
-            # In self-study, everyone works on their most-preferred module,
-            # but at the cost of a controlled penalty.
-            modules = problem.most_preferred[learner_ids, 0]
-
-            objective = problem.preferences[learner_ids, modules].sum()
-            objective -= len(self.learners) * problem.penalty
-
-            return objective
-
         return problem.preferences[learner_ids, self.module.id].sum()
 
     def __str__(self):

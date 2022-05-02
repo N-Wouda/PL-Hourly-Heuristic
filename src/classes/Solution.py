@@ -116,7 +116,7 @@ class Solution(State):
         # The ALNS algorithm solves a minimisation objective by default, but
         # the problem is actually a maximisation problem, hence the trick with
         # the minus.
-        return -sum(map(methodcaller("objective"), self.activities))
+        return -sum(activity.objective() for activity in self.activities)
 
     def preferences_by_module(self) \
             -> List[Tuple[float, Module, List[Learner]]]:

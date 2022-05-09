@@ -64,6 +64,9 @@ target/
 experiments/**/*.json
 experiments/**/*.yaml
 experiments/**/parameters.txt
+experiments_old/**/*.json
+experiments_old/**/*.yaml
+experiments_old/**/parameters.txt
 
 .ipynb_checkpoints/
 _analysis/

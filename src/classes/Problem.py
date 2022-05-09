@@ -7,6 +7,7 @@ from functools import lru_cache
 from typing import Any, Dict, List
 
 import numpy as np
+from scipy import sparse
 
 from src.constants import SELF_STUDY_MODULE_ID
 from .Classroom import Classroom
@@ -28,7 +29,31 @@ class Problem:
         with open(loc, "r") as file:
             data = json.load(file)
 
+        # TODO check sparse
+        q = np.zeros(len(data['teachers']), len(data['modules']))
+
+        for t, m, qual in data['qualifications']:
+            q[t, m] = qual
+
+        p = np.zeros(len(data['learners']), len(data['modules']))
+
+        for l, m, pref in data['preferences']:
+            p[l, m] = pref
+
+        data = {**data, 'qualifications': q, 'preferences': p}
         return cls(data)
+
+    def to_file(self, loc: str):
+        """
+        Writes the problem data to the given location.
+        """
+        with open(loc, "w") as file:
+            # TODO check sparse
+            q = list(sparse.dok_matrix(self._data['qualifications']).items())
+            p = list(sparse.dok_matrix(self._data['preferences']).items())
+
+            data = {**self._data, 'qualifications': q, 'preferences': p}
+            json.dump(data, file)
 
     def __eq__(self, other):
         return (isinstance(other, Problem)
@@ -186,14 +211,14 @@ class Problem:
         """
         Returns the self-study penalty.
         """
-        return self._data['parameters']['penalty']
+        return self._data['penalty']
 
     @property
     @lru_cache(1)
     def min_batch(self) -> int:
-        return self._data['parameters']['min_batch']
+        return self._data['min_batch']
 
     @property
     @lru_cache(1)
     def max_batch(self) -> int:
-        return self._data['parameters']['max_batch']
+        return self._data['max_batch']

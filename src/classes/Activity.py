@@ -5,11 +5,9 @@ from typing import List, Optional
 
 import numpy as np
 
-from src.functions import get_problem
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
-from .Problem import Problem
 from .Teacher import Teacher
 
 
@@ -39,6 +37,7 @@ class Activity:
         else:
             self._objective = objective
 
+        from src.functions import get_problem
         problem = get_problem()
 
         if self.is_instruction():
@@ -108,19 +107,23 @@ class Activity:
         self.learners.append(learner)
         self._learners_set.add(learner)
 
+        from src.functions import get_problem
         problem = get_problem()
 
         self._objective += problem.preferences[learner.id, self.module.id]
         self._excess_capacity -= 1
 
     def can_remove_learner(self) -> bool:
+        from src.functions import get_problem
         problem = get_problem()
+
         return self.num_learners > problem.min_batch
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
         self._learners_set.remove(learner)
 
+        from src.functions import get_problem
         problem = get_problem()
 
         self._objective -= problem.preferences[learner.id, self.module.id]
@@ -131,6 +134,7 @@ class Activity:
         Attempts to remove the learners in the passed-in list. Returns the
         actual number removed (from the start of the list).
         """
+        from src.functions import get_problem
         problem = get_problem()
         removable = self.num_learners - problem.min_batch
 
@@ -144,6 +148,7 @@ class Activity:
         Tests if this activity can be split, that is, there are sufficient
         learners to break the activity up into two activities.
         """
+        from src.functions import get_problem
         problem = get_problem()
         return self.num_learners >= 2 * problem.min_batch
 
@@ -157,6 +162,7 @@ class Activity:
         Does not check whether whether the passed-in classroom and teacher are
         qualified for the activity's module.
         """
+        from src.functions import get_problem
         problem = get_problem()
 
         if self.module.is_self_study():
@@ -177,12 +183,14 @@ class Activity:
         return activity
 
     def switch_to_self_study(self):
+        from src.functions import get_problem
         problem = get_problem()
 
         self._module = problem.self_study_module
         self._objective = self._compute_objective()
 
     def _compute_objective(self):
+        from src.functions import get_problem
         problem = get_problem()
 
         learner_ids = self.learner_ids()

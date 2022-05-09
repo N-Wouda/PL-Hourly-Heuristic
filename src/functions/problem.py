@@ -9,4 +9,5 @@ def get_problem() -> Problem:
 
 
 def set_problem(problem: Problem):
+    global _INSTANCE
     _INSTANCE = problem

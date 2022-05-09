@@ -9,7 +9,8 @@ def main():
     experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
     instance = int(sys.argv[2])
 
-    problem = Problem.from_instance(experiment, instance)
+    data_loc = f"experiments/{experiment}/{instance}.json"
+    problem = Problem.from_file(data_loc)
     set_problem(problem)
 
     valid = True

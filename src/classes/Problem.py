@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Any, Dict, List
 
@@ -15,20 +15,28 @@ from .Module import Module
 from .Teacher import Teacher
 
 
-@dataclass
+@dataclass(frozen=True)
 class Problem:
-    _data: Dict[str, Any]
+    _data: Dict[str, Any] = field(hash=False)
 
     @classmethod
-    def from_instance(cls, experiment: int, instance: int) -> Problem:
+    def from_file(cls, loc: str) -> Problem:
         """
-        Builds a Problem object for the experiment data file associated with the
-        given experiment and instance.
+        Builds a Problem object for the experiment data file at the given
+        location.
         """
-        with open(f"experiments/{experiment}/{instance}.json") as file:
+        with open(loc, "r") as file:
             data = json.load(file)
 
         return cls(data)
+
+    def __eq__(self, other):
+        return (isinstance(other, Problem)
+                and self._data['experiment'] == other._data['experiment']
+                and self._data['instance'] == other._data['instance'])
+
+    def __hash__(self):
+        return hash(100 * self._data['experiment'] + self._data['instance'])
 
     @property
     @lru_cache(1)

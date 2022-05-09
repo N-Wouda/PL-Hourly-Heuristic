@@ -20,7 +20,7 @@ def ilp() -> Result:
 
     start_time = time.perf_counter()
     run_times = []
-    lower_bounds = []
+    upper_bounds = []
     incumbent_objs = []
 
     def callback(model: Model, where: int):
@@ -30,17 +30,21 @@ def ilp() -> Result:
         obj = model.cbGet(GRB.Callback.MIPSOL_OBJ)
         bnd = model.cbGet(GRB.Callback.MIPSOL_OBJBND)
 
-        lower_bounds.append(bnd)
+        upper_bounds.append(bnd)
         incumbent_objs.append(obj)
         run_times.append((time.perf_counter() - start_time))
 
+    m.modelSense = GRB.MAXIMIZE
     m.optimize(callback)  # type: ignore
 
     assignments = _to_assignments(x.getAttr('X'), y.getAttr('X'))
+    run_times = np.diff(run_times, prepend=run_times[0]).tolist()
+
     return Result(assignments,
-                  np.diff(run_times, prepend=run_times[0]),  # type: ignore
-                  lower_bounds,
-                  incumbent_objs)
+                  m.objVal,
+                  run_times,
+                  incumbent_objs,
+                  upper_bounds)
 
 
 def _make_model() -> Tuple[Model, MVar, MVar]:
@@ -55,11 +59,9 @@ def _make_model() -> Tuple[Model, MVar, MVar]:
 
     y = m.addMVar((len(problem.learners), len(problem.modules)),
                   vtype=GRB.BINARY,
+                  obj=problem.preferences,  # noqa
+                  ub=problem.preferences > 0,  # preference indicator
                   name="learner_module")
-
-    m.setObjective((problem.preferences * y).sum(), GRB.MAXIMIZE)
-
-    m.addConstr(y <= (problem.preferences > 0), "preference indicator")
 
     for learner in range(problem.num_learners):
         m.addConstr(y[learner, :].sum() == 1, "assignment")
@@ -81,18 +83,18 @@ def _make_model() -> Tuple[Model, MVar, MVar]:
 
         for classroom in problem.classrooms:
             lhs = x[module.id, classroom.id, :].sum()
-            rhs = classroom.is_qualified_for(module)
+            rhs = int(classroom.is_qualified_for(module))
 
             m.addConstr(lhs <= rhs, "room type")
 
         for teacher in problem.teachers:
             lhs = x[module.id, :, teacher.id].sum()
-            rhs = teacher.is_qualified_for(module)
+            rhs = int(teacher.is_qualified_for(module))
 
             m.addConstr(lhs <= rhs, "teacher qualification")
 
     for teacher in problem.teachers:
-        m.addConstr(x[:, :, teacher.id].sum(1) <= 1, "single use teacher")
+        m.addConstr(x[:, :, teacher.id].sum() <= 1, "single use teacher")
 
     for classroom in problem.classrooms:
         m.addConstr(x[:, classroom.id, :].sum() <= 1, "single use classroom")
@@ -100,7 +102,7 @@ def _make_model() -> Tuple[Model, MVar, MVar]:
     return m, x, y
 
 
-def _to_assignments(x, y) -> List[List[int, int, int, int]]:
+def _to_assignments(x, y) -> List[List[int]]:
     """
     Turns the solver's decision variables into a series of (learner, module,
     classroom, teacher) assignments, which are then stored to the file system.
@@ -182,11 +184,16 @@ def parse_args():
 def main():
     args = parse_args()
 
-    problem = Problem.from_instance(args.experiment, args.instance)
+    data_loc = f"{args.experiment}-{args.instance}.json"
+    res_loc = f"{args.experiment}-{args.instance}-ilp.json"
+
+    problem = Problem.from_file(data_loc)
     set_problem(problem)
 
     result = ilp()
-    result.to_file(f"experiments/{args.experiment}/{args.instance}-ilp.json")
+    result.to_file(res_loc)
+
+    print(result)
 
 
 if __name__ == "__main__":

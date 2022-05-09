@@ -7,7 +7,6 @@ from typing import Dict, List, Set, Tuple
 
 from alns import State
 
-from src.functions import get_problem
 from .Activity import Activity
 from .Classroom import Classroom
 from .Learner import Learner
@@ -72,6 +71,7 @@ class Solution(State):
         Finds a free classroom that can host the passed-in module. If none
         exist, this function raises a LookupError.
         """
+        from src.functions import get_problem
         problem = get_problem()
 
         avail_rooms = set(problem.classrooms_by_module[module])
@@ -88,6 +88,7 @@ class Solution(State):
         Finds a teacher that can teach the passed-in module. If none exist, this
         function raises a LookupError.
         """
+        from src.functions import get_problem
         problem = get_problem()
 
         available_teachers = set(problem.teachers_by_module[module])
@@ -126,6 +127,7 @@ class Solution(State):
         The list forms a heap, ordered by aggregate learner preferences (high
         to low). Use ``heapq`` for modification and access.
         """
+        from src.functions import get_problem
         problem = get_problem()
 
         learners_by_module = defaultdict(list)
@@ -167,7 +169,7 @@ class Solution(State):
     def used_teachers(self) -> Set[Teacher]:
         return self._used_teachers
 
-    def get_assignments(self) -> List[List[int, int, int, int]]:
+    def get_assignments(self) -> List[List[int]]:
         """
         Returns a list of (learner, module, classroom, teacher) assignments.
         """
@@ -179,14 +181,14 @@ class Solution(State):
                 for learner in activity.learners]
 
     @classmethod
-    def from_assignments(
-            cls,
-            assignments: List[List[int, int, int, int]]) -> Solution:
+    def from_assignments(cls, assignments: List[List[int]]) -> Solution:
         """
         Reconstructs a Solution object from a list of (learner, module,
         classroom, teacher) assignments.
         """
+        from src.functions import get_problem
         problem = get_problem()
+
         resources = defaultdict(list)
 
         for learner, module, classroom, teacher in assignments:

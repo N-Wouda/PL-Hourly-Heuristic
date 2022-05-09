@@ -29,7 +29,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    problem = Problem.from_instance(args.experiment, args.instance)
+    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
+    problem = Problem.from_file(data_loc)
     set_problem(problem)
 
     if args.experiment == "tuning":
@@ -68,6 +69,7 @@ def main():
 
     res = alns.iterate(init, weights, criterion, ITERATIONS)
     res = Result(res.best_state.get_assignments(),  # noqa
+                 res.best_state.objective(),
                  [time.perf_counter() - start],
                  [res.best_state.objective()],
                  [float("inf")])

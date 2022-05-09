@@ -68,7 +68,9 @@ experiments/**/parameters.txt
 .ipynb_checkpoints/
 _analysis/
 
-# Data and output files
 *.xlsx
 out/
 cache/*.csv
+
+# Gurobi config
+gurobi.env

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from src.functions import get_problem
 from .Module import Module
 
 
@@ -12,10 +11,10 @@ class Teacher:
         """
         Tests if this teacher is qualified to teach the passed-in module.
         """
-
         if module.is_self_study():
             return True
 
+        from src.functions import get_problem
         problem = get_problem()
 
         # A teacher is qualified only if its qualification degree is lower than

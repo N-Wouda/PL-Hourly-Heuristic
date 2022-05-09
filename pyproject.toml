@@ -9,7 +9,6 @@ license = "MIT"
 python = "^3.9"
 numpy = "^1.22.3"
 alns = "^2.0.2"
-simplejson = "^3.17.6"
 pandas = "^1.4.2"
 gurobipy = "^9.5.1"
 

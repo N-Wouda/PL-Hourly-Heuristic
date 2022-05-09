@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import List
 
@@ -19,7 +20,14 @@ class Result:
 
     @classmethod
     def from_file(cls, loc: str) -> Result:
-        pass  # TODO
+        with open(loc, "r") as fh:
+            data = json.load(fh)
+
+        return cls(data["assignments"],
+                   data["run_times"],
+                   data["lbs"],
+                   data["ubs"])
 
     def to_file(self, loc: str):
-        pass  # TODO
+        with open(loc, "w") as fh:
+            json.dump(vars(self), fh)

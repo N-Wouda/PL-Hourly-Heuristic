@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import json
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Dict, List
 
 import numpy as np
-import simplejson as json
 
 from src.constants import SELF_STUDY_MODULE_ID
 from .Classroom import Classroom

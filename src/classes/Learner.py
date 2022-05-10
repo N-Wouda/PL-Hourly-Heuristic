@@ -29,6 +29,6 @@ class Learner:
         problem = get_problem()
 
         self_study_mod = problem.self_study_module
-        self_study_pref = problem.preferences[self.id, self_study_mod]
+        self_study_pref = problem.preferences[self.id, self_study_mod.id]
 
         return problem.preferences[self.id, module.id] > self_study_pref

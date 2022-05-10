@@ -184,8 +184,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    data_loc = f"{args.experiment}-{args.instance}.json"
-    res_loc = f"{args.experiment}-{args.instance}-ilp.json"
+    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
+    res_loc = f"experiments/{args.experiment}/{args.instance}-ilp.json"
 
     problem = Problem.from_file(data_loc)
     set_problem(problem)

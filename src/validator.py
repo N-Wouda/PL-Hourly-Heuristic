@@ -20,7 +20,7 @@ def main():
 
         try:
             result = Result.from_file(path)
-        except IOError:
+        except FileNotFoundError:
             print(f"{path}: solution file does not exist.")
         else:
             for rule in RULES:

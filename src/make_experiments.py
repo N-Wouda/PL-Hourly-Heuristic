@@ -4,14 +4,17 @@ paper. See there for details.
 """
 
 import csv
+import itertools
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Any
 
 import numpy as np
+from iteround import saferound
 from pyDOE2 import fullfact
 
 from src.classes import Problem
-from scipy import sparse
 
 
 def parameter_levels() -> dict[str, Any]:
@@ -23,8 +26,8 @@ def parameter_levels() -> dict[str, Any]:
     progress = [0, 1, 2, 3]
     qualifications = [(1, 0, 0), (0.5, 0.5, 0), (0.4, 0.4, 0.2)]
     split = [True, False]
-    courses = [(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3), (1, 4),
-               (3, 1), (2, 1), (2, 5), (2, 6)]  # (workload, room type) tuples
+    courses = [[(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3), (1, 4),
+                (3, 1), (2, 1), (2, 5), (2, 6)]]  # (workload, room type) tuples
     modules = [48]
 
     return locals()
@@ -36,6 +39,28 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     instances discussed in the paper. This function is legacy code, and has
     mostly been copied verbatim from the bachelor thesis implementation.
     """
+    def round_integers(*,
+                       by_idx: bool = False,
+                       by_roomtype: bool = False,
+                       num_values: int):
+        total_workload = sum(workload for workload, _ in values['courses'])
+        by_item = defaultdict(lambda: 0)
+
+        for idx, (workload, room_type) in enumerate(values['courses']):
+            # Number of values allocated to this course (or room type).
+            allotted = (workload / total_workload) * num_values
+
+            if by_idx:
+                by_item[idx] += allotted
+            elif by_roomtype:
+                by_item[room_type] += allotted
+            else:
+                raise ValueError("Either by_idx or by_roomtype must be set.")
+
+        # see https://stackoverflow.com/a/52807416/4316405
+        return dict(zip(by_item.keys(),
+                        map(int, saferound(by_item.values(), places=0))))
+
     # 1. Create the learner data.
     learners = []
     year = 0
@@ -49,7 +74,34 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
         learners.append(dict(id=idx, year=year))
 
     # 2. Create classroom data.
-    classrooms = ...  # TODO
+    classrooms = []
+    idx = itertools.count(0)
+
+    # - regular classrooms for each room type.
+    classrooms_by_room_type = round_integers(
+        by_roomtype=True,
+        # number of regular classrooms for this many learners.
+        num_values=values['learners'] // 20
+    )
+
+    for room_type, num_classrooms in classrooms_by_room_type.items():
+        for classroom in range(num_classrooms):
+            classrooms.append(dict(
+                id=next(idx),
+                capacity=32,
+                self_study_allowed=room_type == 1,
+                room_type=room_type
+            ))
+
+    # - self-study classrooms.
+    learners2numselfstudy = {800: 3, 1600: 6, 2400: 9}
+    for _ in range(learners2numselfstudy[values['learners']]):
+        classrooms.append(dict(
+            id=next(idx),
+            capacity=80,
+            self_study_allowed=True,
+            room_type=999,  # some unused large number
+        ))
 
     # 3. Create module data.
     modules = []
@@ -63,10 +115,35 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
                                 qualification=2 - is_first))  # bool as int
 
     # 4. Create teacher data.
-    teachers = [dict(id=idx) for idx in range(len(values['learners']) // 10)]
+    teachers = [dict(id=idx) for idx in range(values['learners'] // 10)]
 
     # 5. Create teacher qualification matrix.
-    qualifications = ...  # TODO
+    qualifications = np.zeros((values['learners'] // 10,
+                               len(values['courses']) * values['modules']))
+
+    module = 0
+    teacher = 0
+
+    learn2teach = {800: 80, 1600: 160, 2400: 240}
+    assignment = round_integers(by_idx=True,
+                                num_values=learn2teach[values['learners']])
+
+    for course, num_teachers in assignment.items():
+        distribution = [float(num_teachers * values['qualifications'][degree])
+                        for degree in range(len(values['qualifications']))]
+
+        teachers_by_qualification = saferound(distribution, places=0)
+
+        for degree, value in enumerate(map(int, teachers_by_qualification), 1):
+            qualifications[teacher:teacher + value,
+                           module: module + values['modules']] = degree
+
+            teacher += value
+
+        module += values['modules']
+
+    exp_dir = Path(f"experiments/{experiment}/")
+    exp_dir.mkdir(parents=True, exist_ok=True)
 
     for instance in range(1, 101):
         # 6. Create the instance-specific learner preferences.
@@ -76,13 +153,11 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
             prefs = np.random.exponential(scale=2, size=(len(learners),))
 
             for idx, learner in enumerate(learners):
-                loc = 8 * (learner['year'] - 1) + 4
+                loc = 8 * (learner['year'] - 1) + 4  # midpoint in each year
                 preferences[idx, values['modules'] * course + loc] = prefs[idx]
 
-        # TODO check preference matrix
-
         # 7. Create instance and write to file.
-        instance = Problem(dict(
+        problem = Problem(dict(
             experiment=experiment,
             instance=instance,
             preferences=preferences,
@@ -96,7 +171,7 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
             max_batch=values['max_batch'],
         ))
 
-        instance.to_file(f"experiments/{experiment}/{instance}.json")
+        problem.to_file(exp_dir / f"{instance}.json")  # noqa
 
 
 def main():

@@ -29,15 +29,14 @@ class Problem:
         with open(loc, "r") as file:
             data = json.load(file)
 
-        # TODO check sparse
-        q = np.zeros(len(data['teachers']), len(data['modules']))
+        q = np.zeros((len(data['teachers']), len(data['modules'])))
 
-        for t, m, qual in data['qualifications']:
+        for (t, m), qual in data['qualifications']:
             q[t, m] = qual
 
-        p = np.zeros(len(data['learners']), len(data['modules']))
+        p = np.zeros((len(data['learners']), len(data['modules'])))
 
-        for l, m, pref in data['preferences']:
+        for (l, m), pref in data['preferences']:
             p[l, m] = pref
 
         data = {**data, 'qualifications': q, 'preferences': p}
@@ -48,9 +47,11 @@ class Problem:
         Writes the problem data to the given location.
         """
         with open(loc, "w") as file:
-            # TODO check sparse
-            q = list(sparse.dok_matrix(self._data['qualifications']).items())
-            p = list(sparse.dok_matrix(self._data['preferences']).items())
+            q = sparse.dok_matrix(self._data['qualifications'])
+            q = list([tuple(map(int, k)), int(v)] for k, v in q.items())
+
+            p = sparse.dok_matrix(self._data['preferences'])
+            p = list([tuple(map(int, k)), float(v)] for k, v in p.items())
 
             data = {**self._data, 'qualifications': q, 'preferences': p}
             json.dump(data, file)

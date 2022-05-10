@@ -52,6 +52,14 @@ python-versions = "*"
 matrixapi = ["numpy", "scipy"]
 
 [[package]]
+name = "iteround"
+version = "1.0.4"
+description = "Rounds iterables (arrays, lists, sets, etc) while maintaining the sum of the initial array."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.2"
 description = "A fast implementation of the Cassowary constraint solver"
@@ -218,7 +226,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "7a0ab0d9e6a053f9f70e58c963bb01e3a58e1a1a07845c943cf6843fb33ba58a"
+content-hash = "ad3c4d8961b0b701834a22fcb89d654c9b08ffb60a23be474271ddf2161e74c5"
 
 [metadata.files]
 alns = [
@@ -254,6 +262,9 @@ gurobipy = [
     {file = "gurobipy-9.5.1-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:eeb4d93077f49044be61e0972a4326126823111ab848744cb91ea9fc1aea5663"},
     {file = "gurobipy-9.5.1-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:88d664929e441caa19df64aea19be1e935ee2379570633ee254fd182b9393526"},
     {file = "gurobipy-9.5.1-cp39-cp39-win_amd64.whl", hash = "sha256:61140dab7f85dc22e9523fcd9264f64b291df27175ee0c190cfd23ca3460f0db"},
+]
+iteround = [
+    {file = "iteround-1.0.4-py3-none-any.whl", hash = "sha256:17947dd5479177e6fb186b0a3d5d594b55eedea14dc722c6da7e84bbed45f5b2"},
 ]
 kiwisolver = [
     {file = "kiwisolver-1.4.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6e395ece147f0692ca7cdb05a028d31b83b72c369f7b4a2c1798f4b96af1e3d8"},

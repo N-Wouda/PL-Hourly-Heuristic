@@ -40,10 +40,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
             if not learner.prefers_over_self_study(module):
                 break
 
-            # TODO Py3.8: use assignment expression in if-statement.
-            inserted = _insert(learner, activities[module])
-
-            if inserted:
+            if inserted := _insert(learner, activities[module]):
                 break
 
             # Could not insert, so the module activities must be exhausted.
@@ -103,7 +100,9 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                 classroom = unused_classrooms.pop()
                 teacher = unused_teachers.pop()
 
-                # TODO what if there are insufficient learners left?
+                # This could be a problem if there are insufficient learners
+                # left. That has never happened so far, so the concern seems
+                # more theoretical than real.
                 learners = [destroyed.unassigned.pop()
                             for _ in range(problem.min_batch)]
 

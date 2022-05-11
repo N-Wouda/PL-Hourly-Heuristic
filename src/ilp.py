@@ -106,8 +106,8 @@ def _to_assignments(x, y) -> List[List[int]]:
     Turns the solver's decision variables into a series of (learner, module,
     classroom, teacher) assignments, which are then stored to the file system.
 
-    TODO this is legacy code, taken from the old State object. It's not the
-     prettiest, but it should work.
+    This is legacy code, taken from the old State object. It is not the
+    prettiest, but it works.
     """
     problem = get_problem()
 

@@ -3,10 +3,8 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import copy, deepcopy
 from heapq import heappush
-from operator import methodcaller
 from typing import Dict, List, Set, Tuple
 
-import simplejson as json
 from alns import State
 
 from .Activity import Activity
@@ -73,8 +71,8 @@ class Solution(State):
         Finds a free classroom that can host the passed-in module. If none
         exist, this function raises a LookupError.
         """
-        from .Problem import Problem
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         avail_rooms = set(problem.classrooms_by_module[module])
         avail_rooms -= self.used_classrooms()
@@ -90,8 +88,8 @@ class Solution(State):
         Finds a teacher that can teach the passed-in module. If none exist, this
         function raises a LookupError.
         """
-        from .Problem import Problem
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         available_teachers = set(problem.teachers_by_module[module])
         available_teachers -= self.used_teachers()
@@ -117,7 +115,7 @@ class Solution(State):
         # The ALNS algorithm solves a minimisation objective by default, but
         # the problem is actually a maximisation problem, hence the trick with
         # the minus.
-        return -sum(map(methodcaller("objective"), self.activities))
+        return -sum(activity.objective() for activity in self.activities)
 
     def preferences_by_module(self) \
             -> List[Tuple[float, Module, List[Learner]]]:
@@ -129,8 +127,8 @@ class Solution(State):
         The list forms a heap, ordered by aggregate learner preferences (high
         to low). Use ``heapq`` for modification and access.
         """
-        from .Problem import Problem
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         learners_by_module = defaultdict(list)
 
@@ -171,13 +169,25 @@ class Solution(State):
     def used_teachers(self) -> Set[Teacher]:
         return self._used_teachers
 
-    @classmethod
-    def from_file(cls, location: str) -> Solution:
-        from .Problem import Problem
-        problem = Problem()
+    def get_assignments(self) -> List[List[int]]:
+        """
+        Returns a list of (learner, module, classroom, teacher) assignments.
+        """
+        return [[learner.id,
+                 activity.module.id,
+                 activity.classroom.id,
+                 activity.teacher.id]
+                for activity in self.activities
+                for learner in activity.learners]
 
-        with open(location) as file:
-            assignments = json.load(file)
+    @classmethod
+    def from_assignments(cls, assignments: List[List[int]]) -> Solution:
+        """
+        Reconstructs a Solution object from a list of (learner, module,
+        classroom, teacher) assignments.
+        """
+        from src.functions import get_problem
+        problem = get_problem()
 
         resources = defaultdict(list)
 
@@ -196,14 +206,3 @@ class Solution(State):
             solution.add_activity(activity)
 
         return solution
-
-    def to_file(self, location: str):
-        assignments = [[learner.id,
-                        activity.module.id,
-                        activity.classroom.id,
-                        activity.teacher.id]
-                       for activity in self.activities
-                       for learner in activity.learners]
-
-        with open(location, "w") as file:
-            json.dump(assignments, file)

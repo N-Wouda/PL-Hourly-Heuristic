@@ -1,8 +1,8 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.classes import Problem
 from src.constants import SELF_STUDY_MODULE_ID
+from src.functions import get_problem
 
 
 def activity_size(solution: List[Tuple]) -> bool:
@@ -10,11 +10,10 @@ def activity_size(solution: List[Tuple]) -> bool:
     Verifies each activity satisfies both the minimum and maximum group size
     constraints.
     """
-    problem = Problem()
+    problem = get_problem()
     classroom_learners = defaultdict(set)
 
-    for assignment in solution:
-        learner, module, classroom, _ = assignment
+    for learner, module, classroom, _ in solution:
         classroom_learners[classroom, module].add(learner)
 
     for (classroom, module), learners in classroom_learners.items():

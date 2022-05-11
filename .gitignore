@@ -64,11 +64,16 @@ target/
 experiments/**/*.json
 experiments/**/*.yaml
 experiments/**/parameters.txt
+experiments_old/**/*.json
+experiments_old/**/*.yaml
+experiments_old/**/parameters.txt
 
 .ipynb_checkpoints/
 _analysis/
 
-# Data and output files
 *.xlsx
 out/
 cache/*.csv
+
+# Gurobi config
+gurobi.env

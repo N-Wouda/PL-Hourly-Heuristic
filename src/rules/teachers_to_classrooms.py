@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def teachers_to_classrooms(solution: List[Tuple]) -> bool:
@@ -9,11 +9,10 @@ def teachers_to_classrooms(solution: List[Tuple]) -> bool:
     Verifies each teacher is assigned to *one* classroom, and at most all
     teachers are in use.
     """
-    problem = Problem()
+    problem = get_problem()
     teacher_classrooms = defaultdict(set)
 
-    for assignment in solution:
-        *_, classroom, teacher = assignment
+    for *_, classroom, teacher in solution:
         teacher_classrooms[teacher].add(classroom)
 
     if len(teacher_classrooms) > len(problem.teachers):

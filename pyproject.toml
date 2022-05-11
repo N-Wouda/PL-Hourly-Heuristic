@@ -6,12 +6,14 @@ authors = ["Your Name <you@example.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9,<3.11"
 numpy = "^1.22.3"
 alns = "^2.0.2"
-simplejson = "^3.17.6"
 pandas = "^1.4.2"
 gurobipy = "^9.5.1"
+scipy = "^1.8.0"
+pyDOE2 = "^1.3.0"
+iteround = "^1.0.4"
 
 [tool.poetry.dev-dependencies]
 

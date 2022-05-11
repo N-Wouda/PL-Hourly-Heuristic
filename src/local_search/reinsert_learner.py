@@ -2,7 +2,8 @@ from heapq import heappop, heappush
 
 from numpy.random import Generator
 
-from src.classes import Problem, Solution
+from src.classes import Solution
+from src.functions import get_problem
 
 
 def reinsert_learner(current: Solution, generator: Generator) -> Solution:
@@ -11,7 +12,7 @@ def reinsert_learner(current: Solution, generator: Generator) -> Solution:
     and executes them. This improves the solution further by moving learners
     into strictly improving assignments, if possible.
     """
-    problem = Problem()
+    problem = get_problem()
 
     # Get all instruction activities, grouped by module. We only consider
     # moves out of self-study (self-study could be better as well, but the

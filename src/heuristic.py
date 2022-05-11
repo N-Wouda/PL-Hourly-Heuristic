@@ -1,13 +1,14 @@
 import argparse
+import time
 
 import numpy.random as rnd
 from alns import ALNS
 from alns.weight_schemes import SimpleWeights
 
-from src.classes import Problem
+from src.classes import Problem, Result
 from src.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
-from src.functions import initial_solution
+from src.functions import initial_solution, set_problem
 from src.local_search import reinsert_learner
 from src.repair_operators import REPAIR_OPERATORS
 
@@ -28,7 +29,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    Problem.from_instance(args.experiment, args.instance)
+    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
+    problem = Problem.from_file(data_loc)
+    set_problem(problem)
 
     if args.experiment == "tuning":
         generator = rnd.default_rng(args.instance)
@@ -62,10 +65,16 @@ def main():
                             len(alns.repair_operators),
                             DECAY)
 
-    result = alns.iterate(init, weights, criterion, ITERATIONS)
+    start = time.perf_counter()
 
-    location = f"experiments/{args.experiment}/{args.instance}-heuristic.json"
-    result.best_state.to_file(location)  # noqa
+    res = alns.iterate(init, weights, criterion, ITERATIONS)
+    res = Result(res.best_state.get_assignments(),  # noqa
+                 res.best_state.objective(),
+                 [time.perf_counter() - start],
+                 [res.best_state.objective()],
+                 [float("inf")])
+
+    res.to_file(f"experiments/{args.experiment}/{args.instance}-heuristic.json")
 
 
 if __name__ == "__main__":

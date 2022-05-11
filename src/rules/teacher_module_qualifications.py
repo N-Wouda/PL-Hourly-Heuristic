@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def teacher_module_qualifications(solution: List[Tuple]) -> bool:
@@ -8,11 +8,10 @@ def teacher_module_qualifications(solution: List[Tuple]) -> bool:
     Verifies each teacher-module assignment satisfies the required teacher
     qualification.
     """
-    problem = Problem()
+    problem = get_problem()
     teacher_modules = {}
 
-    for assignment in solution:
-        _, module, _, teacher = assignment
+    for _, module, _, teacher in solution:
         teacher_modules[teacher] = module
 
     for teacher_idx, module_idx in teacher_modules.items():

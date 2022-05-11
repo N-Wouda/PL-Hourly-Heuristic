@@ -8,7 +8,6 @@ import numpy as np
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
-from .Problem import Problem
 from .Teacher import Teacher
 
 
@@ -38,7 +37,8 @@ class Activity:
         else:
             self._objective = objective
 
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         if self.is_instruction():
             self._excess_capacity = min(classroom.capacity, problem.max_batch)
@@ -107,40 +107,26 @@ class Activity:
         self.learners.append(learner)
         self._learners_set.add(learner)
 
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
-        if self.is_self_study():
-            module_id = problem.most_preferred[learner.id, 0]
-
-            objective = problem.preferences[learner.id, module_id]
-            objective -= problem.penalty
-
-            self._objective += objective
-        else:
-            self._objective += problem.preferences[learner.id, self.module.id]
-
+        self._objective += problem.preferences[learner.id, self.module.id]
         self._excess_capacity -= 1
 
     def can_remove_learner(self) -> bool:
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
+
         return self.num_learners > problem.min_batch
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
         self._learners_set.remove(learner)
 
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
-        if self.is_self_study():
-            module_id = problem.most_preferred[learner.id, 0]
-
-            objective = problem.preferences[learner.id, module_id]
-            objective -= problem.penalty
-
-            self._objective -= objective
-        else:
-            self._objective -= problem.preferences[learner.id, self.module.id]
-
+        self._objective -= problem.preferences[learner.id, self.module.id]
         self._excess_capacity += 1
 
     def remove_learners(self, learners: List[Learner]) -> int:
@@ -148,7 +134,8 @@ class Activity:
         Attempts to remove the learners in the passed-in list. Returns the
         actual number removed (from the start of the list).
         """
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
         removable = self.num_learners - problem.min_batch
 
         for learner in learners[:removable]:
@@ -161,7 +148,9 @@ class Activity:
         Tests if this activity can be split, that is, there are sufficient
         learners to break the activity up into two activities.
         """
-        return self.num_learners >= 2 * Problem().min_batch
+        from src.functions import get_problem
+        problem = get_problem()
+        return self.num_learners >= 2 * problem.min_batch
 
     def split_with(self, classroom: Classroom, teacher: Teacher) -> Activity:
         """
@@ -173,7 +162,8 @@ class Activity:
         Does not check whether whether the passed-in classroom and teacher are
         qualified for the activity's module.
         """
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         if self.module.is_self_study():
             splitter = min(self.num_learners // 2, classroom.capacity)
@@ -187,31 +177,23 @@ class Activity:
 
         activity = Activity(learners, classroom, teacher, self.module)
 
-        self._objective -= activity.objective()  # book-keeping on cached vars.
+        self._objective -= activity.objective()  # bookkeeping on cached vars.
         self._excess_capacity += len(learners)
 
         return activity
 
     def switch_to_self_study(self):
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         self._module = problem.self_study_module
-        self._objective -= problem.penalty * self.num_learners
+        self._objective = self._compute_objective()
 
     def _compute_objective(self):
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
+
         learner_ids = self.learner_ids()
-
-        if self.is_self_study():
-            # In self-study, everyone works on their most-preferred module,
-            # but at the cost of a controlled penalty.
-            modules = problem.most_preferred[learner_ids, 0]
-
-            objective = problem.preferences[learner_ids, modules].sum()
-            objective -= len(self.learners) * problem.penalty
-
-            return objective
-
         return problem.preferences[learner_ids, self.module.id].sum()
 
     def __str__(self):

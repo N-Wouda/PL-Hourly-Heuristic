@@ -1,8 +1,7 @@
 import sys
 
-import simplejson as json
-
-from src.classes import Problem
+from src.classes import Problem, Result
+from src.functions import set_problem
 from src.rules import RULES
 
 
@@ -10,7 +9,9 @@ def main():
     experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
     instance = int(sys.argv[2])
 
-    Problem.from_instance(experiment, instance)
+    data_loc = f"experiments/{experiment}/{instance}.json"
+    problem = Problem.from_file(data_loc)
+    set_problem(problem)
 
     valid = True
 
@@ -18,13 +19,12 @@ def main():
         path = f"experiments/{experiment}/{instance}-{method}.json"
 
         try:
-            with open(path) as file:
-                solution = [tuple(assignment) for assignment in json.load(file)]
-        except IOError:
+            result = Result.from_file(path)
+        except FileNotFoundError:
             print(f"{path}: solution file does not exist.")
         else:
             for rule in RULES:
-                if not rule(solution):
+                if not rule(result.assignments):
                     valid = False
                     print(f"{path}: solution violates {rule.__name__}.")
 

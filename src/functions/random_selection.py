@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import Generator
 
-from src.classes import Problem
+from .problem import get_problem
 from .learners_to_remove import learners_to_remove
 
 
@@ -11,7 +11,7 @@ def random_selection(generator: Generator):
     a certain list of num_learners length (e.g., for a cost computation),
     favouring smaller indices.
     """
-    problem = Problem()
+    problem = get_problem()
 
     triangle = np.arange(learners_to_remove(), 0, -1)
 

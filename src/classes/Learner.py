@@ -14,8 +14,8 @@ class Learner:
         """
         Tests if the learner is eligible to take the passed-in module.
         """
-        from .Problem import Problem
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
         return problem.preferences[self.id, module.id] > 0
 
@@ -25,12 +25,10 @@ class Learner:
         Tests if this learner prefers the passed-in module over the
         self-study assignment (when comparing objectives).
         """
-        from .Problem import Problem
-        problem = Problem()
+        from src.functions import get_problem
+        problem = get_problem()
 
-        self_study_mod = problem.most_preferred[self.id, 0]
-
-        self_study_pref = problem.preferences[self.id, self_study_mod]
-        self_study_pref -= problem.penalty
+        self_study_mod = problem.self_study_module
+        self_study_pref = problem.preferences[self.id, self_study_mod.id]
 
         return problem.preferences[self.id, module.id] > self_study_pref

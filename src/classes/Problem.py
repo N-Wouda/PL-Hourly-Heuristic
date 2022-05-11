@@ -1,38 +1,68 @@
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Any, Dict, List
 
 import numpy as np
-import simplejson as json
+from scipy import sparse
 
 from src.constants import SELF_STUDY_MODULE_ID
 from .Classroom import Classroom
 from .Learner import Learner
 from .Module import Module
-from .Singleton import Singleton
 from .Teacher import Teacher
 
 
-class Problem(metaclass=Singleton):
-    _data: Dict[str, Any]
+@dataclass(frozen=True)
+class Problem:
+    _data: Dict[str, Any] = field(hash=False)
 
     @classmethod
-    def from_instance(cls, experiment: int, instance: int) -> Problem:
+    def from_file(cls, loc: str) -> Problem:
         """
-        Builds a Problem object for the experiment data file associated with the
-        given experiment and instance.
+        Builds a Problem object for the experiment data file at the given
+        location.
         """
-        cls.clear()
-
-        with open(f"experiments/{experiment}/{instance}.json") as file:
+        with open(loc, "r") as file:
             data = json.load(file)
 
-        problem = cls()
-        problem._data = data
+        q = np.zeros((len(data['teachers']), len(data['modules'])))
 
-        return problem
+        for (t, m), qual in data['qualifications']:
+            q[t, m] = qual
+
+        p = np.zeros((len(data['learners']), len(data['modules'])))
+
+        for (l, m), pref in data['preferences']:
+            p[l, m] = pref
+
+        data = {**data, 'qualifications': q, 'preferences': p}
+        return cls(data)
+
+    def to_file(self, loc: str):
+        """
+        Writes the problem data to the given location.
+        """
+        with open(loc, "w") as file:
+            q = sparse.dok_matrix(self._data['qualifications'])
+            q = list([tuple(map(int, k)), int(v)] for k, v in q.items())
+
+            p = sparse.dok_matrix(self._data['preferences'])
+            p = list([tuple(map(int, k)), float(v)] for k, v in p.items())
+
+            data = {**self._data, 'qualifications': q, 'preferences': p}
+            json.dump(data, file)
+
+    def __eq__(self, other):
+        return (isinstance(other, Problem)
+                and self._data['experiment'] == other._data['experiment']
+                and self._data['instance'] == other._data['instance'])
+
+    def __hash__(self):
+        return hash(100 * self._data['experiment'] + self._data['instance'])
 
     @property
     @lru_cache(1)
@@ -182,14 +212,14 @@ class Problem(metaclass=Singleton):
         """
         Returns the self-study penalty.
         """
-        return self._data['parameters']['penalty']
+        return self._data['penalty']
 
     @property
     @lru_cache(1)
     def min_batch(self) -> int:
-        return self._data['parameters']['min_batch']
+        return self._data['min_batch']
 
     @property
     @lru_cache(1)
     def max_batch(self) -> int:
-        return self._data['parameters']['max_batch']
+        return self._data['max_batch']

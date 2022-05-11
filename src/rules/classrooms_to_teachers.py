@@ -1,18 +1,17 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def classrooms_to_teachers(solution: List[Tuple]) -> bool:
     """
     Verifies each classroom is assigned to only *one* teacher.
     """
-    problem = Problem()
+    problem = get_problem()
     classroom_teachers = defaultdict(set)
 
-    for assignment in solution:
-        *_, classroom, teacher = assignment
+    for *_, classroom, teacher in solution:
         classroom_teachers[classroom].add(teacher)
 
     if len(classroom_teachers) > len(problem.classrooms):

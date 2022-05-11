@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.classes import Problem
+from src.functions import get_problem
 
 
 def learners_to_modules(solution: List[Tuple]) -> bool:
@@ -9,11 +9,10 @@ def learners_to_modules(solution: List[Tuple]) -> bool:
     Verifies each learner is assigned to *one* module, and all learners are
     assigned.
     """
-    problem = Problem()
+    problem = get_problem()
     learner_modules = defaultdict(set)
 
-    for assignment in solution:
-        learner, module, *_ = assignment
+    for learner, module, *_ in solution:
         learner_modules[learner].add(module)
 
     if len(learner_modules) != problem.num_learners:

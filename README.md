@@ -21,7 +21,7 @@ The analysis tool is available in `src/analyse.py`. It can be used to analyse re
 from an ILP or heuristic run on an entire experiment. Usage,
 
 ```
-pipenv run python -m src.analyse heuristic 1
+poetry run python -m src.analyse heuristic 1
 ```
 
 Which analyses the heuristic output in experiment `1`. If an output does not
@@ -49,7 +49,7 @@ operators to achieve a reasonable solution in little time. No
 optimality guarantees are made. Usage,
 
 ```
-pipenv run python -m src.heuristic 1 5
+poetry run python -m src.heuristic 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -63,7 +63,7 @@ this. Furthermore, the ILP relies on Gurobi, which is commercial
 software. Usage,
 
 ```
-pipenv run python -m src.ilp 1 5
+poetry run python -m src.ilp 1 5
 ```
 
 For experiment `1`, instance `5`. The assignment output will be written
@@ -76,7 +76,7 @@ instance arguments, the validator confirms the ILP and heuristic
 solutions (where available) satisfy the problem constraints. Usage,
 
 ```
-pipenv run python -m src.validator 1 5
+poetry run python -m src.validator 1 5
 ```
 
 For experiment `1`, instance `5`. An exit code of `0` indicates the ILP and

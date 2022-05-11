@@ -4,7 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.classes import Problem, Solution
+from src.classes import Problem, Result
+from src.functions import set_problem
 from src.measures import MEASURES
 
 pd.set_option('display.max_rows', None)  # display all rows.
@@ -30,15 +31,19 @@ def compute(parser, args):
     measures = []
 
     for instance in np.arange(1, 101):
-        location = Path(f"experiments/{args.experiment}/"
-                        f"{instance}-{args.method}.json")
+        data_loc = f"experiments/{args.experiment}/{instance}.json"
+        problem = Problem.from_file(data_loc)
+        set_problem(problem)
 
-        if not location.exists():
-            print(f"{parser.prog}: {location} does not exist; skipping.")
+        res_loc = Path(f"experiments/{args.experiment}/"
+                       f"{instance}-{args.method}.json")
+
+        if not res_loc.exists():
+            print(f"{parser.prog}: {res_loc} does not exist; skipping.")
             continue
 
-        Problem.from_instance(args.experiment, instance)
-        sol = Solution.from_file(location)
+        res = Result.from_file(res_loc)
+        sol = res.solution
 
         measures.append({name: fn(sol) for name, fn in MEASURES.items()})
 

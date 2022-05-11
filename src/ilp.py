@@ -2,21 +2,54 @@ import argparse
 from collections import defaultdict
 from typing import List, Tuple
 
-import simplejson as json
-from gurobipy import GRB, Model
+import numpy as np
+from gurobipy import GRB, MVar, Model
 
-from src.classes import Problem
+from src.classes import Problem, Result
 from src.constants import SELF_STUDY_MODULE_ID
+from src.functions import get_problem, set_problem
 
 
-def ilp() -> List[Tuple]:
+def ilp() -> Result:
     """
     Solves the integer linear programming (ILP) formulation of the hourly
     learner preference problem.
     """
-    m = Model()
+    m, x, y = _make_model()
 
-    problem = Problem()
+    run_times = []
+    upper_bounds = []
+    lower_bounds = []
+
+    def callback(model: Model, where: int):
+        if where != GRB.Callback.MIP:
+            return
+
+        upper_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBND))
+        lower_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBST))
+        run_times.append(model.cbGet(GRB.Callback.RUNTIME))
+
+    m.modelSense = GRB.MAXIMIZE
+    m.optimize(callback)  # type: ignore
+
+    lower_bounds.append(m.objVal)
+    upper_bounds.append(m.objBound)
+    run_times.append(m.runTime)
+
+    assignments = _to_assignments(x.getAttr('X'), y.getAttr('X'))
+    run_times = np.diff(run_times, prepend=0).tolist()
+
+    return Result(assignments,
+                  m.objVal,
+                  run_times,
+                  lower_bounds,
+                  upper_bounds)
+
+
+def _make_model() -> Tuple[Model, MVar, MVar]:
+    m = Model()
+    problem = get_problem()
+
     x = m.addMVar((len(problem.modules),
                    len(problem.classrooms),
                    len(problem.teachers)),
@@ -25,11 +58,9 @@ def ilp() -> List[Tuple]:
 
     y = m.addMVar((len(problem.learners), len(problem.modules)),
                   vtype=GRB.BINARY,
+                  obj=problem.preferences,  # noqa
+                  ub=problem.preferences > 0,  # preference indicator
                   name="learner_module")
-
-    m.setObjective((problem.preferences * y).sum(), GRB.MAXIMIZE)
-
-    m.addConstr(y <= (problem.preferences > 0), "preference indicator")
 
     for learner in range(problem.num_learners):
         m.addConstr(y[learner, :].sum() == 1, "assignment")
@@ -51,42 +82,34 @@ def ilp() -> List[Tuple]:
 
         for classroom in problem.classrooms:
             lhs = x[module.id, classroom.id, :].sum()
-            rhs = classroom.is_qualified_for(module)
+            rhs = int(classroom.is_qualified_for(module))
 
             m.addConstr(lhs <= rhs, "room type")
 
         for teacher in problem.teachers:
             lhs = x[module.id, :, teacher.id].sum()
-            rhs = teacher.is_qualified_for(module)
+            rhs = int(teacher.is_qualified_for(module))
 
             m.addConstr(lhs <= rhs, "teacher qualification")
 
     for teacher in problem.teachers:
-        m.addConstr(x[:, :, teacher.id].sum(1) <= 1, "single use teacher")
+        m.addConstr(x[:, :, teacher.id].sum() <= 1, "single use teacher")
 
     for classroom in problem.classrooms:
         m.addConstr(x[:, classroom.id, :].sum() <= 1, "single use classroom")
 
-    status = m.optimize()
-
-    if status != GRB.Status.OPTIMAL:
-        # There is not much that can be done in this case, so we raise an
-        # error. Logging should pick this up, but it is nearly impossible
-        # for this to happen due to the problem structure.
-        raise ValueError("Infeasible!")
-
-    return _to_assignments(x.getAttr('X'), y.getAttr('X'))
+    return m, x, y
 
 
-def _to_assignments(x, y) -> List[Tuple]:
+def _to_assignments(x, y) -> List[List[int]]:
     """
     Turns the solver's decision variables into a series of (learner, module,
     classroom, teacher) assignments, which are then stored to the file system.
 
-    TODO this is legacy code, taken from the old State object. It's not the
-     prettiest, but it should work.
+    This is legacy code, taken from the old State object. It is not the
+    prettiest, but it works.
     """
-    problem = Problem()
+    problem = get_problem()
 
     learner_assignments = [module
                            for learner in range(len(problem.learners))
@@ -146,7 +169,7 @@ def _to_assignments(x, y) -> List[Tuple]:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog="heuristic")
+    parser = argparse.ArgumentParser(prog="ilp")
 
     parser.add_argument("experiment", type=str)
     parser.add_argument("instance", type=int)
@@ -160,13 +183,16 @@ def parse_args():
 def main():
     args = parse_args()
 
-    Problem.from_instance(args.experiment, args.instance)
-
-    result = ilp()
+    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
     res_loc = f"experiments/{args.experiment}/{args.instance}-ilp.json"
 
-    with open(res_loc, "w") as file:
-        json.dump(result, file)
+    problem = Problem.from_file(data_loc)
+    set_problem(problem)
+
+    result = ilp()
+    result.to_file(res_loc)
+
+    print(result)
 
 
 if __name__ == "__main__":

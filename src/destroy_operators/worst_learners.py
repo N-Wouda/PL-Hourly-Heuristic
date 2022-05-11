@@ -3,7 +3,7 @@ from copy import deepcopy
 import numpy as np
 from numpy.random import Generator
 
-from src.classes import Problem, Solution
+from src.classes import Solution
 from src.functions import random_selection
 
 
@@ -13,9 +13,10 @@ def worst_learners(current: Solution, generator: Generator):
     and current assignments. Using a skewed distribution, q of the worst cost
     learners are randomly selected and removed from the solution.
     """
-    destroyed = deepcopy(current)
+    from src.functions import get_problem
+    problem = get_problem()
 
-    problem = Problem()
+    destroyed = deepcopy(current)
     costs = np.zeros(problem.num_learners)
 
     assigned_activities = {}

@@ -1,5 +1,4 @@
 import argparse
-import time
 from collections import defaultdict
 from typing import List, Tuple
 
@@ -18,32 +17,32 @@ def ilp() -> Result:
     """
     m, x, y = _make_model()
 
-    start_time = time.perf_counter()
     run_times = []
     upper_bounds = []
-    incumbent_objs = []
+    lower_bounds = []
 
     def callback(model: Model, where: int):
-        if where != GRB.Callback.MIPSOL:
+        if where != GRB.Callback.MIP:
             return
 
-        obj = model.cbGet(GRB.Callback.MIPSOL_OBJ)
-        bnd = model.cbGet(GRB.Callback.MIPSOL_OBJBND)
-
-        upper_bounds.append(bnd)
-        incumbent_objs.append(obj)
-        run_times.append((time.perf_counter() - start_time))
+        upper_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBND))
+        lower_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBST))
+        run_times.append(model.cbGet(GRB.Callback.RUNTIME))
 
     m.modelSense = GRB.MAXIMIZE
     m.optimize(callback)  # type: ignore
 
+    lower_bounds.append(m.objVal)
+    upper_bounds.append(m.objBound)
+    run_times.append(m.runTime)
+
     assignments = _to_assignments(x.getAttr('X'), y.getAttr('X'))
-    run_times = np.diff(run_times, prepend=run_times[0]).tolist()
+    run_times = np.diff(run_times, prepend=0).tolist()
 
     return Result(assignments,
                   m.objVal,
                   run_times,
-                  incumbent_objs,
+                  lower_bounds,
                   upper_bounds)
 
 

@@ -4,6 +4,9 @@ import json
 from dataclasses import dataclass
 from typing import List
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from .Solution import Solution
 
 
@@ -33,6 +36,25 @@ class Result:
     def to_file(self, loc: str):
         with open(loc, "w") as fh:
             json.dump(vars(self), fh)
+
+    def plot_convergence(self):
+        x = np.cumsum(self.run_times)
+        lbs = np.array(self.lbs)
+        ubs = np.array(self.ubs)
+
+        _, ax = plt.subplots(figsize=(12, 8))
+
+        ax.plot(x[lbs > 0], lbs[lbs > 0], label="Lower bound")
+        ax.plot(x[lbs > 0], ubs[lbs > 0], label="Upper bound")
+        ax.plot(x[-1], self.objective, 'r*', markersize=18, label="Optimal")
+
+        ax.set_xlabel("Run-time (s)")
+        ax.set_ylabel("Objective")
+        ax.set_title("Convergence plot")
+        ax.legend(frameon=False)
+
+        plt.tight_layout()
+        plt.show()
 
     def __str__(self):
         lb = self.lbs[-1]

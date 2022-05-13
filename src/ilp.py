@@ -105,23 +105,8 @@ def _to_assignments(x, y) -> List[List[int]]:
     """
     Turns the solver's decision variables into a series of (learner, module,
     classroom, teacher) assignments, which are then stored to the file system.
-
-    This is legacy code, taken from the old State object. It is not the
-    prettiest, but it works.
     """
     problem = get_problem()
-
-    learner_assignments = [module
-                           for learner in range(len(problem.learners))
-                           for module in range(len(problem.modules))
-                           if y[learner, module] > 0]
-
-    classroom_teacher_assignments = {
-        (classroom, teacher): module
-        for classroom in range(len(problem.classrooms))
-        for teacher in range(len(problem.teachers))
-        for module in range(len(problem.modules))
-        if x[module, classroom, teacher] > 0}
 
     assignments = []
     counters = defaultdict(lambda: 0)
@@ -129,23 +114,21 @@ def _to_assignments(x, y) -> List[List[int]]:
     for module in range(len(problem.modules)):
         # Select learners and activities belonging to each module, such
         # that we can assign them below.
-        learners = [learner for learner in range(len(problem.learners))
-                    if learner_assignments[learner] == module]
+        learners = [learner
+                    for learner in range(len(problem.learners))
+                    if y[learner, module] > .5]
 
-        activities = [activity for activity, activity_module
-                      in classroom_teacher_assignments.items()
-                      if module == activity_module]
+        activities = [(classroom, teacher)
+                      for classroom in range(len(problem.classrooms))
+                      for teacher in range(len(problem.teachers))
+                      if x[module, classroom, teacher] > .5]
 
         # Assign at least min_batch number of learners to each activity.
         # This ensures the minimum constraint is met for all activities.
         for classroom, teacher in activities:
             for _ in range(problem.min_batch):
-                if not learners:
-                    break
-
                 assignment = (learners.pop(), module, classroom, teacher)
                 assignments.append(list(assignment))
-
                 counters[classroom] += 1
 
         # Next we flood-fill these activities with learners, until none
@@ -156,15 +139,12 @@ def _to_assignments(x, y) -> List[List[int]]:
             if module != SELF_STUDY_MODULE_ID:
                 capacity = min(problem.max_batch, capacity)
 
-            while learners:
-                if counters[classroom] == capacity:  # classroom is full
-                    break
-
+            while learners and counters[classroom] < capacity:
                 assignment = (learners.pop(), module, classroom, teacher)
                 assignments.append(list(assignment))
-
                 counters[classroom] += 1
 
+    assert len(assignments) == problem.num_learners
     return assignments
 
 

@@ -18,7 +18,7 @@ from src.classes import Problem
 
 
 def parameter_levels() -> dict[str, Any]:
-    learners = [800, 1600, 2400]
+    learners = [800, 1200, 1600]
     instances = [100]
     penalty = [.5, .75]
     min_batch = [5]
@@ -94,7 +94,7 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
             ))
 
     # - self-study classrooms.
-    learners2numselfstudy = {800: 3, 1600: 6, 2400: 9}
+    learners2numselfstudy = {800: 3, 1200: 4, 1600: 6}
     for _ in range(learners2numselfstudy[values['learners']]):
         classrooms.append(dict(
             id=next(idx),
@@ -124,9 +124,8 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     module = 0
     teacher = 0
 
-    learn2teach = {800: 80, 1600: 160, 2400: 240}
     assignment = round_integers(by_idx=True,
-                                num_values=learn2teach[values['learners']])
+                                num_values=values['learners'] // 10)
 
     for course, num_teachers in assignment.items():
         distribution = [float(num_teachers * values['qualifications'][degree])
@@ -145,7 +144,7 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     exp_dir = Path(f"experiments/{experiment}/")
     exp_dir.mkdir(parents=True, exist_ok=True)
 
-    for instance in range(1, 101):
+    for instance in range(1, values['instances'] + 1):
         # 6. Create the instance-specific learner preferences.
         preferences = np.zeros((len(learners), len(modules)))
 

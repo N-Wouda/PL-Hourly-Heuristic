@@ -147,6 +147,9 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     for instance in range(1, values['instances'] + 1):
         # 5. Create the instance-specific learner preferences.
         preferences = np.zeros((len(learners), len(modules)))
+        norm_vals = norm.rvs(loc=0,
+                             scale=values['progress'],
+                             size=(len(learners), len(values['courses'])))
 
         for course, _ in enumerate(values['courses']):
             prefs = expon.rvs(scale=values['preferences'],
@@ -154,7 +157,7 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
 
             for idx, learner in enumerate(learners):
                 midpoint = 8 * (learner['year'] - 1) + 4
-                norm_val = norm.rvs(loc=midpoint, scale=values['progress'])
+                norm_val = midpoint + norm_vals[idx, course]
                 loc = min(max(int(round(norm_val)), 0), values['modules'] - 1)
 
                 preferences[idx, values['modules'] * course + loc] \

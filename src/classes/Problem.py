@@ -29,17 +29,12 @@ class Problem:
         with open(loc, "r") as file:
             data = json.load(file)
 
-        q = np.zeros((len(data['teachers']), len(data['modules'])))
-
-        for (t, m), qual in data['qualifications']:
-            q[t, m] = qual
-
         p = np.zeros((len(data['learners']), len(data['modules'])))
 
         for (l, m), pref in data['preferences']:
             p[l, m] = pref
 
-        data = {**data, 'qualifications': q, 'preferences': p}
+        data = {**data, 'preferences': p}
         return cls(data)
 
     def to_file(self, loc: str):
@@ -47,13 +42,10 @@ class Problem:
         Writes the problem data to the given location.
         """
         with open(loc, "w") as file:
-            q = sparse.dok_matrix(self._data['qualifications'])
-            q = list([tuple(map(int, k)), int(v)] for k, v in q.items())
-
             p = sparse.dok_matrix(self._data['preferences'])
             p = list([tuple(map(int, k)), float(v)] for k, v in p.items())
 
-            data = {**self._data, 'qualifications': q, 'preferences': p}
+            data = {**self._data, 'preferences': p}
             json.dump(data, file)
 
     def __eq__(self, other):
@@ -136,18 +128,6 @@ class Problem:
 
     @property
     @lru_cache(1)
-    def qualifications(self) -> np.ndarray:
-        """
-        Returns the teacher qualification matrix, as a NumPy array.
-        Qualifications are a matrix of teachers (rows) to modules (columns),
-        where each element represents the given teacher's qualification for
-        the given module. A zero element indicates the teacher is not qualified
-        to teach the given module.
-        """
-        return np.asarray(self._data['qualifications'], dtype=int)
-
-    @property
-    @lru_cache(1)
     def learners(self) -> List[Learner]:
         return [Learner(**data) for data in self._data['learners']]
 
@@ -161,13 +141,8 @@ class Problem:
     def teachers_by_module(self) -> Dict[Module, List[Teacher]]:
         grouped = defaultdict(list)
 
-        by_module = np.argsort(-self.qualifications, axis=1)
-
         for teacher in self.teachers:
-            for module_id in by_module[teacher.id]:
-                if self.qualifications[teacher.id, module_id] == 0:
-                    break
-
+            for module_id in range(teacher.frm_module, teacher.to_module):
                 grouped[self.modules[module_id]].append(teacher)
 
         return grouped

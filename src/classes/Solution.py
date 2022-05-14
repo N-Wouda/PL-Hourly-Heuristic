@@ -102,9 +102,8 @@ class Solution(State):
 
         for teacher in available_teachers:
             if teacher.is_qualified_for(module):
-                qualification = problem.qualifications[teacher.id, module.id]
                 heappush(qualified_teachers,
-                         (-qualification, teacher.id, teacher))
+                         (-teacher.degree, teacher.id, teacher))
 
         if not qualified_teachers:
             raise LookupError(f"No qualified, available teachers for {module}.")

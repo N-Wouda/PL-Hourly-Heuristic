@@ -13,6 +13,7 @@ from typing import Any
 import numpy as np
 from iteround import saferound
 from pyDOE2 import fullfact
+from scipy.stats import expon, norm
 
 from src.classes import Problem
 
@@ -24,6 +25,7 @@ def parameter_levels() -> dict[str, Any]:
     min_batch = [5]
     max_batch = [30]
     progress = [0, 1, 2, 3]
+    preferences = [2]  # mean value for the exponential distribution
     qualifications = [(1, 0, 0), (0.5, 0.5, 0), (0.4, 0.4, 0.2)]
     split = [True, False]
     courses = [[(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3), (1, 4),
@@ -39,6 +41,9 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     instances discussed in the paper. This function is legacy code, and has
     mostly been copied verbatim from the bachelor thesis implementation.
     """
+    exp_dir = Path(f"experiments/{experiment}/")
+    exp_dir.mkdir(parents=True, exist_ok=True)
+
     def round_integers(*,
                        by_idx: bool = False,
                        by_roomtype: bool = False,
@@ -81,14 +86,14 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
     classrooms_by_room_type = round_integers(
         by_roomtype=True,
         # number of regular classrooms for this many learners.
-        num_values=values['learners'] // 20
+        num_values=values['learners'] // (10 if values['split'] else 20)
     )
 
     for room_type, num_classrooms in classrooms_by_room_type.items():
         for classroom in range(num_classrooms):
             classrooms.append(dict(
                 id=next(idx),
-                capacity=32,
+                capacity=16 if values['split'] else 32,
                 self_study_allowed=room_type == 1,
                 room_type=room_type
             ))
@@ -114,12 +119,8 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
                                 room_type=room_type,
                                 qualification=2 - is_first))  # bool as int
 
-    # 4. Create teacher data.
+    # 4. Create teacher data, including qualifications.
     teachers = [dict(id=idx) for idx in range(values['learners'] // 10)]
-
-    # 5. Create teacher qualification matrix.
-    qualifications = np.zeros((values['learners'] // 10,
-                               len(values['courses']) * values['modules']))
 
     module = 0
     teacher = 0
@@ -134,33 +135,36 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
         teachers_by_qualification = saferound(distribution, places=0)
 
         for degree, value in enumerate(map(int, teachers_by_qualification), 1):
-            qualifications[teacher:teacher + value,
-                           module: module + values['modules']] = degree
+            for _ in range(value):
+                teachers[teacher]['degree'] = degree
+                teachers[teacher]['frm_module'] = module
+                teachers[teacher]['to_module'] = module + values['modules']
 
-            teacher += value
+                teacher += 1
 
         module += values['modules']
 
-    exp_dir = Path(f"experiments/{experiment}/")
-    exp_dir.mkdir(parents=True, exist_ok=True)
-
     for instance in range(1, values['instances'] + 1):
-        # 6. Create the instance-specific learner preferences.
+        # 5. Create the instance-specific learner preferences.
         preferences = np.zeros((len(learners), len(modules)))
 
         for course, _ in enumerate(values['courses']):
-            prefs = np.random.exponential(scale=2, size=(len(learners),))
+            prefs = expon.rvs(scale=values['preferences'],
+                              size=(len(learners),))
 
             for idx, learner in enumerate(learners):
-                loc = 8 * (learner['year'] - 1) + 4  # midpoint in each year
-                preferences[idx, values['modules'] * course + loc] = prefs[idx]
+                midpoint = 8 * (learner['year'] - 1) + 4
+                norm_val = norm.rvs(loc=midpoint, scale=values['progress'])
+                loc = min(max(int(round(norm_val)), 0), values['modules'] - 1)
 
-        # 7. Create instance and write to file.
+                preferences[idx, values['modules'] * course + loc] \
+                    = round(prefs[idx], 3)
+
+        # 6. Create instance and write to file.
         problem = Problem(dict(
             experiment=experiment,
             instance=instance,
             preferences=preferences,
-            qualifications=qualifications,
             learners=learners,
             classrooms=classrooms,
             modules=modules,

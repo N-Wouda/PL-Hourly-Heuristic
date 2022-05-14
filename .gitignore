@@ -63,9 +63,7 @@ target/
 # Data
 experiments/**/*.json
 experiments/**/*.csv
-experiments_old/**/*.json
-experiments_old/**/*.yaml
-experiments_old/**/parameters.txt
+experiments_old/*
 *.zip
 
 .ipynb_checkpoints/

@@ -62,11 +62,11 @@ target/
 
 # Data
 experiments/**/*.json
-experiments/**/*.yaml
-experiments/**/parameters.txt
+experiments/**/*.csv
 experiments_old/**/*.json
 experiments_old/**/*.yaml
 experiments_old/**/parameters.txt
+*.zip
 
 .ipynb_checkpoints/
 _analysis/

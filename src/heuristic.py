@@ -1,6 +1,7 @@
 import argparse
 import time
 
+import numpy as np
 import numpy.random as rnd
 from alns import ALNS
 from alns.weight_schemes import SimpleWeights
@@ -26,36 +27,26 @@ def parse_args():
     return args
 
 
-def main():
-    args = parse_args()
-
-    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
-    problem = Problem.from_file(data_loc)
-    set_problem(problem)
-
-    if args.experiment == "tuning":
-        generator = rnd.default_rng(args.instance)
+def run_alns(experiment, instance, exclude):
+    if experiment == "tuning":
+        generator = rnd.default_rng(instance)
     else:
         # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for
         # inst. 100, there will never be overlap between random number streams
         # across experiments.
-        generator = rnd.default_rng(100 * args.experiment + args.instance)
+        generator = rnd.default_rng(100 * experiment + instance)
 
     alns = ALNS(generator)  # noqa
 
     for operator in DESTROY_OPERATORS:
-        if args.exclude == operator.__name__:
-            continue
-
-        alns.add_destroy_operator(operator)
+        if exclude != operator.__name__:
+            alns.add_destroy_operator(operator)
 
     for operator in REPAIR_OPERATORS:
-        if args.exclude == operator.__name__:
-            continue
+        if exclude != operator.__name__:
+            alns.add_repair_operator(operator)
 
-        alns.add_repair_operator(operator)
-
-    if args.exclude == "reinsert_learner":
+    if exclude != "reinsert_learner":
         alns.on_best(reinsert_learner)
 
     init = initial_solution()
@@ -65,16 +56,30 @@ def main():
                             len(alns.repair_operators),
                             DECAY)
 
-    start = time.perf_counter()
-
     res = alns.iterate(init, weights, criterion, ITERATIONS)
-    res = Result(res.best_state.get_assignments(),  # noqa
-                 res.best_state.objective(),
-                 [time.perf_counter() - start],
-                 [res.best_state.objective()],
-                 [float("inf")])
+    lbs = -np.minimum.accumulate(res.statistics.objectives[1:])
+    ubs = [float("inf")] * ITERATIONS
 
-    res.to_file(f"experiments/{args.experiment}/{args.instance}-heuristic.json")
+    return Result(res.best_state.get_assignments(),  # noqa
+                  -res.best_state.objective(),
+                  res.statistics.runtimes.tolist(),
+                  lbs.tolist(),
+                  ubs)
+
+
+def main():
+    args = parse_args()
+
+    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
+    res_loc = f"experiments/{args.experiment}/{args.instance}-heuristic.json"
+
+    problem = Problem.from_file(data_loc)
+    set_problem(problem)
+
+    res = run_alns(**vars(args))
+    res.to_file(res_loc)
+
+    print(res)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ import pandas as pd
 
 from src.classes import Problem, Result
 from src.functions import set_problem
-from src.measures import MEASURES
 
 pd.set_option('display.max_rows', None)  # display all rows.
 pd.set_option('display.float_format', '{:.2f}'.format)  # two decimals.
@@ -43,11 +42,9 @@ def compute(parser, args):
             continue
 
         res = Result.from_file(res_loc)
-        sol = res.solution
+        measures.append(dict(instance=instance) | res.measures())
 
-        measures.append({name: fn(sol) for name, fn in MEASURES.items()})
-
-    return pd.DataFrame.from_records(measures, columns=MEASURES.keys())
+    return pd.DataFrame.from_records(measures)
 
 
 def main():

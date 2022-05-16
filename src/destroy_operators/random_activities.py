@@ -2,11 +2,13 @@ from copy import deepcopy
 
 from numpy.random import Generator
 
-from src.classes import Solution
+from src.classes import Problem, Solution
 from src.functions import learners_to_remove
 
 
-def random_activities(current: Solution, generator: Generator) -> Solution:
+def random_activities(current: Solution,
+                      generator: Generator,
+                      problem: Problem) -> Solution:
     """
     Randomly removes whole activities from the solution, until at least q
     learners have been removed.

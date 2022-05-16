@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
+from dataclasses import dataclass
 from typing import List, Optional
 
 import numpy as np
@@ -11,44 +12,13 @@ from .Module import Module
 from .Teacher import Teacher
 
 
+@dataclass
 class Activity:
-    _learners: List[Learner]
-    _classroom: Classroom
-    _teacher: Teacher
-    _module: Module
-    _objective: float
-    _excess_capacity: int  # num learners that can be added to this activity
-
-    def __init__(self,
-                 learners: List[Learner],
-                 classroom: Classroom,
-                 teacher: Teacher,
-                 module: Module,
-                 objective: Optional[float] = None):
-        self._learners = learners
-        self._learners_set = set(learners)
-
-        self._classroom = classroom
-        self._teacher = teacher
-        self._module = module
-
-        if objective is None:
-            self._objective = self._compute_objective()
-        else:
-            self._objective = objective
-
-        from src.functions import get_problem
-        problem = get_problem()
-
-        if self.is_instruction():
-            self._excess_capacity = min(classroom.capacity, problem.max_batch)
-        else:
-            self._excess_capacity = classroom.capacity
-
-        self._excess_capacity -= self.num_learners
-
-    def __contains__(self, learner: Learner) -> bool:
-        return learner in self._learners_set
+    learners: List[Learner]
+    classroom: Classroom
+    teacher: Teacher
+    module: Module
+    _objective: Optional[float] = None
 
     def __deepcopy__(self, memo={}) -> Activity:
         # This is not an *actual* deepcopy, but that's also not necessary
@@ -64,34 +34,13 @@ class Activity:
     def num_learners(self) -> int:
         return len(self.learners)
 
-    @property
-    def learners(self) -> List[Learner]:
-        return self._learners
-
-    @property
-    def classroom(self) -> Classroom:
-        return self._classroom
-
-    @classroom.setter
-    def classroom(self, classroom: Classroom):
-        self._classroom = classroom
-
-    @property
-    def teacher(self) -> Teacher:
-        return self._teacher
-
-    @teacher.setter
-    def teacher(self, teacher: Teacher):
-        self._teacher = teacher
-
-    @property
-    def module(self) -> Module:
-        return self._module
-
     def learner_ids(self) -> np.ndarray:
         return np.array([learner.id for learner in self.learners])
 
     def objective(self):
+        if self._objective is None:
+            self._objective = self._compute_objective()
+
         return self._objective
 
     def is_self_study(self) -> bool:
@@ -100,34 +49,28 @@ class Activity:
     def is_instruction(self) -> bool:
         return not self.is_self_study()
 
-    def can_insert_learner(self) -> bool:
-        return self._excess_capacity > 0
+    def can_insert_learner(self, if_self_study: bool = False) -> bool:
+        """
+        Tests if the passed-in learner can be inserted into this activity.
+        The optional argument determines whether the learner could be inserted,
+        should this activity be (converted to) self-study.
+        """
+        if self.is_self_study() or if_self_study:
+            return self.num_learners < self.classroom.capacity
+
+        from src.functions import get_problem
+        problem = get_problem()
+
+        return self.num_learners < min(problem.max_batch,
+                                       self.classroom.capacity)
 
     def insert_learner(self, learner: Learner):
         self.learners.append(learner)
-        self._learners_set.add(learner)
-
-        from src.functions import get_problem
-        problem = get_problem()
-
-        self._objective += problem.preferences[learner.id, self.module.id]
-        self._excess_capacity -= 1
-
-    def can_remove_learner(self) -> bool:
-        from src.functions import get_problem
-        problem = get_problem()
-
-        return self.num_learners > problem.min_batch
+        self._objective = None
 
     def remove_learner(self, learner: Learner):
         self.learners.remove(learner)
-        self._learners_set.remove(learner)
-
-        from src.functions import get_problem
-        problem = get_problem()
-
-        self._objective -= problem.preferences[learner.id, self.module.id]
-        self._excess_capacity += 1
+        self._objective = None
 
     def remove_learners(self, learners: List[Learner]) -> int:
         """
@@ -173,28 +116,23 @@ class Activity:
                            problem.max_batch)
 
         learners = self.learners[-splitter:]
-        self._learners = self.learners[:-splitter]
+        self.learners = self.learners[:-splitter]
+        self._objective = None
 
-        activity = Activity(learners, classroom, teacher, self.module)
-
-        self._objective -= activity.objective()  # bookkeeping on cached vars.
-        self._excess_capacity += len(learners)
-
-        return activity
+        return Activity(learners, classroom, teacher, self.module)
 
     def switch_to_self_study(self):
         from src.functions import get_problem
         problem = get_problem()
 
-        self._module = problem.self_study_module
-        self._objective = self._compute_objective()
+        self.module = problem.self_study_module
+        self._objective = None
 
     def _compute_objective(self):
         from src.functions import get_problem
         problem = get_problem()
 
-        learner_ids = self.learner_ids()
-        return problem.preferences[learner_ids, self.module.id].sum()
+        return problem.preferences[self.learner_ids(), self.module.id].sum()
 
     def __str__(self):
         return (f"(#{self.num_learners},"

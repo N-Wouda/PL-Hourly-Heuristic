@@ -1,5 +1,4 @@
 import argparse
-import time
 
 import numpy as np
 import numpy.random as rnd
@@ -27,7 +26,7 @@ def parse_args():
     return args
 
 
-def run_alns(experiment, instance, exclude):
+def run_alns(experiment, instance, exclude, problem):
     if experiment == "tuning":
         generator = rnd.default_rng(instance)
     else:
@@ -56,13 +55,13 @@ def run_alns(experiment, instance, exclude):
                             len(alns.repair_operators),
                             DECAY)
 
-    res = alns.iterate(init, weights, criterion, ITERATIONS)
+    res = alns.iterate(init, weights, criterion, ITERATIONS, problem=problem)
     lbs = -np.minimum.accumulate(res.statistics.objectives[1:])
     ubs = [float("inf")] * ITERATIONS
 
     return Result(res.best_state.get_assignments(),  # noqa
                   -res.best_state.objective(),
-                  res.statistics.runtimes.tolist(),
+                  res.statistics.runtimes.tolist(),  # noqa
                   lbs.tolist(),
                   ubs)
 
@@ -76,7 +75,7 @@ def main():
     problem = Problem.from_file(data_loc)
     set_problem(problem)
 
-    res = run_alns(**vars(args))
+    res = run_alns(**vars(args), problem=problem)
     res.to_file(res_loc)
 
     print(res)

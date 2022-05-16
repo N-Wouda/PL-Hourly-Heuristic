@@ -48,14 +48,6 @@ class Problem:
             data = {**self._data, 'preferences': p}
             json.dump(data, file)
 
-    def __eq__(self, other):
-        return (isinstance(other, Problem)
-                and self._data['experiment'] == other._data['experiment']
-                and self._data['instance'] == other._data['instance'])
-
-    def __hash__(self):
-        return hash(100 * self._data['experiment'] + self._data['instance'])
-
     @property
     @lru_cache(1)
     def instance(self) -> int:

@@ -2,18 +2,17 @@ from operator import attrgetter, methodcaller
 
 from numpy.random import Generator
 
-from src.classes import Activity, Solution
-from src.functions import get_problem
+from src.classes import Activity, Problem, Solution
 
 
-def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
+def greedy_insert(destroyed: Solution,
+                  generator: Generator,
+                  problem: Problem) -> Solution:
     """
     Greedily inserts learners into the best, feasible activities. If no
     activity can be found for a learner, (s)he is inserted into self-study
     instead.
     """
-    problem = get_problem()
-
     unused_teachers = set(problem.teachers) - destroyed.used_teachers()
 
     unused_classrooms = set(problem.classrooms) - destroyed.used_classrooms()
@@ -61,7 +60,7 @@ def greedy_insert(destroyed: Solution, generator: Generator) -> Solution:
                             if activity.classroom.is_self_study_allowed()
                             # After switching to self-study, the max_batch
                             # constraint is longer applicable - only capacity.
-                            if activity.num_learners < activity.classroom.capacity]
+                            if activity.can_insert_learner(if_self_study=True)]
 
                 activity = min(iterable, key=methodcaller("objective"))
 

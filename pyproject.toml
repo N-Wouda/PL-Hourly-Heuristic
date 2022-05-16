@@ -13,8 +13,8 @@ gurobipy = "^9.5.1"
 scipy = "^1.8.0"
 pyDOE2 = "^1.3.0"
 iteround = "^1.0.4"
-alns = "2.1.1"
 matplotlib = "^3.5.2"
+alns = "2.1.2"
 
 [tool.poetry.dev-dependencies]
 

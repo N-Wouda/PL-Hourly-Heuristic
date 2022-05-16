@@ -10,7 +10,7 @@ class Learner:
     year: int
 
     @lru_cache(None)
-    def is_qualified_for(self, module: Module) -> bool:
+    def is_eligible_for(self, module: Module) -> bool:
         """
         Tests if the learner is eligible to take the passed-in module.
         """

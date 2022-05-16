@@ -1,6 +1,6 @@
 [[package]]
 name = "alns"
-version = "2.1.1"
+version = "2.1.2"
 description = "A flexible implementation of the adaptive large neighbourhood search (ALNS) algorithm."
 category = "main"
 optional = false
@@ -226,12 +226,12 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "9f548d01d46db6770a7c015d6549c611a5c1edc14203157860e8422982ff69af"
+content-hash = "77ed56a09d49cdd0ff4cb38f9b5f1aa154badfb7a563f16d44376a5709e6ff3e"
 
 [metadata.files]
 alns = [
-    {file = "alns-2.1.1-py3-none-any.whl", hash = "sha256:28a8826a09ec501d9e6b343ebff873d1235e34c925004841855f711fd8fc5dae"},
-    {file = "alns-2.1.1.tar.gz", hash = "sha256:1c3c4486c8ea979ad6a729377ecb179b4f9bc35d626c567e0e40d90bcba490ec"},
+    {file = "alns-2.1.2-py3-none-any.whl", hash = "sha256:6d712df84dbcd1af6591156f8b1d1d31457e6eb179b2530a407ca1271543bd66"},
+    {file = "alns-2.1.2.tar.gz", hash = "sha256:02d7c15b9aab508b648729cc4d95ecbd87daf199c4fda984de209dbf9fdbd2cf"},
 ]
 cycler = [
     {file = "cycler-0.11.0-py3-none-any.whl", hash = "sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3"},

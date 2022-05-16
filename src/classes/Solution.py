@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from copy import copy, deepcopy
-from heapq import heappush
+from heapq import heapify, heappush
 from typing import Dict, List, Set, Tuple
 
 from alns import State
@@ -117,7 +117,7 @@ class Solution(State):
         return -sum(activity.objective() for activity in self.activities)
 
     def preferences_by_module(self) \
-            -> List[Tuple[float, Module, List[Learner]]]:
+            -> List[Tuple[float, int, List[int]]]:
         """
         Computes the unassigned learners preferences by module. This list
         consists only of modules and learners for which the minimum batch size
@@ -133,22 +133,16 @@ class Solution(State):
 
         for learner in self.unassigned:
             for module in problem.prefers_over_self_study[learner]:
-                learners_by_module[module].append(learner)
+                learners_by_module[module.id].append(learner.id)
 
-        histogram = []
+        # Histogram (heap) of (preference, module, learner_ids) tuples.
+        histogram = [(-problem.preferences[learners, mod_id].sum(),
+                      mod_id,
+                      learners)
+                     for mod_id, learners in learners_by_module.items()
+                     if len(learners) >= problem.min_batch]
 
-        for module, learners in learners_by_module.items():
-            if len(learners) < problem.min_batch:
-                # This cannot be scheduled (except maybe with self-study
-                # learners, but that's not considered currently), so there's
-                # no point in considering it further.
-                continue
-
-            aggregate = sum(problem.preferences[learner.id, module.id]
-                            for learner in learners)
-
-            heappush(histogram, (-aggregate, module, learners))
-
+        heapify(histogram)
         return histogram
 
     def activities_by_module(self) -> Dict[Module, List[Activity]]:

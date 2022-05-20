@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import Generator
 
 from src.classes import Problem, Solution
-from src.functions import random_selection
+from src.functions import learners_to_remove
 
 
 def worst_learners(current: Solution,
@@ -42,7 +42,7 @@ def worst_learners(current: Solution,
             costs[learner_ids] += problem.penalty
 
     learners = np.argsort(costs)
-    learners = learners[-random_selection(generator)]
+    learners = learners[-_rnd_select(generator, problem)]
 
     for learner_id in learners:
         activity = assigned_activities[learner_id]
@@ -54,3 +54,21 @@ def worst_learners(current: Solution,
             activity.remove_learner(learner)
 
     return destroyed
+
+
+def _rnd_select(generator: Generator, problem: Problem):
+    """
+    Implements a random selection mechanism, which selects random indices for
+    a certain list of num_learners length (e.g., for a cost computation),
+    favouring smaller indices.
+    """
+    triangle = np.arange(learners_to_remove(), 0, -1)
+
+    probabilities = np.ones(problem.num_learners)
+    probabilities[:learners_to_remove()] = triangle
+    probabilities = probabilities / np.sum(probabilities)
+
+    return generator.choice(problem.num_learners,
+                            learners_to_remove(),
+                            replace=False,
+                            p=probabilities)

@@ -7,6 +7,6 @@ def smallest_activities(current: Solution,
                         generator: Generator,
                         problem: Problem) -> Solution:
     """
-    TODO
+    Removes activities that consist of the smallest number of learners.
     """
     return current

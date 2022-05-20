@@ -7,6 +7,9 @@ def most_slack_classrooms(current: Solution,
                           generator: Generator,
                           problem: Problem) -> Solution:
     """
-    TODO
+    Removes activities where classrooms are underutilised (based on #learners
+    / capacity, or something similar).
+
+    TODO rewrite comment
     """
     return current

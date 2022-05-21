@@ -7,9 +7,9 @@ from .worst_learners import worst_learners
 
 DESTROY_OPERATORS = [
     # most_mobile_teachers,
-    # most_slack_classrooms,
+    most_slack_classrooms,
     random_activities,
     random_learners,
-    # smallest_activities,
+    smallest_activities,
     worst_learners,
 ]

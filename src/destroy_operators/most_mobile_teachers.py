@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from numpy.random import Generator
 
 from src.classes import Problem, Solution
@@ -12,4 +14,8 @@ def most_mobile_teachers(current: Solution,
     enough). This should improve the solution by making the appropriate
     resources available for a better schedule.
     """
-    return current
+    destroyed = deepcopy(current)
+
+    # TODO
+
+    return destroyed

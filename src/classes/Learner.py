@@ -10,16 +10,6 @@ class Learner:
     year: int
 
     @lru_cache(None)
-    def is_eligible_for(self, module: Module) -> bool:
-        """
-        Tests if the learner is eligible to take the passed-in module.
-        """
-        from src.functions import get_problem
-        problem = get_problem()
-
-        return problem.preferences[self.id, module.id] > 0
-
-    @lru_cache(None)
     def prefers_over_self_study(self, module: Module) -> bool:
         """
         Tests if this learner prefers the passed-in module over the

@@ -3,10 +3,10 @@ import argparse
 import numpy as np
 import numpy.random as rnd
 from alns import ALNS
-from alns.weight_schemes import SimpleWeights
+from alns.weights import SimpleWeights
 
 from src.classes import Problem, Result
-from src.constants import DECAY, ITERATIONS, WEIGHTS, get_criterion
+from src.constants import DECAY, STOP, WEIGHTS, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
 from src.functions import initial_solution, set_problem
 from src.local_search import reinsert_learner
@@ -55,15 +55,15 @@ def run_alns(experiment, instance, exclude, problem):
                             len(alns.repair_operators),
                             DECAY)
 
-    res = alns.iterate(init, weights, criterion, ITERATIONS, problem=problem)
+    res = alns.iterate(init, weights, criterion, STOP, problem=problem)
     lbs = -np.minimum.accumulate(res.statistics.objectives[1:])
-    ubs = [float("inf")] * ITERATIONS
+    ubs = [float("inf")] * len(lbs)
 
     return Result(res.best_state.get_assignments(),  # noqa
-                  -res.best_state.objective(),
                   res.statistics.runtimes.tolist(),  # noqa
                   lbs.tolist(),
-                  ubs)
+                  ubs,
+                  -res.best_state.objective())
 
 
 def main():

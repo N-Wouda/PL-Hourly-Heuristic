@@ -3,6 +3,7 @@ from heapq import heappop
 from numpy.random import Generator
 
 from src.classes import Activity, Problem, Solution
+from src.constants import SELF_STUDY_MODULE_ID
 from .greedy_insert import greedy_insert
 
 
@@ -18,6 +19,8 @@ def break_out(destroyed: Solution,
     If any learners remain that cannot be assigned to a new activity, those are
     inserted into existing activities using ``greedy_insert``.
     """
+    prefs = problem.preferences
+
     unassigned = [learner.id for learner in destroyed.unassigned]
     histogram = problem.preferences_by_module(unassigned)
 
@@ -39,19 +42,18 @@ def break_out(destroyed: Solution,
             if activity.is_instruction():
                 continue
 
-            if len(to_assign) >= max_size:
-                break
-
             # We snoop off any self-study learners that can be assigned to
             # this module as well.
-            learners = [learner
-                        for learner in activity.learners
-                        if learner.is_eligible_for(module)
-                        if learner.prefers_over_self_study(module)]
+            learners = [learner for learner in activity.learners
+                        if (prefs[learner.id, module.id]
+                            > prefs[learner.id, SELF_STUDY_MODULE_ID])]
 
             learners = learners[:max_size - len(to_assign)]
             num_removed = activity.remove_learners(learners)
             to_assign.extend(learners[:num_removed])
+
+            if len(to_assign) >= max_size:
+                break
 
         activity = Activity(to_assign[:max_size], classroom, teacher, module)
 

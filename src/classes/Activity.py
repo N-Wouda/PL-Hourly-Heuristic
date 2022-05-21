@@ -34,6 +34,10 @@ class Activity:
     def num_learners(self) -> int:
         return len(self.learners)
 
+    @property
+    def utilisation(self) -> float:
+        return self.num_learners / self.classroom.capacity
+
     def learner_ids(self) -> np.ndarray:
         return np.array([learner.id for learner in self.learners])
 
@@ -47,7 +51,7 @@ class Activity:
         return self.module.is_self_study()
 
     def is_instruction(self) -> bool:
-        return not self.is_self_study()
+        return not self.module.is_self_study()
 
     def can_insert_learner(self, if_self_study: bool = False) -> bool:
         """

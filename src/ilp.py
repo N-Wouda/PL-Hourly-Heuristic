@@ -17,7 +17,7 @@ def ilp() -> Result:
     """
     m, x, y = _make_model()
 
-    run_times = []
+    runtimes = []
     upper_bounds = []
     lower_bounds = []
 
@@ -27,23 +27,23 @@ def ilp() -> Result:
 
         upper_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBND))
         lower_bounds.append(model.cbGet(GRB.Callback.MIP_OBJBST))
-        run_times.append(model.cbGet(GRB.Callback.RUNTIME))
+        runtimes.append(model.cbGet(GRB.Callback.RUNTIME))
 
     m.modelSense = GRB.MAXIMIZE
     m.optimize(callback)  # type: ignore
 
     lower_bounds.append(m.objVal)
     upper_bounds.append(m.objBound)
-    run_times.append(m.runTime)
+    runtimes.append(m.runtime)
 
     assignments = _to_assignments(x.getAttr('X'), y.getAttr('X'))
-    run_times = np.diff(run_times, prepend=0).tolist()
+    runtimes = np.diff(runtimes, prepend=0).tolist()
 
     return Result(assignments,
-                  m.objVal,
-                  run_times,
+                  runtimes,
                   lower_bounds,
-                  upper_bounds)
+                  upper_bounds,
+                  m.objVal)
 
 
 def _make_model() -> Tuple[Model, MVar, MVar]:

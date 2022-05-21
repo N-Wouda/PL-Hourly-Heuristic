@@ -17,9 +17,9 @@ def random_activities(current: Solution,
 
     while len(destroyed.unassigned) < learners_to_remove():
         idx = generator.integers(len(destroyed.activities))
-        learners = destroyed.activities[idx].learners
+        activity = destroyed.activities[idx]
 
-        destroyed.unassigned |= set(learners)
-        destroyed.remove_activity(idx)
+        destroyed.unassigned |= set(activity.learners)
+        destroyed.remove_activity(activity)
 
     return destroyed

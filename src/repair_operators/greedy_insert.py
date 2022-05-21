@@ -124,7 +124,7 @@ def _insert(learner, activities):
             activity.insert_learner(learner)
 
             # Ensures the next traversal finds an activity that we could just
-            # insert into (so probably can for several more activities).
+            # insert into (so probably can for several more learners).
             activities[0], activities[idx] = activity, activities[0]
             return True
 

@@ -48,16 +48,14 @@ class Solution(State):
         self._used_classrooms.add(activity.classroom)
         self._used_teachers.add(activity.teacher)
 
-    def remove_activity(self, idx: int):
+    def remove_activity(self, activity: Activity):
         """
-        Removes the activity at idx from the solution.
+        Removes the passed-in activity from the solution. Raises ValueError if
+        activity is not in the solution.
         """
-        activity = self.activities[idx]
-
+        self.activities.remove(activity)
         self._used_classrooms.remove(activity.classroom)
         self._used_teachers.remove(activity.teacher)
-
-        del self.activities[idx]
 
     def switch_classrooms(self, from_room: Classroom, to_room: Classroom):
         """

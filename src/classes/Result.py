@@ -14,10 +14,10 @@ from .Solution import Solution
 @dataclass
 class Result:
     assignments: List[List[int]]
-    objective: float
-    run_times: List[float]
+    runtimes: List[float]
     lbs: List[float]
     ubs: List[float]
+    objective: float
 
     @cached_property
     def solution(self) -> Solution:
@@ -29,10 +29,10 @@ class Result:
             data = json.load(fh)
 
         return cls(data["assignments"],
-                   data["objective"],
                    data["run_times"],
                    data["lbs"],
-                   data["ubs"])
+                   data["ubs"],
+                   data["objective"])
 
     def to_file(self, loc: str):
         with open(loc, "w") as fh:
@@ -40,8 +40,9 @@ class Result:
 
     def measures(self) -> dict[str, ...]:
         return {
-            "objective": self.objective(),
-            "runtime": sum(self.run_times),
+            "objective": self.objective,
+            "bounds": [self.lbs[-1], self.ubs[-1]],
+            "run-time (wall)": sum(self.runtimes),
             "instruction (# learners)": self.num_instruction(),
             "self-study (# learners)": self.num_self_study(),
             "activities (#)": self.num_activities(),
@@ -72,7 +73,7 @@ class Result:
                 if a.is_self_study()]
 
     def plot_convergence(self):
-        x = np.cumsum(self.run_times)
+        x = np.cumsum(self.runtimes)
         lbs = np.array(self.lbs)
         ubs = np.array(self.ubs)
 
@@ -91,14 +92,19 @@ class Result:
         plt.show()
 
     def __str__(self):
-        lb = self.lbs[-1]
-        ub = self.ubs[-1]
-        run_time = sum(self.run_times)
+        measures = self.measures()
+
+        lb, ub = measures["bounds"]
+        runtime = measures["run-time (wall)"]
+        instruction = measures["instruction (# learners)"]
+        self_study = measures["self-study (# learners)"]
 
         lines = ["Solution results",
                  "================",
                  f"      objective: {self.objective:.2f}",
                  f"         bounds: [{lb:.2f}, {ub:.2f}]",
-                 f"run-time (wall): {run_time:.2f}s"]
+                 f"run-time (wall): {runtime:.2f}s",
+                 f"    instruction: {instruction} learners",
+                 f"     self-study: {self_study} learners"]
 
         return "\n".join(lines)

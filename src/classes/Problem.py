@@ -102,12 +102,8 @@ class Problem:
 
         for learner in self.learners:
             for module_id in most_preferred[learner.id]:
-                module = self.modules[module_id]
-
-                if not learner.prefers_over_self_study(module):
-                    break
-
-                grouped[learner.id].append(module)
+                if learner.prefers_over_self_study(self.modules[module_id]):
+                    grouped[learner.id].append(module_id)
 
         return grouped
 
@@ -135,14 +131,8 @@ class Problem:
 
     @cached_property
     def classrooms_by_module(self) -> dict[Module, list[Classroom]]:
-        grouped = defaultdict(list)
-
-        for module in self.modules:
-            for classroom in self.classrooms:
-                if classroom.is_qualified_for(module):
-                    grouped[module].append(classroom)
-
-        return grouped
+        return {m: [c for c in self.classrooms if c.is_qualified_for(m)]
+                for m in self.modules}
 
     @cached_property
     def modules(self) -> list[Module]:
@@ -168,10 +158,16 @@ class Problem:
 
     @cached_property
     def min_batch(self) -> int:
+        """
+        Minimum group size, for instruction and self-study activities.
+        """
         return self._data['min_batch']
 
     @cached_property
     def max_batch(self) -> int:
+        """
+        Maximum group size for instruction activities.
+        """
         return self._data['max_batch']
 
     def preferences_by_module(
@@ -192,7 +188,9 @@ class Problem:
             for module_id in self.prefers_over_self_study[learner_id]:
                 learners_by_module[module_id].append(learner_id)
 
-            # Histogram (heap) of (preference, module, learner_ids) tuples.
+        # Heap of (aggregate preference, module, learner_ids) tuples.
+        # Preferences are negative since heapq creates a min heap (and
+        # we need a max heap).
         histogram = [(-self.preferences[learners, mod_id].sum(),
                       mod_id,
                       learners)

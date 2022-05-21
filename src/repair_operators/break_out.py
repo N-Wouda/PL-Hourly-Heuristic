@@ -18,7 +18,8 @@ def break_out(destroyed: Solution,
     If any learners remain that cannot be assigned to a new activity, those are
     inserted into existing activities using ``greedy_insert``.
     """
-    histogram = destroyed.preferences_by_module()
+    unassigned = [learner.id for learner in destroyed.unassigned]
+    histogram = problem.preferences_by_module(unassigned)
 
     while len(histogram) != 0:
         _, module_id, to_assign_ids = heappop(histogram)

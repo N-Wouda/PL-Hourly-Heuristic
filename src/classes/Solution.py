@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 from copy import copy, deepcopy
-from heapq import heapify, heappush
-from typing import Dict, List, Set, Tuple
+from heapq import heappush
+from typing import Dict, List, Set
 
 from alns import State
 
@@ -115,35 +115,6 @@ class Solution(State):
         # the problem is actually a maximisation problem, hence the trick with
         # the minus.
         return -sum(activity.objective() for activity in self.activities)
-
-    def preferences_by_module(self) \
-            -> List[Tuple[float, int, List[int]]]:
-        """
-        Computes the unassigned learners preferences by module. This list
-        consists only of modules and learners for which the minimum batch size
-        is respected.
-
-        The list forms a heap, ordered by aggregate learner preferences (high
-        to low). Use ``heapq`` for modification and access.
-        """
-        from src.functions import get_problem
-        problem = get_problem()
-
-        learners_by_module = defaultdict(list)
-
-        for learner in self.unassigned:
-            for module in problem.prefers_over_self_study[learner]:
-                learners_by_module[module.id].append(learner.id)
-
-        # Histogram (heap) of (preference, module, learner_ids) tuples.
-        histogram = [(-problem.preferences[learners, mod_id].sum(),
-                      mod_id,
-                      learners)
-                     for mod_id, learners in learners_by_module.items()
-                     if len(learners) >= problem.min_batch]
-
-        heapify(histogram)
-        return histogram
 
     def activities_by_module(self) -> Dict[Module, List[Activity]]:
         """

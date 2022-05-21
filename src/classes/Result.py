@@ -28,8 +28,10 @@ class Result:
         with open(loc, "r") as fh:
             data = json.load(fh)
 
+        runtimes = data["runtimes"] if "runtimes" in data else data["run_times"]
+
         return cls(data["assignments"],
-                   data["run_times"],
+                   runtimes,
                    data["lbs"],
                    data["ubs"],
                    data["objective"])

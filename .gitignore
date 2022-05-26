@@ -75,3 +75,6 @@ cache/*.csv
 
 # Gurobi config
 gurobi.env
+
+# Jobscript generator for Peregrine
+make_pl_jobscripts.py

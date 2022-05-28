@@ -44,6 +44,7 @@ class Result:
         return {
             "objective": self.objective,
             "bounds": [self.lbs[-1], self.ubs[-1]],
+            "iterations": self.iterations(),
             "run-time (wall)": sum(self.runtimes),
             "instruction (# learners)": self.num_instruction(),
             "self-study (# learners)": self.num_self_study(),
@@ -51,6 +52,9 @@ class Result:
             "instruction activity sizes": self.instruction_sizes(),
             "self-study activity sizes": self.self_study_sizes(),
         }
+
+    def iterations(self):
+        return len(self.runtimes)
 
     def objective(self):
         return self.objective

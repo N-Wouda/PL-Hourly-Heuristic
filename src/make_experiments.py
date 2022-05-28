@@ -2,7 +2,7 @@
 Makes the random instances used in the numerical experiments section of the
 paper. See there for details.
 """
-
+import argparse
 import csv
 import itertools
 from collections import defaultdict
@@ -16,6 +16,13 @@ from pyDOE2 import fullfact
 from scipy.stats import expon, norm
 
 from src.classes import Problem
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(prog="make_experiments")
+    parser.add_argument("--tuning", action="store_true")
+
+    return parser.parse_args()
 
 
 def parameter_levels() -> dict[str, Any]:
@@ -35,13 +42,20 @@ def parameter_levels() -> dict[str, Any]:
     return locals()
 
 
-def make_and_write_instances(experiment: int, values: dict[str, Any]):
+def make_and_write_instances(experiment: int,
+                             values: dict[str, Any],
+                             tuning: bool):
     """
     A long but mostly straightforward function that makes the experiment
     instances discussed in the paper. This function is legacy code, and has
     mostly been copied verbatim from the bachelor thesis implementation.
     """
-    exp_dir = Path(f"experiments/{experiment}/")
+    if tuning:
+        values['instances'] = 1
+        exp_dir = Path(f"experiments/tuning/")
+    else:
+        exp_dir = Path(f"experiments/{experiment}/")
+
     exp_dir.mkdir(parents=True, exist_ok=True)
 
     def round_integers(*,
@@ -177,11 +191,15 @@ def make_and_write_instances(experiment: int, values: dict[str, Any]):
             max_batch=values['max_batch'],
         ))
 
-        problem.to_file(exp_dir / f"{instance}.json")  # noqa
+        if tuning:
+            problem.to_file(exp_dir / f"{experiment}.json")  # noqa
+        else:
+            problem.to_file(exp_dir / f"{instance}.json")  # noqa
 
 
 def main():
     np.random.seed(42)
+    args = parse_args()
 
     levels = parameter_levels()
     num_levels = [len(level) for level in levels.values()]
@@ -194,7 +212,7 @@ def main():
 
             exp["index"] = num
 
-            executor.submit(make_and_write_instances, num, exp)
+            executor.submit(make_and_write_instances, num, exp, args.tuning)
             experiments.append(exp)
 
     with open("experiments/experiments.csv", "w", newline='') as fh:

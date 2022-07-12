@@ -1,40 +1,23 @@
-import argparse
+from typing import Any, Dict
 
 import numpy as np
 import numpy.random as rnd
+from ConfigSpace import ConfigurationSpace, UniformIntegerHyperparameter
 from alns import ALNS
 from alns.weights import SimpleWeights
+from smac.facade.smac_bb_facade import SMAC4BB
+from smac.scenario.scenario import Scenario
 
 from src.classes import Problem, Result
 from src.constants import DECAY, STOP, WEIGHTS, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
-from src.functions import initial_solution, set_problem
+from src.functions import initial_solution
 from src.local_search import reinsert_learner
 from src.repair_operators import REPAIR_OPERATORS
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(prog="heuristic")
-
-    parser.add_argument("experiment", type=str)
-    parser.add_argument("instance", type=int)
-    parser.add_argument("--exclude", type=str, default=None)
-
-    args = parser.parse_args()
-    args.experiment = "tuning" if args.experiment == "tuning" else int(args.experiment)
-
-    return args
-
-
-def run_alns(experiment, instance, exclude, problem) -> Result:
-    if experiment == "tuning":
-        generator = rnd.default_rng(instance)
-    else:
-        # E.g. for exp 72 and inst. 1, this becomes 7201. This way, even for
-        # inst. 100, there will never be overlap between random number streams
-        # across experiments.
-        generator = rnd.default_rng(100 * experiment + instance)
-
+def run_alns(instance, problem, settings: Dict[str, Any]) -> Result:
+    generator = rnd.default_rng(instance)
     alns = ALNS(generator)  # noqa
 
     for operator in DESTROY_OPERATORS:
@@ -66,19 +49,34 @@ def run_alns(experiment, instance, exclude, problem) -> Result:
                   -res.best_state.objective())
 
 
+def evaluate(settings: Dict[str, any]) -> float:
+    objs = []
+
+    for instance in range(144):
+        # TODO: USE MPI HERE | https://mpi4py.readthedocs.io/
+        problem = Problem.from_file(f"experiments/tuning/{instance}.json")
+        res = run_alns(instance, problem, settings)
+        objs.append(res.objective)
+
+    return np.mean(objs)
+
+
 def main():
-    args = parse_args()
+    # TODO add tuning parameters
+    cs = ConfigurationSpace()
+    cs.add_hyperparameter(UniformIntegerHyperparameter("depth", 2, 100))
 
-    data_loc = f"experiments/{args.experiment}/{args.instance}.json"
-    res_loc = f"experiments/{args.experiment}/{args.instance}-heuristic.json"
+    # TODO think about what goes into this
+    scenario = Scenario({
+        "run_obj": "quality",
+        "runcount-limit": 10,
+        "cs": cs,
+    })
 
-    problem = Problem.from_file(data_loc)
-    set_problem(problem)
-
-    res = run_alns(**vars(args), problem=problem)
-    res.to_file(res_loc)
-
-    print(res)
+    # TODO how to save config?
+    smac = SMAC4BB(scenario=scenario, tae_runner=evaluate)
+    best_found_config = smac.optimize()
+    print(best_found_config)
 
 
 if __name__ == "__main__":

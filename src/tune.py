@@ -2,14 +2,16 @@ from typing import Any, Dict
 
 import numpy as np
 import numpy.random as rnd
-from ConfigSpace import ConfigurationSpace, UniformIntegerHyperparameter
+from ConfigSpace import (ConfigurationSpace, UniformFloatHyperparameter,
+                         UniformIntegerHyperparameter)
 from alns import ALNS
 from alns.weights import SimpleWeights
 from smac.facade.smac_bb_facade import SMAC4BB
 from smac.scenario.scenario import Scenario
 
+import src.constants
 from src.classes import Problem, Result
-from src.constants import DECAY, STOP, WEIGHTS, get_criterion
+from src.constants import STOP, get_criterion
 from src.destroy_operators import DESTROY_OPERATORS
 from src.functions import initial_solution
 from src.local_search import reinsert_learner
@@ -20,23 +22,23 @@ def run_alns(instance, problem, settings: Dict[str, Any]) -> Result:
     generator = rnd.default_rng(instance)
     alns = ALNS(generator)  # noqa
 
+    src.constants.DEGREE_OF_DESTRUCTION = settings["dod"]
+
     for operator in DESTROY_OPERATORS:
-        if exclude != operator.__name__:
-            alns.add_destroy_operator(operator)
+        alns.add_destroy_operator(operator)
 
     for operator in REPAIR_OPERATORS:
-        if exclude != operator.__name__:
-            alns.add_repair_operator(operator)
+        alns.add_repair_operator(operator)
 
-    if exclude != "reinsert_learner":
-        alns.on_best(reinsert_learner)
+    alns.on_best(reinsert_learner)
 
     init = initial_solution()
     criterion = get_criterion(init.objective())
-    weights = SimpleWeights(WEIGHTS,
+    weights = [settings["w" + str(idx + 1)] for idx in range(4)]
+    weights = SimpleWeights(weights,
                             len(alns.destroy_operators),
                             len(alns.repair_operators),
-                            DECAY)
+                            settings["decay"])
 
     res = alns.iterate(init, weights, criterion, STOP, problem=problem)
     lbs = -np.minimum.accumulate(res.statistics.objectives[1:])
@@ -62,9 +64,13 @@ def evaluate(settings: Dict[str, any]) -> float:
 
 
 def main():
-    # TODO add tuning parameters
     cs = ConfigurationSpace()
-    cs.add_hyperparameter(UniformIntegerHyperparameter("depth", 2, 100))
+    cs.add_hyperparameter(UniformIntegerHyperparameter("w1", 0, 50))
+    cs.add_hyperparameter(UniformIntegerHyperparameter("w2", 0, 50))
+    cs.add_hyperparameter(UniformIntegerHyperparameter("w3", 0, 50))
+    cs.add_hyperparameter(UniformIntegerHyperparameter("w4", 0, 50))
+    cs.add_hyperparameter(UniformFloatHyperparameter("decay", 0, 1))
+    cs.add_hyperparameter(UniformFloatHyperparameter("dod", 0, .5))
 
     # TODO think about what goes into this
     scenario = Scenario({

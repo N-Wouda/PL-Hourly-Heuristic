@@ -51,12 +51,12 @@ def run_alns(config, instance, seed):
 
 def main():
     cs = ConfigurationSpace()
-    cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 50))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 50))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w3", 0, 50))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w4", 0, 50))
-    cs.add_hyperparameter(UniformFloatHyperparameter("decay", 0, 1))
-    cs.add_hyperparameter(UniformFloatHyperparameter("dod", 0, .5))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 25))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 25))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w3", 0, 25))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w4", 0, 25))
+    cs.add_hyperparameter(UniformFloatHyperparameter("decay", .5, 1))
+    cs.add_hyperparameter(UniformFloatHyperparameter("dod", .1, .5))
 
     scenario = Scenario({
         "run_obj": "quality",

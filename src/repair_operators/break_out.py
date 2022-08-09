@@ -48,7 +48,7 @@ def break_out(destroyed: Solution,
                         if (prefs[learner.id, module.id]
                             > prefs[learner.id, SELF_STUDY_MODULE_ID])]
 
-            learners = learners[:max_size - len(to_assign)]
+            learners = learners[:max(max_size - len(to_assign), 0)]
             num_removed = activity.remove_learners(learners)
             to_assign.extend(learners[:num_removed])
 

@@ -1,14 +1,11 @@
 from typing import List, Tuple
 
-from src.functions import get_problem
 
-
-def module_classroom_room_type(solution: List[Tuple]) -> bool:
+def module_classroom_room_type(problem, solution: List[Tuple]) -> bool:
     """
     Verifies each classroom-module assignment satisfies the room type
     requirement.
     """
-    problem = get_problem()
     classrooms = {}
 
     for _, module, classroom, _ in solution:

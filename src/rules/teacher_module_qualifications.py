@@ -1,14 +1,11 @@
 from typing import List, Tuple
 
-from src.functions import get_problem
 
-
-def teacher_module_qualifications(solution: List[Tuple]) -> bool:
+def teacher_module_qualifications(problem, solution: List[Tuple]) -> bool:
     """
     Verifies each teacher-module assignment satisfies the required teacher
     qualification.
     """
-    problem = get_problem()
     teacher_modules = {}
 
     for _, module, _, teacher in solution:

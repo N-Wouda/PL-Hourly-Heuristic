@@ -1,14 +1,11 @@
 from collections import defaultdict
 from typing import List, Tuple
 
-from src.functions import get_problem
 
-
-def classrooms_to_teachers(solution: List[Tuple]) -> bool:
+def classrooms_to_teachers(problem, solution: List[Tuple]) -> bool:
     """
     Verifies each classroom is assigned to only *one* teacher.
     """
-    problem = get_problem()
     classroom_teachers = defaultdict(set)
 
     for *_, classroom, teacher in solution:

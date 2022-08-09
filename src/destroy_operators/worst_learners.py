@@ -42,7 +42,7 @@ def worst_learners(current: Solution,
             costs[learner_ids] += problem.penalty
 
     learners = np.argsort(costs)
-    learners = learners[-_rnd_select(generator, problem)]
+    learners = learners[-_rnd_select(generator, problem) - 1]
 
     for learner_id in learners:
         activity = assigned_activities[learner_id]

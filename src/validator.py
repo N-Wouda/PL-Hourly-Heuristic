@@ -1,7 +1,6 @@
 import sys
 
 from src.classes import Problem, Result
-from src.functions import set_problem
 from src.rules import RULES
 
 
@@ -11,7 +10,6 @@ def main():
 
     data_loc = f"experiments/{experiment}/{instance}.json"
     problem = Problem.from_file(data_loc)
-    set_problem(problem)
 
     valid = True
 
@@ -24,7 +22,7 @@ def main():
             print(f"{path}: solution file does not exist.")
         else:
             for rule in RULES:
-                if not rule(result.assignments):
+                if not rule(problem, result.assignments):
                     valid = False
                     print(f"{path}: solution violates {rule.__name__}.")
 

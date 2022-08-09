@@ -2,15 +2,13 @@ from collections import defaultdict
 from typing import List, Tuple
 
 from src.constants import SELF_STUDY_MODULE_ID
-from src.functions import get_problem
 
 
-def activity_size(solution: List[Tuple]) -> bool:
+def activity_size(problem, solution: List[Tuple]) -> bool:
     """
     Verifies each activity satisfies both the minimum and maximum group size
     constraints.
     """
-    problem = get_problem()
     classroom_learners = defaultdict(set)
 
     for learner, module, classroom, _ in solution:

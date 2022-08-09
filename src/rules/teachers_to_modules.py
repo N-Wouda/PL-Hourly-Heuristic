@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import List, Tuple
 
 
-def teachers_to_modules(solution: List[Tuple]) -> bool:
+def teachers_to_modules(problem, solution: List[Tuple]) -> bool:
     """
     Verifies each teacher is assigned to *one* module.
     """

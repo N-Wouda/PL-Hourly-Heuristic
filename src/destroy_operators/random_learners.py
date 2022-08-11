@@ -22,6 +22,9 @@ def random_learners(current: Solution,
                   if activity.num_learners > problem.min_batch]
 
     while len(destroyed.unassigned) < learners_to_remove():
+        if len(activities) == 0:  # cannot remove more learners, so we return
+            return destroyed      # and hope we have unassigned enough
+
         a_frac, l_frac = generator.random(size=2)
 
         activity_idx = int(a_frac * len(activities))

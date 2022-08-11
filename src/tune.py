@@ -51,20 +51,11 @@ def run_alns(config, instance, seed):
                             len(alns.repair_operators),
                             config["decay"])
 
-    try:
-        res = alns.iterate(init,
-                           weights,
-                           criterion,
-                           stop,
-                           problem=problem)
-
-    except Exception as e:
-        # This could *rarely* happen, if there's been a particularly weird
-        # set of parameter argument passed in. In that case, just ignore this
-        # particular sample for the tuning evaluation - it's rare enough that
-        # it should not matter much.
-        print(instance, seed, config, str(e))
-        return None
+    res = alns.iterate(init,
+                       weights,
+                       criterion,
+                       stop,
+                       problem=problem)
 
     return res.best_state.objective()
 

@@ -49,7 +49,7 @@ def run_alns(experiment, instance, exclude, problem) -> Result:
         alns.on_best(reinsert_learner)
 
     init = initial_solution()
-    criterion = get_criterion(init.objective())
+    criterion = get_criterion(init.objective(), STOP)
     weights = SimpleWeights(WEIGHTS,
                             len(alns.destroy_operators),
                             len(alns.repair_operators),

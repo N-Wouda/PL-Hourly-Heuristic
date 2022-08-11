@@ -14,7 +14,7 @@ def random_learners(current: Solution,
     an activity, and checks if a learner can be removed from that activity. If
     so, a random learner in the activity is selected and removed. If not, a new
     activity is selected. The procedure continues until q learners have been
-    removed.
+    removed, or no more can be removed.
     """
     destroyed = deepcopy(current)
 

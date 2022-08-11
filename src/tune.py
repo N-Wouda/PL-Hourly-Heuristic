@@ -1,3 +1,5 @@
+import argparse
+
 import numpy.random as rnd
 from ConfigSpace import ConfigurationSpace, UniformFloatHyperparameter
 from alns import ALNS
@@ -13,6 +15,14 @@ from src.destroy_operators import DESTROY_OPERATORS
 from src.functions import initial_solution, set_problem
 from src.local_search import reinsert_learner
 from src.repair_operators import REPAIR_OPERATORS
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(prog="tune")
+    parser.add_argument("--out_dir", default="out/smac")
+    parser.add_argument("--time_limit", type=int, default=3600)
+
+    return parser.parse_args()
 
 
 def run_alns(config, instance, seed):
@@ -50,6 +60,8 @@ def run_alns(config, instance, seed):
 
 
 def main():
+    args = parse_args()
+
     cs = ConfigurationSpace()
     cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 25))
     cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 25))
@@ -60,13 +72,13 @@ def main():
 
     scenario = Scenario({
         "run_obj": "quality",
-        "wallclock_limit": 3600,
+        "wallclock_limit": args.time_limit,
         "cs": cs,
         "deterministic": False,
         "instances": [[str(inst + 1)] for inst in range(144)],
         "shared_model": True,
-        "input_psmac_dirs": "out/smac",
-        "output_dir": "out/smac",
+        "input_psmac_dirs": args.out_dir,
+        "output_dir": args.out_dir,
     })
 
     smac = SMAC4HPO(scenario=scenario, tae_runner=run_alns)

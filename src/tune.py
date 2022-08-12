@@ -19,6 +19,7 @@ from src.repair_operators import REPAIR_OPERATORS
 
 def parse_args():
     parser = argparse.ArgumentParser(prog="tune")
+    parser.add_argument("seed", type=int)
     parser.add_argument("--out_dir", default="out/smac")
     parser.add_argument("--time_limit", type=int, default=3600)
 
@@ -64,12 +65,12 @@ def main():
     args = parse_args()
 
     cs = ConfigurationSpace()
-    cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 25))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 25))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w3", 0, 25))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w4", 0, 25))
-    cs.add_hyperparameter(UniformFloatHyperparameter("decay", .5, 1))
-    cs.add_hyperparameter(UniformFloatHyperparameter("dod", .1, .5))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 50, 50))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 50, 10))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w3", 0, 50, 1))
+    cs.add_hyperparameter(UniformFloatHyperparameter("w4", 0, 50, 1))
+    cs.add_hyperparameter(UniformFloatHyperparameter("decay", .5, 1, .8))
+    cs.add_hyperparameter(UniformFloatHyperparameter("dod", .1, .5, .35))
 
     scenario = Scenario({
         "run_obj": "quality",
@@ -77,15 +78,19 @@ def main():
         "cs": cs,
         "deterministic": False,
         "instances": [[str(inst + 1)] for inst in range(144)],
-        "shared_model": True,
-        "input_psmac_dirs": args.out_dir,
         "output_dir": args.out_dir,
     })
 
-    smac = SMAC4HPO(scenario=scenario, tae_runner=run_alns)
+    rng = rnd.RandomState(args.seed)
+    smac = SMAC4HPO(scenario=scenario, tae_runner=run_alns, rng=rng)
 
-    best_found_config = smac.optimize()
-    print(best_found_config)
+    config = smac.optimize()
+    rh = smac.get_runhistory()
+
+    # Print best configuration, its average cost across evaluations, and the
+    # number of evaluation runs.
+    print(config)
+    print(rh.average_cost(config), len(rh.get_runs_for_config(config, False)))
 
 
 if __name__ == "__main__":

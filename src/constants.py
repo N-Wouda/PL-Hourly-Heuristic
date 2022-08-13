@@ -14,7 +14,7 @@ MAX_WORSE = 0.05
 ACCEPT_PROB = 0.5
 
 
-def get_criterion(init_obj: float, stop) -> SimulatedAnnealing:
+def get_criterion(init_obj: float, stop: MaxIterations) -> SimulatedAnnealing:
     return SimulatedAnnealing.autofit(-init_obj,
                                       MAX_WORSE,
                                       ACCEPT_PROB,

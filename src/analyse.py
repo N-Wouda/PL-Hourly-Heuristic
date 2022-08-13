@@ -29,7 +29,9 @@ def parse_args():
 def compute(parser, args):
     measures = []
 
-    for instance in np.arange(1, 101):
+    num_instances = 144 if args.experiment == "tuning" else 100
+
+    for instance in np.arange(1, num_instances + 1):
         data_loc = f"experiments/{args.experiment}/{instance}.json"
         problem = Problem.from_file(data_loc)
         set_problem(problem)
@@ -61,7 +63,7 @@ def main():
     data.set_index("instance", inplace=True)
 
     print(data, '\n')
-    print("Aggregates:", data.aggregate("mean"), sep="\n")
+    print("Aggregates:", data.aggregate("mean", numeric_only=True), sep="\n")
 
     data.to_csv(cache)
 

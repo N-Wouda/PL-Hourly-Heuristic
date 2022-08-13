@@ -71,7 +71,7 @@ def _make_model() -> Tuple[Model, MVar, MVar]:
         m.addConstr(y[:, module.id].sum() >= problem.min_batch * res,
                     "min batch")
 
-        if module != SELF_STUDY_MODULE_ID:
+        if module.id != SELF_STUDY_MODULE_ID:  # *not* for self-study
             m.addConstr(y[:, module.id].sum() <= problem.max_batch * res,
                         "max batch")
 

@@ -47,6 +47,8 @@ def run_alns(config, instance, seed):
     stop = MaxIterations(1_000)
     criterion = get_criterion(init.objective(), stop)
     weights = [config["w" + str(idx + 1)] for idx in range(4)]
+    weights.append(0)  # the fourth weight to the ALNS package is unused
+
     weights = SimpleWeights(weights,
                             len(alns.destroy_operators),
                             len(alns.repair_operators),
@@ -68,7 +70,6 @@ def main():
     cs.add_hyperparameter(UniformFloatHyperparameter("w1", 0, 50, 50))
     cs.add_hyperparameter(UniformFloatHyperparameter("w2", 0, 50, 10))
     cs.add_hyperparameter(UniformFloatHyperparameter("w3", 0, 50, 1))
-    cs.add_hyperparameter(UniformFloatHyperparameter("w4", 0, 50, 1))
     cs.add_hyperparameter(UniformFloatHyperparameter("decay", .5, 1, .8))
     cs.add_hyperparameter(UniformFloatHyperparameter("dod", .1, .5, .35))
 

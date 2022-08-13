@@ -5,10 +5,10 @@ from alns.stop import MaxIterations
 # index/ID for self-study is 576.
 SELF_STUDY_MODULE_ID = 576
 
-WEIGHTS = [50, 10, 1, 1]
-STOP = MaxIterations(10_000)
+WEIGHTS = [21.8, 12.6, 3.8, 0]
+STOP = MaxIterations(1_000)
 DECAY = 0.8
-DEGREE_OF_DESTRUCTION = 0.35
+DEGREE_OF_DESTRUCTION = 0.15
 
 MAX_WORSE = 0.05
 ACCEPT_PROB = 0.5

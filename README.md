@@ -1,5 +1,11 @@
 # PL-Heuristic
 
+Code and experiments for the paper:
+
+> Wouda, Niels A., and Aslan, Ayse, and Vis, Iris F. A. An adaptive large 
+> neighbourhood search metaheuristic for hourly learning activity planning in
+> personalised learning. Submitted to _Computers & Operations Research_.
+
 This repository hosts all code used in the development of an hourly
 scheduling heuristic for personalised learning. The repository exposes
 several executable packages: one for the heuristic, the integer linear program
@@ -13,12 +19,11 @@ constraints.
 set-up, and populated with the experimental data. The data is of considerable
 size, and as such not part of the repository itself. The data may be downloaded
 from [the data repository](https://doi.org/10.34894/E2L6WC).
-This archive also contains a static version of the code hosted here.
 
 ## Analysis
 
-The analysis tool is available in `src/analyse.py`. It can be used to analyse results
-from an ILP or heuristic run on an entire experiment. Usage,
+The analysis tool is available in `src/analyse.py`. It can be used to analyse 
+results from an ILP or heuristic run on an entire experiment. Usage,
 
 ```
 poetry run python -m src.analyse heuristic 1
@@ -30,8 +35,8 @@ experiment, a cached file is created in `cache/` to speed-up subsequent
 analyses - this can be overridden using the `--force` flag. Use the `--help`
 flag to see all options. 
 
-A notebook analysing the cached files is available in the repository root as
-`analysis.ipynb`. This contains most results described in the paper.
+Notebooks analysing the cached files are available in the repository root.
+These contain most results described in the paper.
 
 ## How to use
 

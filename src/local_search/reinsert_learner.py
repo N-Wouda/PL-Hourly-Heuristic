@@ -53,6 +53,9 @@ def reinsert_learner(current: Solution,
                                 learner, from_activity, to_activity)
                         heappush(moves, item)
 
+    if not moves:
+        return current
+
     has_moved = set()  # tracks whether we've already moved a learner.
 
     while len(moves) != 0:
@@ -65,4 +68,4 @@ def reinsert_learner(current: Solution,
             to_activity.insert_learner(learner)
             has_moved.add(learner)
 
-    return current
+    return reinsert_learner(current, generator, problem)

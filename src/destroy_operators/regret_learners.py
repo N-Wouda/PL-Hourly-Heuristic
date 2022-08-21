@@ -7,16 +7,16 @@ from src.classes import Problem, Solution
 from src.functions import learners_to_remove
 
 
-def worst_learners(current: Solution,
-                   generator: Generator,
-                   problem: Problem) -> Solution:
+def regret_learners(current: Solution,
+                    generator: Generator,
+                    problem: Problem) -> Solution:
     """
-    Computes the costs for each learner, as the difference between their best
+    Computes the regret for each learner, as the difference between their best
     and current assignments. Using a skewed distribution, q of the worst cost
     learners are randomly selected and removed from the solution.
     """
     destroyed = deepcopy(current)
-    costs = np.zeros(problem.num_learners)
+    regrets = np.zeros(problem.num_learners)
 
     assigned_activities = {}
 
@@ -26,22 +26,16 @@ def worst_learners(current: Solution,
 
         learner_ids = activity.learner_ids()
 
-        # The cost is the cost of the best possible assignment for this
-        # learner, minus the cost of the current assignment (including
-        # self-study penalty, if applicable). The larger the cost, the more
+        # The regret is the cost of the best assignment for this learner, minus
+        # the cost of the current assignment. The larger the regret, the more
         # suboptimal the current assignment.
         best_module_id = problem.most_preferred[learner_ids, 0]
         curr_module_id = activity.module.id
 
-        costs[learner_ids] = problem.preferences[learner_ids, best_module_id]
-        costs[learner_ids] -= problem.preferences[learner_ids, curr_module_id]
+        regrets[learner_ids] = problem.preferences[learner_ids, best_module_id]
+        regrets[learner_ids] -= problem.preferences[learner_ids, curr_module_id]
 
-        if activity.is_self_study():
-            # Per the paper:   pref(best) - (pref(curr) - <maybe penalty>)
-            #                = pref(best) - pref(curr) + <maybe penalty>.
-            costs[learner_ids] += problem.penalty
-
-    learners = np.argsort(costs)
+    learners = np.argsort(regrets)
     learners = learners[-_rnd_select(generator, problem) - 1]
 
     for learner_id in learners:

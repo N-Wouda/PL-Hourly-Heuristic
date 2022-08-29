@@ -51,8 +51,17 @@ class Result:
             "activities (#)": self.num_activities(),
             "instruction activity sizes": self.instruction_sizes(),
             "self-study activity sizes": self.self_study_sizes(),
-            "gap at 10 min (%)": self.gap_at(600),  # 600 seconds = 10 minutes
+            "gap (10 min)": self.gap(600),
         }
+
+    def gap(self, seconds: int):
+        times = np.cumsum(self.runtimes)
+        idx = np.searchsorted(times, seconds)
+
+        lb = self.lbs[idx - 1]
+        ub = self.ubs[idx - 1]
+
+        return 100 * (ub - lb) / lb
 
     def iterations(self):
         return len(self.runtimes)
@@ -78,12 +87,6 @@ class Result:
     def self_study_sizes(self):
         return [a.num_learners for a in self.solution.activities
                 if a.is_self_study()]
-
-    def gap_at(self, when: int):
-        time = np.cumsum(self.runtimes)
-        idx = np.searchsorted(time, when) - 1
-
-        return 100 * (self.ubs[idx] - self.lbs[idx]) / self.lbs[idx]
 
     def plot_convergence(self):
         x = np.cumsum(self.runtimes)

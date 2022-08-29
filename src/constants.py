@@ -6,7 +6,7 @@ from alns.stop import MaxIterations
 SELF_STUDY_MODULE_ID = 576
 
 WEIGHTS = [21.8, 12.6, 3.8, 0]
-STOP = MaxIterations(10_000)
+STOP = MaxIterations(25_000)
 DECAY = 0.8
 DEGREE_OF_DESTRUCTION = 0.15
 

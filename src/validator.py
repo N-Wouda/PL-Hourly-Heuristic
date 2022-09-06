@@ -5,8 +5,8 @@ from src.rules import RULES
 
 
 def main():
-    experiment = "tuning" if sys.argv[1] == "tuning" else int(sys.argv[1])
-    instance = int(sys.argv[2])
+    experiment = sys.argv[1]
+    instance = sys.argv[2]
 
     data_loc = f"experiments/{experiment}/{instance}.json"
     problem = Problem.from_file(data_loc)

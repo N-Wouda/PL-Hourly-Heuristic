@@ -154,10 +154,7 @@ def parse_args():
     parser.add_argument("experiment", type=str)
     parser.add_argument("instance", type=int)
 
-    args = parser.parse_args()
-    args.experiment = "tuning" if args.experiment == "tuning" else int(args.experiment)
-
-    return args
+    return parser.parse_args()
 
 
 def main():

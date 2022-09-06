@@ -20,31 +20,51 @@ from src.classes import Problem
 
 def parse_args():
     parser = argparse.ArgumentParser(prog="make_experiments")
-    parser.add_argument("--tuning", action="store_true")
+
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument("--tuning", action="store_true")
+    group.add_argument("--vary_third_degree", action="store_true")
 
     return parser.parse_args()
 
 
-def parameter_levels() -> dict[str, Any]:
-    learners = [800, 1200, 1600]
-    instances = [100]
-    penalty = [.5, .75]
-    min_batch = [5]
-    max_batch = [30]
-    progress = [0, 1, 2, 3]
-    preferences = [2]  # mean value for the exponential distribution
-    qualifications = [(1, 0, 0), (0.5, 0.5, 0), (0.4, 0.4, 0.2)]
-    split = [True, False]
-    courses = [[(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3), (1, 4),
-                (3, 1), (2, 1), (2, 5), (2, 6)]]  # (workload, room type) tuples
-    modules = [48]
-
-    return locals()
+def parameter_levels(vary_third_degree: bool) -> dict[str, Any]:
+    if vary_third_degree:
+        return dict(
+            learners=[800, 1200, 1600],
+            instances=[10],
+            penalty=[.5],
+            min_batch=[5],
+            max_batch=[30],
+            progress=[0, 1, 2, 3],
+            preferences=[2],  # mean value for the exponential distribution
+            qualifications=[(1 - q, 0, q) for q in np.linspace(0, 1, num=11)],
+            split=[False],
+            courses=[[(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3),
+                      (1, 4), (3, 1), (2, 1), (2, 5), (2, 6)]],  # (load, room)
+            modules=[48]
+        )
+    else:
+        return dict(
+            learners=[800, 1200, 1600],
+            instances=[100],
+            penalty=[.5, .75],
+            min_batch=[5],
+            max_batch=[30],
+            progress=[0, 1, 2, 3],
+            preferences=[2],  # mean value for the exponential distribution
+            qualifications=[(1, 0, 0), (0.5, 0.5, 0), (0.4, 0.4, 0.2)],
+            split=[True, False],
+            courses=[[(4, 1), (4, 1), (3, 1), (4, 1), (2, 1), (1, 2), (3, 3),
+                      (1, 4), (3, 1), (2, 1), (2, 5), (2, 6)]],  # (load, room)
+            modules=[48]
+        )
 
 
 def make_and_write_instances(experiment: int,
                              values: dict[str, Any],
-                             tuning: bool):
+                             tuning: bool = False,
+                             dir_prefix: str = ""):
     """
     A long but mostly straightforward function that makes the experiment
     instances discussed in the paper. This function is legacy code, and has
@@ -52,9 +72,9 @@ def make_and_write_instances(experiment: int,
     """
     if tuning:
         values['instances'] = 1
-        exp_dir = Path(f"experiments/tuning/")
+        exp_dir = Path(f"experiments/{dir_prefix}tuning/")
     else:
-        exp_dir = Path(f"experiments/{experiment}/")
+        exp_dir = Path(f"experiments/{dir_prefix}{experiment}/")
 
     exp_dir.mkdir(parents=True, exist_ok=True)
 
@@ -201,7 +221,7 @@ def main():
     np.random.seed(42)
     args = parse_args()
 
-    levels = parameter_levels()
+    levels = parameter_levels(args.vary_third_degree)
     num_levels = [len(level) for level in levels.values()]
     experiments = []
 
@@ -211,11 +231,18 @@ def main():
                    for (key, value), idx in zip(levels.items(), design)}
 
             exp["index"] = num
-
-            executor.submit(make_and_write_instances, num, exp, args.tuning)
             experiments.append(exp)
 
-    with open("experiments/experiments.csv", "w", newline='') as fh:
+            if args.vary_third_degree:
+                executor.submit(make_and_write_instances, num, exp,
+                                dir_prefix="vq_")
+            elif args.tuning:
+                executor.submit(make_and_write_instances, num, exp, tuning=True)
+            else:
+                executor.submit(make_and_write_instances, num, exp)
+
+    filename = "experiments" if not args.vary_third_degree else "vq"
+    with open(f"experiments/{filename}.csv", "w", newline='') as fh:
         writer = csv.DictWriter(fh, ["index"] + list(levels.keys()))
         writer.writeheader()
         writer.writerows(experiments)

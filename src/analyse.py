@@ -30,6 +30,7 @@ def compute(parser, args):
     measures = []
 
     num_instances = 144 if args.experiment == "tuning" else 100
+    num_instances = 10 if "vq" in args.experiment else num_instances
 
     for instance in np.arange(1, num_instances + 1):
         data_loc = f"experiments/{args.experiment}/{instance}.json"

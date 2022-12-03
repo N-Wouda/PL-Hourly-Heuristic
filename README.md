@@ -4,10 +4,11 @@
 
 Code and experiments for the paper:
 
-> Wouda, Niels A., and Aslan, Ayse, and Vis, Iris F. A. 2022. An adaptive
-> large neighbourhood search metaheuristic for hourly learning activity
-> planning in personalised learning. _Computers & Operations Research_:
-> 106089. https://doi.org/10.1016/j.cor.2022.106089.
+> Wouda, Niels A., Ayse Aslan, and Iris F. A. Vis. 2023. ‘An Adaptive Large
+> Neighbourhood Search Metaheuristic for Hourly Learning Activity Planning
+> in Personalised Learning’. _Computers & Operations Research_ 151: 106089.
+> https://doi.org/10.1016/j.cor.2022.106089.
+
 
 This repository hosts all code used in the development of an hourly
 scheduling heuristic for personalised learning. The repository exposes

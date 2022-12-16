@@ -25,6 +25,9 @@ size, and as such not part of the repository itself. The data may be downloaded
 from [the data repository](https://doi.org/10.34894/E2L6WC) (download the file
 `first revision.zip`).
 
+Finally, analysis notebooks are available in `/notebooks`. These notebooks 
+reproduce the results from the paper.
+
 ## Analysis
 
 The analysis tool is available in `src/analyse.py`. It can be used to analyse 
